@@ -20,6 +20,9 @@ import Foundation
 /// The width of the encoded message size. If this value is changed, any previously persisted message encodings will not be readible.
 let MessageSizeLength = MemoryLayout<UInt32>.size
 
+/// A struct that encodes messages of type T into a data that can be incrementally persisted to disk.
+/// Each message is encoded as a data blob, where the first `MessageSizeLength` of the blob
+/// describes the length of the message.
 struct EncodedMessages<T: Codable>: Sequence {
 
     // MARK: Initialization
@@ -56,6 +59,7 @@ struct EncodedMessages<T: Codable>: Sequence {
         }
     }
 
+    /// An array of messages that have been decoded from the stored `data`.
     var decodedMessages: [T] {
         var messages = [T]()
         for message in self {
