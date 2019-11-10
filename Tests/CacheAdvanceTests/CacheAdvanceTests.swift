@@ -133,7 +133,7 @@ final class CacheAdvanceTests: XCTestCase {
             XCTAssertTrue(try cache.append(message: message))
         }
 
-        // Append a message that is shorter than the first message in lorumIpsumMessages.
+        // Append a message that is slightly longer than the first message in lorumIpsumMessages.
         let barelyLongerMessage = lorumIpsumMessages[0] + "hi"
         XCTAssertTrue(try cache.append(message: barelyLongerMessage))
 
