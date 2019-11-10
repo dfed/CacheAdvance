@@ -162,18 +162,18 @@ public final class CacheAdvance<T: Codable> {
             try reader.seekToNextMessage(shouldSeekToOldestMessageIfFound: true)
         }
 
-        writer.write(messageData)
+        try writer.__write(messageData, error: ())
         let endOfMessageOffset = writer.offsetInFile
 
         // Write the end of newest message marker.
-        writer.write(Data.endOfNewestMessageMarker)
+        try writer.__write(Data.endOfNewestMessageMarker, error: ())
 
         if shouldRoll {
             // Write down the offset of the oldest message.
             if reader.offsetInFile > UInt32.max {
                 throw CacheAdvanceReadError.offsetOutOfBounds
             }
-            writer.write(Data(UInt32(reader.offsetInFile)))
+            try writer.__write(Data(UInt32(reader.offsetInFile)), error: ())
         }
 
         // Back the file handle's offset back to the end of the message we just wrote.

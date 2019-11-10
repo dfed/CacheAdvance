@@ -24,9 +24,9 @@ extension FileHandle {
     /// Returns the next encodable message, seeking to the beginning of the next message.
     func nextEncodedMessage() throws -> Data? {
         let startingOffset = offsetInFile
-        switch nextEncodedMessageSpan() {
+        switch try nextEncodedMessageSpan() {
         case let .span(messageLength):
-            let message = readData(ofLength: Int(messageLength))
+            let message = try __readDataUp(toLength: Int(messageLength))
             guard message.count > 0 else {
                 throw CacheAdvanceReadError.fileCorrupted
             }
@@ -71,7 +71,7 @@ extension FileHandle {
     @discardableResult
     func seekToNextMessage(shouldSeekToOldestMessageIfFound: Bool) throws -> Bool {
         let startingOffset = offsetInFile
-        switch nextEncodedMessageSpan() {
+        switch try nextEncodedMessageSpan() {
         case let .endOfNewestMessageMarker(offsetOfNextMessage):
             // We found the last message!
             if shouldSeekToOldestMessageIfFound {
@@ -107,8 +107,8 @@ extension FileHandle {
     // MARK: Private
 
     /// Returns the next encoded message span, seeking to the end the span.
-    private func nextEncodedMessageSpan() -> NextMessageSpan {
-        let messageSizeData = readData(ofLength: Data.messageSpanLength)
+    private func nextEncodedMessageSpan() throws -> NextMessageSpan {
+        let messageSizeData = try __readDataUp(toLength: Data.messageSpanLength)
 
         guard messageSizeData.count > 0 else {
             // We haven't written anything to this file yet, or we've reached the end of the file.
@@ -119,7 +119,7 @@ extension FileHandle {
             // We have reached the most recently written message.
 
             // Find out if we have a span marking the offset of the next message.
-            let nextSpan = nextEncodedMessageSpan()
+            let nextSpan = try nextEncodedMessageSpan()
             switch nextSpan {
             case let .span(offsetOfFirstMessage):
                 return .endOfNewestMessageMarker(offsetOfFirstMessage: UInt64(offsetOfFirstMessage))
