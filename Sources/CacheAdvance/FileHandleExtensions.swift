@@ -45,7 +45,7 @@ extension FileHandle {
 
             if startingOffset != 0 {
                 // We hit an empty read at the end of the file.
-                // We know there's a message here.
+                // We know there's a message to read now that we're at the start of the file.
                 return try nextEncodedMessage()
             }
             return nil
