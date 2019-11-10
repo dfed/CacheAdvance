@@ -52,12 +52,8 @@ struct EncodedMessages<T: Codable>: Sequence {
 
     // MARK: Internal
 
-    /// `data` as DispatchData
-    var dispatchData: DispatchData {
-        data.withUnsafeBytes {
-            DispatchData(bytes: UnsafeRawBufferPointer(start: $0.baseAddress, count: $0.count))
-        }
-    }
+    /// The encoded message, prefixed with the size of the message blob.
+    let data: Data
 
     /// An array of messages that have been decoded from the stored `data`.
     var decodedMessages: [T] {
@@ -69,9 +65,6 @@ struct EncodedMessages<T: Codable>: Sequence {
     }
 
     // MARK: Private
-
-    /// The encoded message, prefixed with the size of the message blob.
-    private let data: Data
 
     struct EncodedMessageIterator: IteratorProtocol {
 
