@@ -101,7 +101,7 @@ final class CacheAdvanceTests: XCTestCase {
             XCTAssertTrue(try cache.append(message: message))
         }
 
-        try cache.append(message: "This message won't fit")
+        XCTAssertFalse(try cache.append(message: "This message won't fit"))
 
         let cachedMessages = try cache.cachedMessages()
         XCTAssertEqual(cachedMessages, lorumIpsumMessages)
@@ -118,7 +118,7 @@ final class CacheAdvanceTests: XCTestCase {
 
         // Append a message that is shorter than the first message in lorumIpsumMessages.
         let shortMessage = "A short message"
-        try cache.append(message: shortMessage)
+        XCTAssertTrue(try cache.append(message: shortMessage))
 
         let cachedMessages = try cache.cachedMessages()
         XCTAssertEqual(cachedMessages, Array(lorumIpsumMessages.dropFirst()) + [shortMessage])
@@ -135,7 +135,7 @@ final class CacheAdvanceTests: XCTestCase {
 
         // Append a message that is shorter than the first message in lorumIpsumMessages.
         let barelyLongerMessage = lorumIpsumMessages[0] + "hi"
-        try cache.append(message: barelyLongerMessage)
+        XCTAssertTrue(try cache.append(message: barelyLongerMessage))
 
         let cachedMessages = try cache.cachedMessages()
         XCTAssertEqual(cachedMessages, Array(lorumIpsumMessages.dropFirst(2)) + [barelyLongerMessage])
