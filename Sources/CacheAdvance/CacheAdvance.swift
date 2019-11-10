@@ -53,6 +53,7 @@ public final class CacheAdvance<T: Codable> {
 
     deinit {
         try? writer.close()
+        try? reader.close()
     }
 
     // MARK: Public
