@@ -1,0 +1,16 @@
+language: objective-c
+install:
+  - bundle install
+  - brew outdated carthage || brew upgrade carthage
+script:
+  - ./Scripts/ci.sh
+matrix:
+  include:
+  - osx_image: xcode11
+    env: ACTION="swift-package";SDK="iphonesimulator";DESTINATION="platform=iOS Simulator,OS=13.0,name=iPad Pro (12.9-inch) (3rd generation)"
+  - osx_image: xcode11
+    env: ACTION="swift-package";SDK="appletvsimulator13.0";DESTINATION="platform=tvOS Simulator,name=Apple TV"
+  - osx_image: xcode11
+    env: ACTION="swift-package";SDK="macosx10.15";DESTINATION="platform=OS X"
+  - osx_image: xcode11
+    env: ACTION="swift-package";SDK="watchos6.0";DESTINATION=""
