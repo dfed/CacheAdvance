@@ -22,6 +22,8 @@ import XCTest
 
 final class CacheAdvanceTests: XCTestCase {
 
+    // MARK: XCTestCase
+
     override func setUp() {
         super.setUp()
         FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
@@ -31,6 +33,8 @@ final class CacheAdvanceTests: XCTestCase {
         super.tearDown()
         try? FileManager.default.removeItem(at: testFileLocation)
     }
+
+    // MARK: Behavior Tests
 
     func test_append_singleMessageThatFitsCanBeRetrieved() throws {
         let message = "This is a test"

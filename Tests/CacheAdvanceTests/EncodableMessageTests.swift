@@ -22,6 +22,8 @@ import XCTest
 
 final class EncodableMessageTests: XCTestCase {
 
+    // MARK: Behavior Tests
+
     func test_encodedData_encodesCorrectSize() throws {
         let message = "This is a test"
         let data = try encoder.encode(message)
