@@ -22,9 +22,9 @@ extension FileHandle {
     // MARK: Internal
 
     /// Returns the next encodable message, seeking to the beginning of the next message.
-    func nextEncodedMessage() throws -> Data? {
+    func nextEncodedMessage(cacheCanRoll: Bool) throws -> Data? {
         let startingOffset = offsetInFile
-        switch try nextEncodedMessageSpan() {
+        switch try nextEncodedMessageSpan(cacheCanRoll: cacheCanRoll) {
         case let .span(messageLength):
             let message = try __readDataUp(toLength: Int(messageLength))
             guard message.count > 0 else {
@@ -46,7 +46,7 @@ extension FileHandle {
             if startingOffset != 0 {
                 // We hit an empty read at the end of the file.
                 // We know there's a message to read now that we're at the start of the file.
-                return try nextEncodedMessage()
+                return try nextEncodedMessage(cacheCanRoll: cacheCanRoll)
             }
             return nil
 
@@ -56,22 +56,31 @@ extension FileHandle {
     }
 
     /// Seeks just ahead of the newest message in the file.
-    func seekToEndOfNewestMessage() throws {
-        while try seekToNextMessage(shouldSeekToOldestMessageIfFound: false) {}
+    /// - Parameter cacheCanRoll: When `true`,  the cache encodes a pointer to the oldest message after the newest message marker.
+    func seekToEndOfNewestMessage(cacheCanRoll: Bool) throws {
+        while try seekToNextMessage(shouldSeekToOldestMessageIfFound: false, cacheCanRoll: cacheCanRoll) {}
     }
 
     /// Seeks to the beginning of the oldest message in the file.
-    func seekToBeginningOfOldestMessage() throws {
-        while try seekToNextMessage(shouldSeekToOldestMessageIfFound: true) {}
+    /// - Parameter cacheCanRoll: When `true`,  the cache encodes a pointer to the oldest message after the newest message marker.
+    func seekToBeginningOfOldestMessage(cacheCanRoll: Bool) throws {
+        if cacheCanRoll {
+            while try seekToNextMessage(shouldSeekToOldestMessageIfFound: true, cacheCanRoll: true) {}
+        } else {
+            // The oldest message is always at the beginning of the cache.
+            try seek(toOffset: 0)
+        }
     }
 
     /// Seeks to the next message. Returns true the span skipped represented a message.
     /// When false is returned, it signifies that the last message marker was passed.
-    /// - Parameter shouldSeekToOldestMessageIfFound: When true, the file handle will seek to the oldest message if the last message marker is pased.
+    /// - Parameters:
+    ///   - shouldSeekToOldestMessageIfFound: When true, the file handle will seek to the oldest message if the last message marker is pased.
+    ///   - cacheCanRoll: When `true`,  the cache encodes a pointer to the oldest message after the newest message marker.
     @discardableResult
-    func seekToNextMessage(shouldSeekToOldestMessageIfFound: Bool) throws -> Bool {
+    func seekToNextMessage(shouldSeekToOldestMessageIfFound: Bool, cacheCanRoll: Bool) throws -> Bool {
         let startingOffset = offsetInFile
-        switch try nextEncodedMessageSpan() {
+        switch try nextEncodedMessageSpan(cacheCanRoll: cacheCanRoll) {
         case let .endOfNewestMessageMarker(offsetOfNextMessage):
             // We found the last message!
             if shouldSeekToOldestMessageIfFound {
@@ -107,7 +116,7 @@ extension FileHandle {
     // MARK: Private
 
     /// Returns the next encoded message span, seeking to the end the span.
-    private func nextEncodedMessageSpan() throws -> NextMessageSpan {
+    private func nextEncodedMessageSpan(cacheCanRoll: Bool) throws -> NextMessageSpan {
         let messageSizeData = try __readDataUp(toLength: Data.messageSpanLength)
 
         guard messageSizeData.count > 0 else {
@@ -117,21 +126,17 @@ extension FileHandle {
 
         guard messageSizeData != Data.endOfNewestMessageMarker else {
             // We have reached the most recently written message.
+            if cacheCanRoll {
+                // We have a span marking the offset of the oldest message.
+                let oldestMessageOffsetData = try __readDataUp(toLength: Data.oldestMessageOffsetLength)
+                guard let oldestMessageOffset = Bytes(oldestMessageOffsetData) else {
+                    // The file is improperly formatted.
+                    return .invalidFormat
+                }
+                return .endOfNewestMessageMarker(offsetOfFirstMessage: oldestMessageOffset)
 
-            // Find out if we have a span marking the offset of the next message.
-            let nextSpan = try nextEncodedMessageSpan()
-            switch nextSpan {
-            case let .span(offsetOfFirstMessage):
-                return .endOfNewestMessageMarker(offsetOfFirstMessage: UInt64(offsetOfFirstMessage))
-
-            case .emptyRead:
-                // We're at the end of the file.
-                return .endOfNewestMessageMarker(offsetOfFirstMessage: 0)
-
-            case .endOfNewestMessageMarker, .invalidFormat:
-                // There's garbage beyond the last message marker.
-                // The garbage is likely a result of rolling the log file multiple times.
-                // This abandoned data can be safely ignored.
+            } else {
+                // The first message is always at the beginning of the file.
                 return .endOfNewestMessageMarker(offsetOfFirstMessage: 0)
             }
         }
@@ -149,6 +154,6 @@ extension FileHandle {
 private enum NextMessageSpan {
     case span(MessageSpan)
     case emptyRead
-    case endOfNewestMessageMarker(offsetOfFirstMessage: UInt64)
+    case endOfNewestMessageMarker(offsetOfFirstMessage: Bytes)
     case invalidFormat
 }

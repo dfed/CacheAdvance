@@ -107,7 +107,7 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertEqual(cachedMessages, lorumIpsumMessages)
     }
 
-    func test_append_dropsFirstMessageIfCacheDoesNotRollAndLastMessageDoesNotFitAndIsShorterThanFirstMessage() throws {
+    func test_append_dropsFirstMessageIfCacheRollsAndLastMessageDoesNotFitAndIsShorterThanFirstMessage() throws {
         let cache = try CacheAdvance<String>(
             file: testFileLocation,
             maximumBytes: requiredByteCount(for: lorumIpsumMessages, cacheWillRoll: true),
@@ -117,14 +117,14 @@ final class CacheAdvanceTests: XCTestCase {
         }
 
         // Append a message that is shorter than the first message in lorumIpsumMessages.
-        let shortMessage = "A short message"
+        let shortMessage = "Short message"
         XCTAssertTrue(try cache.append(message: shortMessage))
 
         let cachedMessages = try cache.cachedMessages()
         XCTAssertEqual(cachedMessages, Array(lorumIpsumMessages.dropFirst()) + [shortMessage])
     }
 
-    func test_append_dropsFirstTwoMessagesIfCacheDoesNotRollAndLastMessageDoesNotFitAndIsLargerThanFirstMessage() throws {
+    func test_append_dropsFirstTwoMessagesIfCacheRollsAndLastMessageDoesNotFitAndIsLargerThanFirstMessage() throws {
         let cache = try CacheAdvance<String>(
             file: testFileLocation,
             maximumBytes: requiredByteCount(for: lorumIpsumMessages, cacheWillRoll: true),
@@ -363,8 +363,8 @@ final class CacheAdvanceTests: XCTestCase {
 
     private func requiredByteCount<T: Codable>(for messages: [T], cacheWillRoll: Bool) -> UInt64 {
         let encoder = JSONEncoder()
-        let messageSpanSuffixLength = cacheWillRoll ? 2 * Data.messageSpanLength : Data.messageSpanLength
-        return UInt64(messageSpanSuffixLength)
+        let messageSpanSuffixLength = cacheWillRoll ? Bytes(Data.messageSpanLength + Data.oldestMessageOffsetLength) : Bytes(Data.messageSpanLength)
+        return messageSpanSuffixLength
             + messages.reduce(0) { allocatedSize, message in
                 let encodableMessage = EncodableMessage(message: message, encoder: encoder)
                 guard let data = try? encodableMessage.encodedData() else {

@@ -23,16 +23,20 @@ typealias MessageSpan = UInt32
 extension MessageSpan {
 
     /// Initializes a MessageSpan from a data blob.
-    /// - Parameter data: A data blob representing a UInt32. Must be of length `Data.messageSpanLength`.
+    /// - Parameter data: A data blob representing a MessageSpan. Must be of length `Data.messageSpanLength`.
     init?(_ data: Data) {
         guard data.count == Data.messageSpanLength else {
-            // Data is of the incorrect size and can't represent a UInt32.
+            // Data is of the incorrect size and can't represent a MessageSpan.
             return nil
         }
         let decodedSize = withUnsafePointer(to: data) {
             return UnsafeRawBufferPointer(start: $0, count: MemoryLayout<MessageSpan>.size)
         }
-        self = decodedSize.load(as: MessageSpan.self)
+        self = NSSwapBigMessageSpanToHost(decodedSize.load(as: MessageSpan.self))
     }
 
+}
+
+private func NSSwapBigMessageSpanToHost(_ x: MessageSpan) -> MessageSpan {
+    return NSSwapBigIntToHost(x)
 }

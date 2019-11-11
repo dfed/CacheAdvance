@@ -29,7 +29,7 @@ public final class CacheAdvance<T: Codable> {
     ///   - shouldRoll: When `true`, new logs will overwrite the oldest logs when the cache runs out of space.
     public init(
         file: URL,
-        maximumBytes: UInt64,
+        maximumBytes: Bytes,
         shouldRoll: Bool)
         throws
     {
@@ -43,10 +43,10 @@ public final class CacheAdvance<T: Codable> {
         lengthOfMessageSuffix = {
             if shouldRoll {
                 /// We store both the `endOfNewestMessageMarker` and `offsetInFileOfOldestMessage` after each message.
-                return 2 * Data.messageSpanLength
+                return Bytes(Data.messageSpanLength + Data.oldestMessageOffsetLength)
             } else {
                 /// We store a `endOfNewestMessageMarker` after each message.
-                return Data.messageSpanLength
+                return Bytes(Data.messageSpanLength)
             }
         }()
     }
@@ -69,7 +69,7 @@ public final class CacheAdvance<T: Codable> {
 
         let encodedMessage = EncodableMessage(message: message, encoder: encoder)
         let messageData = try encodedMessage.encodedData()
-        let cacheHasSpaceForNewMessage = writer.offsetInFile + UInt64(messageData.count + lengthOfMessageSuffix) <= UInt64(maximumBytes)
+        let cacheHasSpaceForNewMessage = writer.offsetInFile + Bytes(messageData.count) + lengthOfMessageSuffix <= maximumBytes
         if cacheHasSpaceForNewMessage {
             try write(messageData: messageData)
             return true
@@ -84,7 +84,7 @@ public final class CacheAdvance<T: Codable> {
             // We know the oldest message is at the beginning of the file, since we just tossed out the rest of the file.
             try reader.seek(toOffset: 0)
             // We know we're about to overwrite the oldest message, so advance the reader to the next message.
-            try reader.seekToNextMessage(shouldSeekToOldestMessageIfFound: false)
+            try reader.seekToNextMessage(shouldSeekToOldestMessageIfFound: false, cacheCanRoll: true)
 
             // Start writing from the beginning of the file.
             try write(messageData: messageData)
@@ -101,7 +101,7 @@ public final class CacheAdvance<T: Codable> {
         try setUpFileHandlesIfNecessary()
 
         var messages = [T]()
-        while let encodedMessage = try reader.nextEncodedMessage() {
+        while let encodedMessage = try reader.nextEncodedMessage(cacheCanRoll: shouldRoll) {
             messages.append(try decoder.decode(T.self, from: encodedMessage))
         }
 
@@ -119,13 +119,11 @@ public final class CacheAdvance<T: Codable> {
 
         // This is our first cache action.
         // We need to find out where we should write our next message.
-        try reader.seekToEndOfNewestMessage()
+        try reader.seekToEndOfNewestMessage(cacheCanRoll: shouldRoll)
         try writer.seek(toOffset: reader.offsetInFile)
 
-        if shouldRoll {
-            // Now that we know where to write, we need to figure out where the oldest message is to support rolling.
-            try reader.seekToBeginningOfOldestMessage()
-        }
+        // Now that we know where to write, we need to figure out where the oldest message is.
+        try reader.seekToBeginningOfOldestMessage(cacheCanRoll: shouldRoll)
 
         hasSetUpFileHandles = true
     }
@@ -149,18 +147,18 @@ public final class CacheAdvance<T: Codable> {
     ///
     /// - Parameter messageData: an `EncodableMessage`'s encoded data. Must be smaller than both `maximumBytes` and `MessageSpan.max`.
     private func write(messageData: Data) throws {
-        let messageLength = UInt64(messageData.count + lengthOfMessageSuffix)
-        guard messageLength <= maximumBytes && messageLength <= UInt64(MessageSpan.max) else {
+        let messageLength = Bytes(messageData.count) + lengthOfMessageSuffix
+        guard messageLength <= maximumBytes && messageLength <= Bytes(MessageSpan.max) else {
             throw CacheAdvanceWriteError.messageDataTooLarge
         }
 
         while shouldRoll
             && writer.offsetInFile < reader.offsetInFile
-            && reader.offsetInFile < writer.offsetInFile + UInt64(messageData.count) + UInt64(lengthOfMessageSuffix)
+            && reader.offsetInFile < writer.offsetInFile + messageLength
         {
             // We are a rolling cache. The current position of the writer is before the oldest message,
             // and writing this message would write into the current message. Advance to the next message.
-            try reader.seekToNextMessage(shouldSeekToOldestMessageIfFound: true)
+            try reader.seekToNextMessage(shouldSeekToOldestMessageIfFound: true, cacheCanRoll: shouldRoll)
         }
 
         try writer.__write(messageData, error: ())
@@ -170,8 +168,7 @@ public final class CacheAdvance<T: Codable> {
         try writer.__write(Data.endOfNewestMessageMarker, error: ())
 
         if shouldRoll {
-            // Write down the offset of the oldest message.
-            try writer.__write(Data(UInt64(reader.offsetInFile)), error: ())
+            try writer.__write(Data(Bytes(reader.offsetInFile)), error: ())
         }
 
         // Back the file handle's offset back to the end of the message we just wrote.
@@ -185,8 +182,8 @@ public final class CacheAdvance<T: Codable> {
     private var hasSetUpFileHandles = false
     private let shouldRoll: Bool
 
-    private let maximumBytes: UInt64
-    private let lengthOfMessageSuffix: Int
+    private let maximumBytes: Bytes
+    private let lengthOfMessageSuffix: Bytes
 
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()

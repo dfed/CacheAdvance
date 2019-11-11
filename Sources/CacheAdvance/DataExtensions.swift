@@ -25,10 +25,18 @@ extension Data {
     /// A marker written at the end of the newest message written to disk.
     static let endOfNewestMessageMarker = Data(MessageSpan.max)
 
+    /// The width of the encoded oldest message offset.
+    static let oldestMessageOffsetLength = MemoryLayout<Bytes>.size
+
     /// Initializes Data from a MessageSpan. The data will always be of length Data.messageSpanLength.
     /// - Parameter value: the MessageSpan to encode as data.
     init(_ value: MessageSpan) {
-        var valueToEncode = value
+        var valueToEncode = value.bigEndian
         self.init(bytes: &valueToEncode, count: Data.messageSpanLength)
+    }
+
+    init(_ value: Bytes) {
+        var valueToEncode = value.bigEndian
+        self.init(bytes: &valueToEncode, count: Data.oldestMessageOffsetLength)
     }
 }
