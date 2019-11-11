@@ -19,15 +19,15 @@ import Foundation
 
 extension Data {
 
-    /// The width of the encoded message size. If this value is changed, any previously persisted message encodings will not be readible.
-    static let messageSpanLength = MemoryLayout<UInt32>.size
+    /// The width of the encoded message size.
+    static let messageSpanLength = MemoryLayout<MessageSpan>.size
 
     /// A marker written at the end of the newest message written to disk.
-    static let endOfNewestMessageMarker = Data(UInt32.max)
+    static let endOfNewestMessageMarker = Data(MessageSpan.max)
 
-    /// Initializes Data from a UInt32. The data will always be of length Data.messageSpanLength.
-    /// - Parameter value: the unsigned 32-bit integer to encode as data.
-    init(_ value: UInt32) {
+    /// Initializes Data from a MessageSpan. The data will always be of length Data.messageSpanLength.
+    /// - Parameter value: the MessageSpan to encode as data.
+    init(_ value: MessageSpan) {
         var valueToEncode = value
         self.init(bytes: &valueToEncode, count: Data.messageSpanLength)
     }

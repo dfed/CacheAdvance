@@ -31,7 +31,7 @@ final class EncodableMessageTests: XCTestCase {
         let encodedData = try encodedMessage.encodedData()
 
         let prefix = encodedData.subdata(in: 0..<Data.messageSpanLength)
-        XCTAssertEqual(UInt32(prefix), UInt32(data.count))
+        XCTAssertEqual(MessageSpan(prefix), MessageSpan(data.count))
     }
 
     func test_encodedData_isOfCorrectLength() throws {

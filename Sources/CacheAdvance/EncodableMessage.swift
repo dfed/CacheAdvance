@@ -40,7 +40,7 @@ struct EncodableMessage<T: Codable> {
     /// The encoded message, prefixed with the size of the message blob.
     func encodedData() throws -> Data {
         let messageData = try encoder.encode(message)
-        let encodedSize = Data(UInt32(messageData.count))
+        let encodedSize = Data(MessageSpan(messageData.count))
         return encodedSize + messageData
     }
 

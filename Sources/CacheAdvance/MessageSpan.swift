@@ -17,9 +17,12 @@
 
 import Foundation
 
-extension UInt32 {
+/// If this value is changed, any previously persisted message encodings will not be readible.
+typealias MessageSpan = UInt32
 
-    /// Initializes a UInt32 from a data blob.
+extension MessageSpan {
+
+    /// Initializes a MessageSpan from a data blob.
     /// - Parameter data: A data blob representing a UInt32. Must be of length `Data.messageSpanLength`.
     init?(_ data: Data) {
         guard data.count == Data.messageSpanLength else {
@@ -27,9 +30,9 @@ extension UInt32 {
             return nil
         }
         let decodedSize = withUnsafePointer(to: data) {
-            return UnsafeRawBufferPointer(start: $0, count: MemoryLayout<UInt32>.size)
+            return UnsafeRawBufferPointer(start: $0, count: MemoryLayout<MessageSpan>.size)
         }
-        self = decodedSize.load(as: UInt32.self)
+        self = decodedSize.load(as: MessageSpan.self)
     }
 
 }

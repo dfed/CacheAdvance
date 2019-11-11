@@ -136,7 +136,7 @@ extension FileHandle {
             }
         }
 
-        guard let messageSize = UInt32(messageSizeData) else {
+        guard let messageSize = MessageSpan(messageSizeData) else {
             // The file is improperly formatted.
             return .invalidFormat
         }
@@ -147,7 +147,7 @@ extension FileHandle {
 }
 
 private enum NextMessageSpan {
-    case span(UInt32)
+    case span(MessageSpan)
     case emptyRead
     case endOfNewestMessageMarker(offsetOfFirstMessage: UInt64)
     case invalidFormat
