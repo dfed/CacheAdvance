@@ -17,12 +17,13 @@
 
 import Foundation
 
-/// If this value is changed, any previously persisted message encodings will not be readible.
+/// A storage unit that counts bytes.
+/// - Warning: If this value is changed, previously persisted message encodings will not be readible.
 public typealias Bytes = UInt64
 
 extension Bytes {
 
-    /// Initializes Bytes from a data blob.
+    /// Initializes the receiver from a data blob.
     /// - Parameter data: A data blob representing Bytes. Must be of length `Data.oldestMessageOffsetLength`.
     init?(_ data: Data) {
         guard data.count == Data.oldestMessageOffsetLength else {
@@ -33,6 +34,12 @@ extension Bytes {
             return UnsafeRawBufferPointer(start: $0, count: MemoryLayout<Bytes>.size)
         }
         self = NSSwapBigBytesToHost(decodedSize.load(as: Bytes.self))
+    }
+
+    /// Converts megabytes into the receiver. Will never overflow.
+    /// - Parameter megabytes: The number of megabytes to convert.
+    init(megabytes: UInt8) {
+        self = Bytes(megabytes) * 1000000
     }
 
 }

@@ -17,7 +17,8 @@
 
 import Foundation
 
-/// If this value is changed, any previously persisted message encodings will not be readible.
+/// A storage unit that measures message length.
+/// - Warning: If this value is changed, previously persisted message encodings will not be readible.
 typealias MessageSpan = UInt32
 
 extension MessageSpan {
