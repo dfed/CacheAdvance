@@ -19,9 +19,6 @@ public enum CacheAdvanceReadError: Error, Equatable {
     /// Thrown when the cache file is of an unexpected format.
     /// A corrupted file should be deleted. Corruption can occur if an application crashes while writing to the file.
     case fileCorrupted
-    /// Thrown when the cache file read beyond its reasonable bounds.
-    /// If this error is caught, please file an Issue. This error represents a bug.
-    case offsetOutOfBounds
 }
 
 public enum CacheAdvanceWriteError: Error, Equatable {

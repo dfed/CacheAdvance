@@ -29,7 +29,7 @@ public final class CacheAdvance<T: Codable> {
     ///   - shouldRoll: When `true`, new logs will overwrite the oldest logs when the cache runs out of space.
     public init(
         file: URL,
-        maximumBytes: UInt32,
+        maximumBytes: UInt64,
         shouldRoll: Bool)
         throws
     {
@@ -147,9 +147,10 @@ public final class CacheAdvance<T: Codable> {
     /// beginning of the written `endOfNewestMessageMarker`, such that the next message
     /// written will overwrite the marker.
     ///
-    /// - Parameter messageData: an `EncodableMessage`'s encoded data.
+    /// - Parameter messageData: an `EncodableMessage`'s encoded data. Must be smaller than both `maximumBytes` and `MessageSpan.max`.
     private func write(messageData: Data) throws {
-        guard UInt32(messageData.count + lengthOfMessageSuffix) <= maximumBytes else {
+        let messageLength = UInt64(messageData.count + lengthOfMessageSuffix)
+        guard messageLength <= maximumBytes && messageLength <= UInt64(MessageSpan.max) else {
             throw CacheAdvanceWriteError.messageDataTooLarge
         }
 
@@ -170,10 +171,7 @@ public final class CacheAdvance<T: Codable> {
 
         if shouldRoll {
             // Write down the offset of the oldest message.
-            if reader.offsetInFile > UInt32.max {
-                throw CacheAdvanceReadError.offsetOutOfBounds
-            }
-            try writer.__write(Data(UInt32(reader.offsetInFile)), error: ())
+            try writer.__write(Data(UInt64(reader.offsetInFile)), error: ())
         }
 
         // Back the file handle's offset back to the end of the message we just wrote.
@@ -187,7 +185,7 @@ public final class CacheAdvance<T: Codable> {
     private var hasSetUpFileHandles = false
     private let shouldRoll: Bool
 
-    private let maximumBytes: UInt32
+    private let maximumBytes: UInt64
     private let lengthOfMessageSuffix: Int
 
     private let decoder = JSONDecoder()

@@ -361,17 +361,17 @@ final class CacheAdvanceTests: XCTestCase {
         "at tempus arcu sagittis quis.",
     ]
 
-    private func requiredByteCount<T: Codable>(for messages: [T], cacheWillRoll: Bool) -> UInt32 {
+    private func requiredByteCount<T: Codable>(for messages: [T], cacheWillRoll: Bool) -> UInt64 {
         let encoder = JSONEncoder()
         let messageSpanSuffixLength = cacheWillRoll ? 2 * Data.messageSpanLength : Data.messageSpanLength
-        return UInt32(messageSpanSuffixLength)
+        return UInt64(messageSpanSuffixLength)
             + messages.reduce(0) { allocatedSize, message in
                 let encodableMessage = EncodableMessage(message: message, encoder: encoder)
                 guard let data = try? encodableMessage.encodedData() else {
                     XCTFail("Could not encode data for message: \(message)")
                     return 0
                 }
-                return allocatedSize + UInt32(data.count)
+                return allocatedSize + UInt64(data.count)
         }
     }
 
