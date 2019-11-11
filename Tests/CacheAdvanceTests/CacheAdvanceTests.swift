@@ -54,13 +54,9 @@ final class CacheAdvanceTests: XCTestCase {
             file: testFileLocation,
             maximumBytes: requiredByteCount(for: [message], cacheWillRoll: false) - 1,
             shouldOverwriteOldMessages: false)
-        do {
-            try cache.append(message: message)
-            XCTFail("Appending too-big message was expected to throw")
-        } catch CacheAdvanceWriteError.messageDataTooLarge {
-            // We hit the expected case.
-        } catch {
-            XCTFail("Encountered unexpected error \(error)")
+
+        XCTAssertThrowsError(try cache.append(message: message)) {
+            XCTAssertEqual($0 as? CacheAdvanceWriteError, CacheAdvanceWriteError.messageDataTooLarge)
         }
 
         let cachedMessages = try cache.cachedMessages()
@@ -73,13 +69,9 @@ final class CacheAdvanceTests: XCTestCase {
             file: testFileLocation,
             maximumBytes: requiredByteCount(for: [message], cacheWillRoll: true) - 1,
             shouldOverwriteOldMessages: true)
-        do {
-            try cache.append(message: message)
-            XCTFail("Appending too-big message was expected to throw")
-        } catch CacheAdvanceWriteError.messageDataTooLarge {
-            // We hit the expected case.
-        } catch {
-            XCTFail("Encountered unexpected error \(error)")
+
+        XCTAssertThrowsError(try cache.append(message: message)) {
+            XCTAssertEqual($0 as? CacheAdvanceWriteError, CacheAdvanceWriteError.messageDataTooLarge)
         }
 
         let cachedMessages = try cache.cachedMessages()
@@ -108,13 +100,8 @@ final class CacheAdvanceTests: XCTestCase {
             try cache.append(message: message)
         }
 
-        do {
-            try cache.append(message: "This message won't fit")
-            XCTFail("Appending too-big message was expected to throw")
-        } catch CacheAdvanceWriteError.messageDataTooLarge {
-            // We hit the expected case.
-        } catch {
-            XCTFail("Encountered unexpected error \(error)")
+        XCTAssertThrowsError(try cache.append(message: "This message won't fit")) {
+            XCTAssertEqual($0 as? CacheAdvanceWriteError, CacheAdvanceWriteError.messageDataTooLarge)
         }
 
         let cachedMessages = try cache.cachedMessages()
