@@ -41,7 +41,7 @@ final class CacheAdvanceTests: XCTestCase {
         let cache = try CacheAdvance<String>(
             file: testFileLocation,
             maximumBytes: requiredByteCount(for: [message], cacheWillRoll: false),
-            shouldRoll: false)
+            shouldOverwriteOldMessages: false)
         try cache.append(message: message)
 
         let cachedMessages = try cache.cachedMessages()
@@ -53,7 +53,7 @@ final class CacheAdvanceTests: XCTestCase {
         let cache = try CacheAdvance<String>(
             file: testFileLocation,
             maximumBytes: requiredByteCount(for: [message], cacheWillRoll: false) - 1,
-            shouldRoll: false)
+            shouldOverwriteOldMessages: false)
         do {
             try cache.append(message: message)
             XCTFail("Appending too-big message was expected to throw")
@@ -72,7 +72,7 @@ final class CacheAdvanceTests: XCTestCase {
         let cache = try CacheAdvance<String>(
             file: testFileLocation,
             maximumBytes: requiredByteCount(for: [message], cacheWillRoll: true) - 1,
-            shouldRoll: true)
+            shouldOverwriteOldMessages: true)
         do {
             try cache.append(message: message)
             XCTFail("Appending too-big message was expected to throw")
@@ -90,7 +90,7 @@ final class CacheAdvanceTests: XCTestCase {
         let cache = try CacheAdvance<String>(
             file: testFileLocation,
             maximumBytes: requiredByteCount(for: lorumIpsumMessages, cacheWillRoll: false),
-            shouldRoll: false)
+            shouldOverwriteOldMessages: false)
         for message in lorumIpsumMessages {
             try cache.append(message: message)
         }
@@ -103,7 +103,7 @@ final class CacheAdvanceTests: XCTestCase {
         let cache = try CacheAdvance<String>(
             file: testFileLocation,
             maximumBytes: requiredByteCount(for: lorumIpsumMessages, cacheWillRoll: false),
-            shouldRoll: false)
+            shouldOverwriteOldMessages: false)
         for message in lorumIpsumMessages {
             try cache.append(message: message)
         }
@@ -125,7 +125,7 @@ final class CacheAdvanceTests: XCTestCase {
         let cache = try CacheAdvance<String>(
             file: testFileLocation,
             maximumBytes: requiredByteCount(for: lorumIpsumMessages, cacheWillRoll: true),
-            shouldRoll: true)
+            shouldOverwriteOldMessages: true)
         for message in lorumIpsumMessages {
             try cache.append(message: message)
         }
@@ -142,7 +142,7 @@ final class CacheAdvanceTests: XCTestCase {
         let cache = try CacheAdvance<String>(
             file: testFileLocation,
             maximumBytes: requiredByteCount(for: lorumIpsumMessages, cacheWillRoll: true),
-            shouldRoll: true)
+            shouldOverwriteOldMessages: true)
         for message in lorumIpsumMessages {
             try cache.append(message: message)
         }
@@ -159,7 +159,7 @@ final class CacheAdvanceTests: XCTestCase {
         let cache = try CacheAdvance<String>(
             file: testFileLocation,
             maximumBytes: requiredByteCount(for: lorumIpsumMessages, cacheWillRoll: true) / 3,
-            shouldRoll: true)
+            shouldOverwriteOldMessages: true)
         for message in lorumIpsumMessages {
             try cache.append(message: message)
         }

@@ -22,9 +22,9 @@ extension FileHandle {
     // MARK: Internal
 
     /// Returns the next encodable message, seeking to the beginning of the next message.
-    func nextEncodedMessage(cacheCanRoll: Bool) throws -> Data? {
+    func nextEncodedMessage(cacheOverwritesOldMessages: Bool) throws -> Data? {
         let startingOffset = offsetInFile
-        switch try nextEncodedMessageSpan(cacheCanRoll: cacheCanRoll) {
+        switch try nextEncodedMessageSpan(cacheOverwritesOldMessages: cacheOverwritesOldMessages) {
         case let .span(messageLength):
             let message = try __readDataUp(toLength: Int(messageLength))
             guard message.count > 0 else {
@@ -46,7 +46,7 @@ extension FileHandle {
             if startingOffset != 0 {
                 // We hit an empty read at the end of the file.
                 // We know there's a message to read now that we're at the start of the file.
-                return try nextEncodedMessage(cacheCanRoll: cacheCanRoll)
+                return try nextEncodedMessage(cacheOverwritesOldMessages: cacheOverwritesOldMessages)
             }
             return nil
 
@@ -56,16 +56,16 @@ extension FileHandle {
     }
 
     /// Seeks just ahead of the newest message in the file.
-    /// - Parameter cacheCanRoll: When `true`,  the cache encodes a pointer to the oldest message after the newest message marker.
-    func seekToEndOfNewestMessage(cacheCanRoll: Bool) throws {
-        while try seekToNextMessage(shouldSeekToOldestMessageIfFound: false, cacheCanRoll: cacheCanRoll) {}
+    /// - Parameter cacheOverwritesOldMessages: When `true`,  the cache encodes a pointer to the oldest message after the newest message marker.
+    func seekToEndOfNewestMessage(cacheOverwritesOldMessages: Bool) throws {
+        while try seekToNextMessage(shouldSeekToOldestMessageIfFound: false, cacheOverwritesOldMessages: cacheOverwritesOldMessages) {}
     }
 
     /// Seeks to the beginning of the oldest message in the file.
-    /// - Parameter cacheCanRoll: When `true`,  the cache encodes a pointer to the oldest message after the newest message marker.
-    func seekToBeginningOfOldestMessage(cacheCanRoll: Bool) throws {
-        if cacheCanRoll {
-            while try seekToNextMessage(shouldSeekToOldestMessageIfFound: true, cacheCanRoll: true) {}
+    /// - Parameter cacheOverwritesOldMessages: When `true`,  the cache encodes a pointer to the oldest message after the newest message marker.
+    func seekToBeginningOfOldestMessage(cacheOverwritesOldMessages: Bool) throws {
+        if cacheOverwritesOldMessages {
+            while try seekToNextMessage(shouldSeekToOldestMessageIfFound: true, cacheOverwritesOldMessages: true) {}
         } else {
             // The oldest message is always at the beginning of the cache.
             try seek(toOffset: 0)
@@ -76,11 +76,11 @@ extension FileHandle {
     /// When false is returned, it signifies that the last message marker was passed.
     /// - Parameters:
     ///   - shouldSeekToOldestMessageIfFound: When true, the file handle will seek to the oldest message if the last message marker is pased.
-    ///   - cacheCanRoll: When `true`,  the cache encodes a pointer to the oldest message after the newest message marker.
+    ///   - cacheOverwritesOldMessages: When `true`,  the cache encodes a pointer to the oldest message after the newest message marker.
     @discardableResult
-    func seekToNextMessage(shouldSeekToOldestMessageIfFound: Bool, cacheCanRoll: Bool) throws -> Bool {
+    func seekToNextMessage(shouldSeekToOldestMessageIfFound: Bool, cacheOverwritesOldMessages: Bool) throws -> Bool {
         let startingOffset = offsetInFile
-        switch try nextEncodedMessageSpan(cacheCanRoll: cacheCanRoll) {
+        switch try nextEncodedMessageSpan(cacheOverwritesOldMessages: cacheOverwritesOldMessages) {
         case let .endOfNewestMessageMarker(offsetOfNextMessage):
             // We found the last message!
             if shouldSeekToOldestMessageIfFound {
@@ -116,7 +116,7 @@ extension FileHandle {
     // MARK: Private
 
     /// Returns the next encoded message span, seeking to the end the span.
-    private func nextEncodedMessageSpan(cacheCanRoll: Bool) throws -> NextMessageSpan {
+    private func nextEncodedMessageSpan(cacheOverwritesOldMessages: Bool) throws -> NextMessageSpan {
         let messageSizeData = try __readDataUp(toLength: Data.messageSpanLength)
 
         guard messageSizeData.count > 0 else {
@@ -126,7 +126,7 @@ extension FileHandle {
 
         guard messageSizeData != Data.endOfNewestMessageMarker else {
             // We have reached the most recently written message.
-            if cacheCanRoll {
+            if cacheOverwritesOldMessages {
                 // We have a span marking the offset of the oldest message.
                 let oldestMessageOffsetData = try __readDataUp(toLength: Data.oldestMessageOffsetLength)
                 guard let oldestMessageOffset = Bytes(oldestMessageOffsetData) else {
