@@ -72,10 +72,11 @@ extension FileHandle {
         }
     }
 
-    /// Seeks to the next message. Returns true the span skipped represented a message.
-    /// When false is returned, it signifies that the last message marker was passed.
+    /// Seeks to the next message. Returns `true` when the span skipped represented a message.
+    /// When `false` is returned, it signifies that the last message marker was passed.
+    ///
     /// - Parameters:
-    ///   - shouldSeekToOldestMessageIfFound: When true, the file handle will seek to the oldest message if the last message marker is pased.
+    ///   - shouldSeekToOldestMessageIfFound: When `true`, the file handle will seek to the oldest message if the last message marker is pased.
     ///   - cacheOverwritesOldMessages: When `true`,  the cache encodes a pointer to the oldest message after the newest message marker.
     @discardableResult
     func seekToNextMessage(shouldSeekToOldestMessageIfFound: Bool, cacheOverwritesOldMessages: Bool) throws -> Bool {
