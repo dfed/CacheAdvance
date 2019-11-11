@@ -84,7 +84,8 @@ public final class CacheAdvance<T: Codable> {
 
             // We know the oldest message is at the beginning of the file, since we just tossed out the rest of the file.
             try reader.seek(toOffset: 0)
-            // We know we're about to overwrite the oldest message, so advance the reader to the next message.
+
+            // We know we're about to overwrite the oldest message, so advance the reader to the second oldest message.
             try reader.seekToNextMessage(shouldSeekToOldestMessageIfFound: false, cacheOverwritesOldMessages: true)
 
             // Start writing from the beginning of the file.
