@@ -17,7 +17,7 @@
 
 import Foundation
 
-/// A performant on-disk cache that supports appending one element at a time.
+/// A cache that enables the performant persistence of individual messages to disk.
 /// This cache is intended to be written from and appended to from the same serial queue.
 public final class CacheAdvance<T: Codable> {
 

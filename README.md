@@ -1,2 +1,2 @@
 # CacheAdvance
-A performant on-disk cache that supports appending one element at a time.
+A cache that enables the performant persistence of individual messages to disk.
