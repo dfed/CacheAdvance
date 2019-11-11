@@ -20,7 +20,7 @@ import Foundation
 /// A struct that encodes a message of type T into data.
 /// A message is encoded with the following format:
 /// `[messageSize][data]`
-/// -  `messageSize` is length `messageSpanLength`.
+/// -  `messageSize` is a big-endian encoded `MessageSpan` of length `messageSpanLength`.
 /// - `data` is length `messageSize`.
 struct EncodableMessage<T: Codable> {
 

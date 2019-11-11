@@ -24,10 +24,13 @@ public final class CacheAdvance<T: Codable> {
     // MARK: Initialization
 
     /// Creates a new instance of the receiver.
+    ///
     /// - Parameters:
     ///   - file: The file URL indicating the desired location of the on-disk store. This file should already exist.
     ///   - maximumBytes: The maximum size of the cache, in bytes. Logs larger than this size will fail to append to the store.
     ///   - shouldOverwriteOldMessages: When `true`, once the on-disk store exceeds maximumBytes, new entries will replace the oldest entry.
+    ///
+    /// - Warning: `maximumBytes` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache leads to undefined behavior.
     public init(
         file: URL,
         maximumBytes: Bytes,
@@ -43,10 +46,10 @@ public final class CacheAdvance<T: Codable> {
 
         lengthOfMessageSuffix = {
             if shouldOverwriteOldMessages {
-                /// We store both the `endOfNewestMessageMarker` and `offsetInFileOfOldestMessage` after each message.
+                /// The message suffix requires space for both `endOfNewestMessageMarker` and `offsetInFileOfOldestMessage` after each message when rolling is enabled.
                 return Bytes(Data.messageSpanLength + Data.oldestMessageOffsetLength)
             } else {
-                /// We store a `endOfNewestMessageMarker` after each message.
+                /// The message suffix requires space for `endOfNewestMessageMarker` after each message.
                 return Bytes(Data.messageSpanLength)
             }
         }()
@@ -130,13 +133,13 @@ public final class CacheAdvance<T: Codable> {
     /// For caches that do not roll, the message data is written in the following format:
     /// `[messageData][endOfNewestMessageMarker]`
     /// - `messageData` is an `EncodableMessage`'s encoded data.
-    /// - `endOfNewestMessageMarker` is length `messageSpanLength`.
+    /// - `endOfNewestMessageMarker` is a big-endian encoded `MessageSpan` of length `messageSpanLength`.
     ///
     /// For caches that roll, the message data is written in the following format:
     /// `[messageData][endOfNewestMessageMarker][offsetInFileOfOldestMessage]`
     /// - `messageData` is an `EncodableMessage`'s encoded data.
-    /// - `endOfNewestMessageMarker` is length `messageSpanLength`.
-    /// - `offsetInFileOfOldestMessage` is length `messageSpanLength`.
+    /// - `endOfNewestMessageMarker` is a big-endian encoded `MessageSpan` of length `messageSpanLength`.
+    /// - `offsetInFileOfOldestMessage` is a big-endian encoded `Bytes` of length `oldestMessageOffsetLength`.
     ///
     /// By the time this method returns, the `writer`'s `offsetInFile` is always set to the
     /// beginning of the written `endOfNewestMessageMarker`, such that the next message
