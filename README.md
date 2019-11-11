@@ -1,2 +1,2 @@
 # CacheAdvance
-A performant on-disk cache that can be appended to one element at a time.
+A performant on-disk cache that supports appending one element at a time.

@@ -17,15 +17,16 @@
 
 import Foundation
 
-/// A performant on-disk cache that can be appended to one element at a time.
+/// A performant on-disk cache that supports appending one element at a time.
+/// This cache is intended to be written from and appended to from the same serial queue.
 public final class CacheAdvance<T: Codable> {
 
     // MARK: Initialization
 
-    /// Creates a CacheAdvance.
+    /// Creates a new instance of the receiver.
     /// - Parameters:
-    ///   - file: The URL for the on-disk cache to live.
-    ///   - maximumBytes: The maximum size of the cache, in bytes.
+    ///   - file: The file URL indicating the desired location of the on-disk store. This file should already exist.
+    ///   - maximumBytes: The maximum size of the cache, in bytes. Logs larger than this size will fail to append to the store.
     ///   - shouldRoll: When `true`, new logs will overwrite the oldest logs when the cache runs out of space.
     public init(
         file: URL,
@@ -62,9 +63,7 @@ public final class CacheAdvance<T: Codable> {
 
     /// Appends a message to the cache.
     /// - Parameter message: A message to write to disk.
-    /// - Returns: Whether there was room in the cache to append the message. Always `true` for caches that roll.
-    @discardableResult
-    public func append(message: T) throws -> Bool {
+    public func append(message: T) throws {
         try setUpFileHandlesIfNecessary()
 
         let encodedMessage = EncodableMessage(message: message, encoder: encoder)
@@ -72,7 +71,6 @@ public final class CacheAdvance<T: Codable> {
         let cacheHasSpaceForNewMessage = writer.offsetInFile + Bytes(messageData.count) + lengthOfMessageSuffix <= maximumBytes
         if cacheHasSpaceForNewMessage {
             try write(messageData: messageData)
-            return true
 
         } else if shouldRoll {
             // Trim the file to the current position.
@@ -88,11 +86,10 @@ public final class CacheAdvance<T: Codable> {
 
             // Start writing from the beginning of the file.
             try write(messageData: messageData)
-            return true
 
         } else {
             // We're out of room.
-            return false
+            throw CacheAdvanceWriteError.messageDataTooLarge
         }
     }
 

@@ -17,7 +17,7 @@
 
 import Foundation
 
-/// A struct that encodes a message of type T into a data that can be incrementally persisted to disk.
+/// A struct that encodes a message of type T into data.
 /// A message is encoded with the following format:
 /// `[messageSize][data]`
 /// -  `messageSize` is length `messageSpanLength`.

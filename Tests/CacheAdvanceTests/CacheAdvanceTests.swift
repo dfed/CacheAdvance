@@ -42,7 +42,7 @@ final class CacheAdvanceTests: XCTestCase {
             file: testFileLocation,
             maximumBytes: requiredByteCount(for: [message], cacheWillRoll: false),
             shouldRoll: false)
-        XCTAssertTrue(try cache.append(message: message))
+        try cache.append(message: message)
 
         let cachedMessages = try cache.cachedMessages()
         XCTAssertEqual(cachedMessages, [message])
@@ -54,7 +54,14 @@ final class CacheAdvanceTests: XCTestCase {
             file: testFileLocation,
             maximumBytes: requiredByteCount(for: [message], cacheWillRoll: false) - 1,
             shouldRoll: false)
-        XCTAssertFalse(try cache.append(message: message))
+        do {
+            try cache.append(message: message)
+            XCTFail("Appending too-big message was expected to throw")
+        } catch CacheAdvanceWriteError.messageDataTooLarge {
+            // We hit the expected case.
+        } catch {
+            XCTFail("Encountered unexpected error \(error)")
+        }
 
         let cachedMessages = try cache.cachedMessages()
         XCTAssertEqual(cachedMessages, [])
@@ -85,7 +92,7 @@ final class CacheAdvanceTests: XCTestCase {
             maximumBytes: requiredByteCount(for: lorumIpsumMessages, cacheWillRoll: false),
             shouldRoll: false)
         for message in lorumIpsumMessages {
-            XCTAssertTrue(try cache.append(message: message))
+            try cache.append(message: message)
         }
 
         let cachedMessages = try cache.cachedMessages()
@@ -98,10 +105,17 @@ final class CacheAdvanceTests: XCTestCase {
             maximumBytes: requiredByteCount(for: lorumIpsumMessages, cacheWillRoll: false),
             shouldRoll: false)
         for message in lorumIpsumMessages {
-            XCTAssertTrue(try cache.append(message: message))
+            try cache.append(message: message)
         }
 
-        XCTAssertFalse(try cache.append(message: "This message won't fit"))
+        do {
+            try cache.append(message: "This message won't fit")
+            XCTFail("Appending too-big message was expected to throw")
+        } catch CacheAdvanceWriteError.messageDataTooLarge {
+            // We hit the expected case.
+        } catch {
+            XCTFail("Encountered unexpected error \(error)")
+        }
 
         let cachedMessages = try cache.cachedMessages()
         XCTAssertEqual(cachedMessages, lorumIpsumMessages)
@@ -113,12 +127,12 @@ final class CacheAdvanceTests: XCTestCase {
             maximumBytes: requiredByteCount(for: lorumIpsumMessages, cacheWillRoll: true),
             shouldRoll: true)
         for message in lorumIpsumMessages {
-            XCTAssertTrue(try cache.append(message: message))
+            try cache.append(message: message)
         }
 
         // Append a message that is shorter than the first message in lorumIpsumMessages.
         let shortMessage = "Short message"
-        XCTAssertTrue(try cache.append(message: shortMessage))
+        try cache.append(message: shortMessage)
 
         let cachedMessages = try cache.cachedMessages()
         XCTAssertEqual(cachedMessages, Array(lorumIpsumMessages.dropFirst()) + [shortMessage])
@@ -130,12 +144,12 @@ final class CacheAdvanceTests: XCTestCase {
             maximumBytes: requiredByteCount(for: lorumIpsumMessages, cacheWillRoll: true),
             shouldRoll: true)
         for message in lorumIpsumMessages {
-            XCTAssertTrue(try cache.append(message: message))
+            try cache.append(message: message)
         }
 
         // Append a message that is slightly longer than the first message in lorumIpsumMessages.
         let barelyLongerMessage = lorumIpsumMessages[0] + "hi"
-        XCTAssertTrue(try cache.append(message: barelyLongerMessage))
+        try cache.append(message: barelyLongerMessage)
 
         let cachedMessages = try cache.cachedMessages()
         XCTAssertEqual(cachedMessages, Array(lorumIpsumMessages.dropFirst(2)) + [barelyLongerMessage])
@@ -147,7 +161,7 @@ final class CacheAdvanceTests: XCTestCase {
             maximumBytes: requiredByteCount(for: lorumIpsumMessages, cacheWillRoll: true) / 3,
             shouldRoll: true)
         for message in lorumIpsumMessages {
-            XCTAssertTrue(try cache.append(message: message))
+            try cache.append(message: message)
         }
 
         let cachedMessages = try cache.cachedMessages()
