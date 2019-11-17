@@ -23,7 +23,7 @@ extension Data {
     static let messageSpanLength = MemoryLayout<MessageSpan>.size
 
     /// A marker written at the end of the newest message written to disk.
-    static let endOfNewestMessageMarker = Data(MessageSpan.max)
+    static let endOfNewestMessageMarker = Data(MessageSpan.zero)
 
     /// The width of the encoded oldest message offset.
     static let offsetOfFirstMessageLength = MemoryLayout<Bytes>.size

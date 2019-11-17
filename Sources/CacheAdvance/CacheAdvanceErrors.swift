@@ -24,4 +24,6 @@ public enum CacheAdvanceReadError: Error, Equatable {
 public enum CacheAdvanceWriteError: Error, Equatable {
     /// Thrown when the message being appended is larger than maximum bytes.
     case messageDataTooLarge
+    /// Thrown when the message being appended is empty.
+    case messageDataEmpty
 }

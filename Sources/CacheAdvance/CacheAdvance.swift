@@ -65,7 +65,7 @@ public final class CacheAdvance<T: Codable> {
     public let file: URL
 
     /// Appends a message to the cache.
-    /// - Parameter message: A message to write to disk.
+    /// - Parameter message: A message to write to disk. The message must not be empty.
     public func append(message: T) throws {
         try setUpFileHandlesIfNecessary()
 
@@ -154,9 +154,9 @@ public final class CacheAdvance<T: Codable> {
             throw CacheAdvanceWriteError.messageDataTooLarge
         }
 
-        guard messageLength == Bytes(MessageSpan.max) else {
+        guard messageLength > 0 else {
             /// The message length has the same value as as our `endOfNewestMessageMarker`.
-            throw CacheAdvanceWriteError.messageDataTooLarge
+            throw CacheAdvanceWriteError.messageDataEmpty
         }
 
         while shouldOverwriteOldMessages
