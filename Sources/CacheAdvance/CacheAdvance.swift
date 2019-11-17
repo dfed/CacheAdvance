@@ -87,9 +87,15 @@ public final class CacheAdvance<T: Codable> {
             if shouldOverwriteOldMessages {
                 try prepareReaderForWriting(dataOfLength: messageLength)
             }
-            try write(messageData: messageData)
+            try write(messageData: messageData, additionalData: nil)
 
         } else if shouldOverwriteOldMessages {
+            /// For caches that overwrite old messages, the message data is written in the following format:
+            /// `[messageData][endOfNewestMessageMarker][offsetInFileOfOldestMessage]`
+            /// - `messageData` is an `EncodableMessage`'s encoded data.
+            /// - `endOfNewestMessageMarker` is a big-endian encoded `MessageSpan` of length `messageSpanLength`.
+            /// - `offsetInFileOfOldestMessage` is a big-endian encoded `Bytes` of length `offsetOfFirstMessageLength`.
+
             // Trim the file to the current position.
             try writer.truncate(atOffset: writer.offsetInFile)
 
@@ -105,8 +111,11 @@ public final class CacheAdvance<T: Codable> {
             // Prepare the reader before writing the message.
             try prepareReaderForWriting(dataOfLength: messageLength)
 
-            // Write the message.
-            try write(messageData: messageData)
+            // Create the marker for the offset representing the beggining of the message that will be the oldest once our write is done.
+            let offsetInFileOfOldestMessage = Data(Bytes(reader.offsetInFile))
+
+            // Write the message and odlest message offset.
+            try write(messageData: messageData, additionalData: offsetInFileOfOldestMessage)
 
         } else {
             // We're out of room.
@@ -175,15 +184,15 @@ public final class CacheAdvance<T: Codable> {
     /// written will overwrite the marker.
     ///
     /// - Parameter messageData: an `EncodableMessage`'s encoded data. Must be smaller than both `maximumBytes` and `MessageSpan.max`.
-    private func write(messageData: Data) throws {
+    private func write(messageData: Data, additionalData: Data?) throws {
         try writer.__write(messageData, error: ())
         let endOfMessageOffset = writer.offsetInFile
 
         // Write the end of newest message marker.
         try writer.__write(Data.endOfNewestMessageMarker, error: ())
 
-        if shouldOverwriteOldMessages {
-            try writer.__write(Data(Bytes(reader.offsetInFile)), error: ())
+        if let additionalData = additionalData, additionalData.count > 0 {
+            try writer.__write(additionalData, error: ())
         }
 
         // Back the file handle's offset back to the end of the message we just wrote.
