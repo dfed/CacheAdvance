@@ -19,24 +19,26 @@ import Foundation
 
 extension Data {
 
-    /// The width of the encoded message size.
-    static let messageSpanLength = MemoryLayout<MessageSpan>.size
+    /// The width of an encoded byte count.
+    static let bytesStorageLength = MemoryLayout<Bytes>.size
+
+    /// The width of an encoded message span.
+    static let messageSpanStorageLength = MemoryLayout<MessageSpan>.size
 
     /// A marker written at the end of the newest message written to disk.
     static let endOfNewestMessageMarker = Data(MessageSpan.zero)
 
-    /// The width of the encoded oldest message offset.
-    static let offsetOfOldestMessageLength = MemoryLayout<Bytes>.size
-
-    /// Initializes Data from a MessageSpan. The data will always be of length Data.messageSpanLength.
-    /// - Parameter value: the MessageSpan to encode as data.
+    /// Initializes Data from a MessageSpan value. The data will always be of length `Data.messageSpanStorageLength`.
+    /// - Parameter value: the value to encode as data.
     init(_ value: MessageSpan) {
         var valueToEncode = value.bigEndian
-        self.init(bytes: &valueToEncode, count: Data.messageSpanLength)
+        self.init(bytes: &valueToEncode, count: Data.messageSpanStorageLength)
     }
 
+    /// Initializes Data from a Bytes value. The data will always be of length `Data.bytesStorageLength`.
+    /// - Parameter value: the value to encode as data.
     init(_ value: Bytes) {
         var valueToEncode = value.bigEndian
-        self.init(bytes: &valueToEncode, count: Data.offsetOfOldestMessageLength)
+        self.init(bytes: &valueToEncode, count: Data.bytesStorageLength)
     }
 }

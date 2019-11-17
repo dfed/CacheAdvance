@@ -47,7 +47,7 @@ public final class CacheAdvance<T: Codable> {
         lengthOfMessageSuffix = {
             if shouldOverwriteOldMessages {
                 /// The message suffix requires space for both `endOfNewestMessageMarker` and `offsetOfFirstMessage` after each message when rolling is enabled.
-                return Bytes(Data.endOfNewestMessageMarker.count) + Bytes(Data.offsetOfOldestMessageLength)
+                return Bytes(Data.endOfNewestMessageMarker.count) + Bytes(Data.bytesStorageLength)
             } else {
                 /// The message suffix requires space for `endOfNewestMessageMarker` after each message.
                 return Bytes(Data.endOfNewestMessageMarker.count)
@@ -174,8 +174,8 @@ public final class CacheAdvance<T: Codable> {
     /// `[messageData][endOfNewestMessageMarker][offsetInFileOfOldestMessage]`
     ///
     /// - `messageData` is an `EncodableMessage`'s encoded data.
-    /// - `endOfNewestMessageMarker` is a big-endian encoded `MessageSpan` of length `messageSpanLength`.
-    /// - `offsetInFileOfOldestMessage` is a big-endian encoded `Bytes` of length `offsetOfOldestMessageLength`.
+    /// - `endOfNewestMessageMarker` is a big-endian encoded `MessageSpan` of length `messageSpanStorageLength`.
+    /// - `offsetInFileOfOldestMessage` is a big-endian encoded `Bytes` of length `bytesStorageLength`.
     ///
     /// By the time this method returns, the `writer`'s `offsetInFile` is always set to the beginning of the written `endOfNewestMessageMarker`, such that the next message written will overwrite the marker.
     ///
