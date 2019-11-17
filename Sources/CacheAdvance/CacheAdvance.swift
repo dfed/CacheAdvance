@@ -71,18 +71,21 @@ public final class CacheAdvance<T: Codable> {
 
         let encodedMessage = EncodableMessage(message: message, encoder: encoder)
         let messageData = try encodedMessage.encodedData()
-        let messageLength = bytesNeededToStore(messageData: messageData)
-        guard messageLength <= maximumBytes && messageLength < Bytes(MessageSpan.max) else {
+        let messageLength = Bytes(messageData.count)
+
+        guard messageLength > 0 else {
+            // The message length has the same value as as our `endOfNewestMessageMarker`.
+            // Storing this message could cause data corruption by fooling the cache into thinking the prior message is the last in the cache.
+            throw CacheAdvanceWriteError.messageDataEmpty
+        }
+
+        let bytesNeededToStoreMessage = messageLength + lengthOfMessageSuffix
+        guard bytesNeededToStoreMessage <= maximumBytes && bytesNeededToStoreMessage < Bytes(MessageSpan.max) else {
             // The message is too long to be written to a cache of this size.
             throw CacheAdvanceWriteError.messageDataTooLarge
         }
 
-        guard messageLength > 0 else {
-            /// The message length has the same value as as our `endOfNewestMessageMarker`.
-            throw CacheAdvanceWriteError.messageDataEmpty
-        }
-
-        let cacheHasSpaceForNewMessageBeforeEndOfFile = writer.offsetInFile + messageLength <= maximumBytes
+        let cacheHasSpaceForNewMessageBeforeEndOfFile = writer.offsetInFile + bytesNeededToStoreMessage <= maximumBytes
         if shouldOverwriteOldMessages {
             if !cacheHasSpaceForNewMessageBeforeEndOfFile {
                 // This message can't be written without exceeding our maximum file length.
@@ -102,7 +105,7 @@ public final class CacheAdvance<T: Codable> {
             }
 
             // Prepare the reader before writing the message.
-            try prepareReaderForWriting(dataOfLength: messageLength)
+            try prepareReaderForWriting(dataOfLength: bytesNeededToStoreMessage)
 
             // Create the marker for the offset representing the beggining of the message that will be the oldest once our write is done.
             let offsetInFileOfOldestMessage = Data(Bytes(reader.offsetInFile))
@@ -199,12 +202,6 @@ public final class CacheAdvance<T: Codable> {
         // Back the file handle's offset back to the end of the message we just wrote.
         // This way the next time we write a message, we'll overwrite the last message marker.
         try writer.seek(toOffset: endOfMessageOffset)
-    }
-
-    /// Calculates the number of bytes needed to write this data to disk.
-    /// - Parameter messageData: The message data in question.
-    private func bytesNeededToStore(messageData: Data) -> Bytes {
-        return Bytes(messageData.count) + lengthOfMessageSuffix
     }
 
     private let writer: FileHandle
