@@ -44,8 +44,8 @@ final class CacheAdvanceTests: XCTestCase {
             shouldOverwriteOldMessages: false)
         try cache.append(message: message)
 
-        let cachedMessages = try cache.cachedMessages()
-        XCTAssertEqual(cachedMessages, [message])
+        let messages = try cache.messages()
+        XCTAssertEqual(messages, [message])
     }
 
     func test_append_singleMessageFailsIfDoesNotFit() throws {
@@ -59,8 +59,8 @@ final class CacheAdvanceTests: XCTestCase {
             XCTAssertEqual($0 as? CacheAdvanceWriteError, CacheAdvanceWriteError.messageDataTooLarge)
         }
 
-        let cachedMessages = try cache.cachedMessages()
-        XCTAssertEqual(cachedMessages, [])
+        let messages = try cache.messages()
+        XCTAssertEqual(messages, [])
     }
 
     func test_append_singleMessageThrowsIfDoesNotFitAndCacheRolls() throws {
@@ -74,8 +74,8 @@ final class CacheAdvanceTests: XCTestCase {
             XCTAssertEqual($0 as? CacheAdvanceWriteError, CacheAdvanceWriteError.messageDataTooLarge)
         }
 
-        let cachedMessages = try cache.cachedMessages()
-        XCTAssertEqual(cachedMessages, [])
+        let messages = try cache.messages()
+        XCTAssertEqual(messages, [])
     }
 
     func test_append_multipleMessagesCanBeRetrieved() throws {
@@ -87,8 +87,8 @@ final class CacheAdvanceTests: XCTestCase {
             try cache.append(message: message)
         }
 
-        let cachedMessages = try cache.cachedMessages()
-        XCTAssertEqual(cachedMessages, lorumIpsumMessages)
+        let messages = try cache.messages()
+        XCTAssertEqual(messages, lorumIpsumMessages)
     }
 
     func test_append_dropsLastMessageIfCacheDoesNotRollAndLastMessageDoesNotFit() throws {
@@ -104,8 +104,8 @@ final class CacheAdvanceTests: XCTestCase {
             XCTAssertEqual($0 as? CacheAdvanceWriteError, CacheAdvanceWriteError.messageDataTooLarge)
         }
 
-        let cachedMessages = try cache.cachedMessages()
-        XCTAssertEqual(cachedMessages, lorumIpsumMessages)
+        let messages = try cache.messages()
+        XCTAssertEqual(messages, lorumIpsumMessages)
     }
 
     func test_append_dropsFirstMessageIfCacheRollsAndLastMessageDoesNotFitAndIsShorterThanFirstMessage() throws {
@@ -121,8 +121,8 @@ final class CacheAdvanceTests: XCTestCase {
         let shortMessage = "Short message"
         try cache.append(message: shortMessage)
 
-        let cachedMessages = try cache.cachedMessages()
-        XCTAssertEqual(cachedMessages, Array(lorumIpsumMessages.dropFirst()) + [shortMessage])
+        let messages = try cache.messages()
+        XCTAssertEqual(messages, Array(lorumIpsumMessages.dropFirst()) + [shortMessage])
     }
 
     func test_append_dropsFirstTwoMessagesIfCacheRollsAndLastMessageDoesNotFitAndIsLargerThanFirstMessage() throws {
@@ -138,8 +138,8 @@ final class CacheAdvanceTests: XCTestCase {
         let barelyLongerMessage = lorumIpsumMessages[0] + "hi"
         try cache.append(message: barelyLongerMessage)
 
-        let cachedMessages = try cache.cachedMessages()
-        XCTAssertEqual(cachedMessages, Array(lorumIpsumMessages.dropFirst(2)) + [barelyLongerMessage])
+        let messages = try cache.messages()
+        XCTAssertEqual(messages, Array(lorumIpsumMessages.dropFirst(2)) + [barelyLongerMessage])
     }
 
     func test_append_dropsOldMessagesAsNecessary() throws {
@@ -151,8 +151,8 @@ final class CacheAdvanceTests: XCTestCase {
             try cache.append(message: message)
         }
 
-        let cachedMessages = try cache.cachedMessages()
-        XCTAssertEqual(Array(lorumIpsumMessages.dropFirst(lorumIpsumMessages.count - cachedMessages.count)), cachedMessages)
+        let messages = try cache.messages()
+        XCTAssertEqual(Array(lorumIpsumMessages.dropFirst(lorumIpsumMessages.count - messages.count)), messages)
     }
 
     private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("CacheAdvanceTests")

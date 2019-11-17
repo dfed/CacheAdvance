@@ -98,7 +98,7 @@ public final class CacheAdvance<T: Codable> {
     }
 
     /// Fetches all messages from the cache.
-    public func cachedMessages() throws -> [T] {
+    public func messages() throws -> [T] {
         try setUpFileHandlesIfNecessary()
 
         var messages = [T]()
