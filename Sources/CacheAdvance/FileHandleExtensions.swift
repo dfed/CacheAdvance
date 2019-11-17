@@ -129,7 +129,7 @@ extension FileHandle {
             // We have reached the most recently written message.
             if cacheOverwritesOldMessages {
                 // We have a span marking the offset of the oldest message.
-                let offsetOfFirstMessageData = try __readDataUp(toLength: Data.offsetOfFirstMessageLength)
+                let offsetOfFirstMessageData = try __readDataUp(toLength: Data.offsetOfOldestMessageLength)
                 guard let offsetOfFirstMessage = Bytes(offsetOfFirstMessageData) else {
                     // The file is improperly formatted.
                     return .invalidFormat

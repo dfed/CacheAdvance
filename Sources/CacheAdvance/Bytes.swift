@@ -26,14 +26,14 @@ extension Bytes {
 
     /// Initializes the receiver from a data blob.
     ///
-    /// - Parameter data: A data blob representing Bytes. Must be of length `Data.offsetOfFirstMessageLength`.
+    /// - Parameter data: A data blob representing Bytes. Must be of length `Data.offsetOfOldestMessageLength`.
     init?(_ data: Data) {
-        guard data.count == Data.offsetOfFirstMessageLength else {
+        guard data.count == Data.offsetOfOldestMessageLength else {
             // Data is of the incorrect size and can't represent Bytes.
             return nil
         }
         let decodedSize = withUnsafePointer(to: data) {
-            return UnsafeRawBufferPointer(start: $0, count: Data.offsetOfFirstMessageLength)
+            return UnsafeRawBufferPointer(start: $0, count: Data.offsetOfOldestMessageLength)
         }
         self = NSSwapBigBytesToHost(decodedSize.load(as: Bytes.self))
     }
