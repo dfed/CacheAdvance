@@ -155,6 +155,22 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertEqual(Array(lorumIpsumMessages.dropFirst(lorumIpsumMessages.count - messages.count)), messages)
     }
 
+    func test_messages_canReadMessagesWrittenByADifferentCache() throws {
+        func createCache() throws -> CacheAdvance<String> {
+            return try CacheAdvance<String>(
+            file: testFileLocation,
+            maximumBytes: requiredByteCount(for: lorumIpsumMessages, cacheWillRoll: true) / 3,
+            shouldOverwriteOldMessages: true)
+        }
+        let cache = try createCache()
+        for message in lorumIpsumMessages {
+            try cache.append(message: message)
+        }
+
+        let secondCache = try createCache()
+        XCTAssertEqual(try cache.messages(), try secondCache.messages())
+    }
+
     private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("CacheAdvanceTests")
     private let lorumIpsumMessages = [
         "Lorem ipsum dolor sit amet,",
