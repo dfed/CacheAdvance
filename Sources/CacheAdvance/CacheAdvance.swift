@@ -65,7 +65,7 @@ public final class CacheAdvance<T: Codable> {
     public let file: URL
 
     /// Appends a message to the cache.
-    /// - Parameter message: A message to write to disk. The message must not be empty.
+    /// - Parameter message: A message to write to disk.
     public func append(message: T) throws {
         try setUpFileHandlesIfNecessary()
 
@@ -76,7 +76,8 @@ public final class CacheAdvance<T: Codable> {
         guard messageLength > 0 else {
             // The message length has the same value as as our `endOfNewestMessageMarker`.
             // Storing this message could cause data corruption by fooling the cache into thinking the prior message is the last in the cache.
-            throw CacheAdvanceWriteError.messageDataEmpty
+            // JSON values (even empty ones) are always encoded with length > 0. If this condition is hit, the message is clearly corrupt.
+            throw CacheAdvanceWriteError.messageCorrupted
         }
 
         let bytesNeededToStoreMessage = messageLength + lengthOfMessageSuffix
