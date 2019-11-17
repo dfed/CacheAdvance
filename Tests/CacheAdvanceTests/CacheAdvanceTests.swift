@@ -364,7 +364,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     private func requiredByteCount<T: Codable>(for messages: [T], cacheWillRoll: Bool) -> UInt64 {
         let encoder = JSONEncoder()
-        let messageSpanSuffixLength = cacheWillRoll ? Bytes(Data.messageSpanLength + Data.oldestMessageOffsetLength) : Bytes(Data.messageSpanLength)
+        let messageSpanSuffixLength = cacheWillRoll ? Bytes(Data.messageSpanLength + Data.offsetOfFirstMessageLength) : Bytes(Data.messageSpanLength)
         return messageSpanSuffixLength
             + messages.reduce(0) { allocatedSize, message in
                 let encodableMessage = EncodableMessage(message: message, encoder: encoder)

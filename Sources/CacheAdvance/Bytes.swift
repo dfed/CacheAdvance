@@ -18,26 +18,32 @@
 import Foundation
 
 /// A storage unit that counts bytes.
-/// - Warning: If this value is changed, previously persisted message encodings will not be readible.
+///
+/// - Warning: If this value is changed, previously persisted message encodings will not be readable.
 public typealias Bytes = UInt64
 
 extension Bytes {
 
     /// Initializes the receiver from a data blob.
-    /// - Parameter data: A data blob representing Bytes. Must be of length `Data.oldestMessageOffsetLength`.
+    ///
+    /// - Parameter data: A data blob representing Bytes. Must be of length `Data.offsetOfFirstMessageLength`.
     init?(_ data: Data) {
-        guard data.count == Data.oldestMessageOffsetLength else {
+        guard data.count == Data.offsetOfFirstMessageLength else {
             // Data is of the incorrect size and can't represent Bytes.
             return nil
         }
         let decodedSize = withUnsafePointer(to: data) {
-            return UnsafeRawBufferPointer(start: $0, count: MemoryLayout<Bytes>.size)
+            return UnsafeRawBufferPointer(start: $0, count: Data.offsetOfFirstMessageLength)
         }
         self = NSSwapBigBytesToHost(decodedSize.load(as: Bytes.self))
     }
 
     /// Converts megabytes into the receiver. Will never overflow.
+    ///
     /// - Parameter megabytes: The number of megabytes to convert.
+    ///
+    /// - Note: `megabytes` are converted to `bytes` by multiplying by 1,000,000.
+    ///         This conversion matches how Apple's systems calcuate `bytes`.
     init(megabytes: UInt8) {
         self = Bytes(megabytes) * 1000000
     }

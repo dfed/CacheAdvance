@@ -18,7 +18,7 @@
 import Foundation
 
 /// A cache that enables the performant persistence of individual messages to disk.
-/// This cache is intended to be written from and appended to from the same serial queue.
+/// This cache is intended to be written to and read from using the same serial queue.
 public final class CacheAdvance<T: Codable> {
 
     // MARK: Initialization
@@ -46,11 +46,11 @@ public final class CacheAdvance<T: Codable> {
 
         lengthOfMessageSuffix = {
             if shouldOverwriteOldMessages {
-                /// The message suffix requires space for both `endOfNewestMessageMarker` and `offsetInFileOfOldestMessage` after each message when rolling is enabled.
-                return Bytes(Data.messageSpanLength + Data.oldestMessageOffsetLength)
+                /// The message suffix requires space for both `endOfNewestMessageMarker` and `offsetOfFirstMessage` after each message when rolling is enabled.
+                return Bytes(Data.endOfNewestMessageMarker.count) + Bytes(Data.offsetOfFirstMessageLength)
             } else {
                 /// The message suffix requires space for `endOfNewestMessageMarker` after each message.
-                return Bytes(Data.messageSpanLength)
+                return Bytes(Data.endOfNewestMessageMarker.count)
             }
         }()
     }
@@ -140,7 +140,7 @@ public final class CacheAdvance<T: Codable> {
     /// `[messageData][endOfNewestMessageMarker][offsetInFileOfOldestMessage]`
     /// - `messageData` is an `EncodableMessage`'s encoded data.
     /// - `endOfNewestMessageMarker` is a big-endian encoded `MessageSpan` of length `messageSpanLength`.
-    /// - `offsetInFileOfOldestMessage` is a big-endian encoded `Bytes` of length `oldestMessageOffsetLength`.
+    /// - `offsetInFileOfOldestMessage` is a big-endian encoded `Bytes` of length `offsetOfFirstMessageLength`.
     ///
     /// By the time this method returns, the `writer`'s `offsetInFile` is always set to the
     /// beginning of the written `endOfNewestMessageMarker`, such that the next message
@@ -149,7 +149,13 @@ public final class CacheAdvance<T: Codable> {
     /// - Parameter messageData: an `EncodableMessage`'s encoded data. Must be smaller than both `maximumBytes` and `MessageSpan.max`.
     private func write(messageData: Data) throws {
         let messageLength = Bytes(messageData.count) + lengthOfMessageSuffix
-        guard messageLength <= maximumBytes && messageLength <= Bytes(MessageSpan.max) else {
+        guard messageLength <= maximumBytes && messageLength < Bytes(MessageSpan.max) else {
+            // The message is too long to be written to a cache of this size.
+            throw CacheAdvanceWriteError.messageDataTooLarge
+        }
+
+        guard messageLength == Bytes(MessageSpan.max) else {
+            /// The message length has the same value as as our `endOfNewestMessageMarker`.
             throw CacheAdvanceWriteError.messageDataTooLarge
         }
 

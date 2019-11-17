@@ -18,7 +18,7 @@
 import Foundation
 
 /// A storage unit that measures message length.
-/// - Warning: If this value is changed, previously persisted message encodings will not be readible.
+/// - Warning: If this value is changed, previously persisted message encodings will not be readable.
 typealias MessageSpan = UInt32
 
 extension MessageSpan {
@@ -31,7 +31,7 @@ extension MessageSpan {
             return nil
         }
         let decodedSize = withUnsafePointer(to: data) {
-            return UnsafeRawBufferPointer(start: $0, count: MemoryLayout<MessageSpan>.size)
+            return UnsafeRawBufferPointer(start: $0, count: Data.messageSpanLength)
         }
         self = NSSwapBigMessageSpanToHost(decodedSize.load(as: MessageSpan.self))
     }
