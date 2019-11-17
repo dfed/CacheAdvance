@@ -71,8 +71,22 @@ public final class CacheAdvance<T: Codable> {
 
         let encodedMessage = EncodableMessage(message: message, encoder: encoder)
         let messageData = try encodedMessage.encodedData()
-        let cacheHasSpaceForNewMessageWithoutOverwriting = writer.offsetInFile + bytesNeededToStore(messageData: messageData) <= maximumBytes
+        let messageLength = bytesNeededToStore(messageData: messageData)
+        guard messageLength <= maximumBytes && messageLength < Bytes(MessageSpan.max) else {
+            // The message is too long to be written to a cache of this size.
+            throw CacheAdvanceWriteError.messageDataTooLarge
+        }
+
+        guard messageLength > 0 else {
+            /// The message length has the same value as as our `endOfNewestMessageMarker`.
+            throw CacheAdvanceWriteError.messageDataEmpty
+        }
+
+        let cacheHasSpaceForNewMessageWithoutOverwriting = writer.offsetInFile + messageLength <= maximumBytes
         if cacheHasSpaceForNewMessageWithoutOverwriting {
+            if shouldOverwriteOldMessages {
+                try prepareReaderForWriting(dataOfLength: messageLength)
+            }
             try write(messageData: messageData)
 
         } else if shouldOverwriteOldMessages {
@@ -88,7 +102,10 @@ public final class CacheAdvance<T: Codable> {
             // We know we're about to overwrite the oldest message, so advance the reader to the second oldest message.
             try reader.seekToNextMessage(shouldSeekToOldestMessageIfFound: false, cacheOverwritesOldMessages: true)
 
-            // Start writing from the beginning of the file.
+            // Prepare the reader before writing the message.
+            try prepareReaderForWriting(dataOfLength: messageLength)
+
+            // Write the message.
             try write(messageData: messageData)
 
         } else {
@@ -129,14 +146,25 @@ public final class CacheAdvance<T: Codable> {
         hasSetUpFileHandles = true
     }
 
+    private func prepareReaderForWriting(dataOfLength messageLength: Bytes) throws {
+        // Advance the reader until there is room to store the new message without writing past the reader.
+        while writer.offsetInFile < reader.offsetInFile
+            && reader.offsetInFile < writer.offsetInFile + messageLength
+        {
+            // The current position of the writer is before the oldest message, which means that
+            // writing this message would write into the current message. Advance to the next message.
+            try reader.seekToNextMessage(shouldSeekToOldestMessageIfFound: true, cacheOverwritesOldMessages: true)
+        }
+    }
+
     /// Writes message data to the cache.
     ///
-    /// For caches that do not roll, the message data is written in the following format:
+    /// For caches that do not overwrite old messages, the message data is written in the following format:
     /// `[messageData][endOfNewestMessageMarker]`
     /// - `messageData` is an `EncodableMessage`'s encoded data.
     /// - `endOfNewestMessageMarker` is a big-endian encoded `MessageSpan` of length `messageSpanLength`.
     ///
-    /// For caches that roll, the message data is written in the following format:
+    /// For caches that overwrite old messages, the message data is written in the following format:
     /// `[messageData][endOfNewestMessageMarker][offsetInFileOfOldestMessage]`
     /// - `messageData` is an `EncodableMessage`'s encoded data.
     /// - `endOfNewestMessageMarker` is a big-endian encoded `MessageSpan` of length `messageSpanLength`.
@@ -148,26 +176,6 @@ public final class CacheAdvance<T: Codable> {
     ///
     /// - Parameter messageData: an `EncodableMessage`'s encoded data. Must be smaller than both `maximumBytes` and `MessageSpan.max`.
     private func write(messageData: Data) throws {
-        let messageLength = bytesNeededToStore(messageData: messageData)
-        guard messageLength <= maximumBytes && messageLength < Bytes(MessageSpan.max) else {
-            // The message is too long to be written to a cache of this size.
-            throw CacheAdvanceWriteError.messageDataTooLarge
-        }
-
-        guard messageLength > 0 else {
-            /// The message length has the same value as as our `endOfNewestMessageMarker`.
-            throw CacheAdvanceWriteError.messageDataEmpty
-        }
-
-        while shouldOverwriteOldMessages
-            && writer.offsetInFile < reader.offsetInFile
-            && reader.offsetInFile < writer.offsetInFile + messageLength
-        {
-            // We are a rolling cache. The current position of the writer is before the oldest message,
-            // and writing this message would write into the current message. Advance to the next message.
-            try reader.seekToNextMessage(shouldSeekToOldestMessageIfFound: true, cacheOverwritesOldMessages: shouldOverwriteOldMessages)
-        }
-
         try writer.__write(messageData, error: ())
         let endOfMessageOffset = writer.offsetInFile
 
