@@ -18,12 +18,14 @@
 import Foundation
 
 /// A storage unit that measures message length.
+/// 
 /// - Warning: If this value is changed, previously persisted message encodings will not be readable.
 typealias MessageSpan = UInt32
 
 extension MessageSpan {
 
     /// Initializes a MessageSpan from a data blob.
+    /// 
     /// - Parameter data: A data blob representing a MessageSpan. Must be of length `Data.messageSpanStorageLength`.
     init?(_ data: Data) {
         guard data.count == Data.messageSpanStorageLength else {
