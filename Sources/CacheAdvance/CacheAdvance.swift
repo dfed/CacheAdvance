@@ -161,8 +161,8 @@ public final class CacheAdvance<T: Codable> {
         while writer.offsetInFile < reader.offsetInFile
             && reader.offsetInFile < writer.offsetInFile + messageLength
         {
-            // The current position of the writer is before the oldest message, which means that
-            // writing this message would write into the current message. Advance to the next message.
+            // The current position of the writer is before the oldest message, which means that writing this message would write into the current message.
+            // Advance to the next message.
             try reader.seekToNextMessage(shouldSeekToOldestMessageIfFound: true, cacheOverwritesOldMessages: true)
         }
     }
@@ -176,9 +176,7 @@ public final class CacheAdvance<T: Codable> {
     /// - `endOfNewestMessageMarker` is a big-endian encoded `MessageSpan` of length `messageSpanLength`.
     /// - `offsetInFileOfOldestMessage` is a big-endian encoded `Bytes` of length `offsetOfOldestMessageLength`.
     ///
-    /// By the time this method returns, the `writer`'s `offsetInFile` is always set to the
-    /// beginning of the written `endOfNewestMessageMarker`, such that the next message
-    /// written will overwrite the marker.
+    /// By the time this method returns, the `writer`'s `offsetInFile` is always set to the beginning of the written `endOfNewestMessageMarker`, such that the next message written will overwrite the marker.
     ///
     /// - Parameters:
     ///   - messageData: an `EncodableMessage`'s encoded data. Must be smaller than both `maximumBytes` and `MessageSpan.max`.
