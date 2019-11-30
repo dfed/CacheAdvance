@@ -184,21 +184,19 @@ public final class CacheAdvance<T: Codable> {
     ///   - offsetInFileOfOldestMessage: An optional big-endian representation of the offset in the file where the oldest message begins.
     ///                                  This data is should only be included in caches that overwrite their oldest messages.
     private func write(messageData: Data, offsetInFileOfOldestMessage: Data?) throws {
-        // Write the messge data.
-        try writer.__write(messageData, error: ())
-
-        // Store where the message ends so we can seek back to it later.
-        let endOfMessageOffset = writer.offsetInFile
-
-        // Write the end of newest message marker.
-        try writer.__write(Data.endOfNewestMessageMarker, error: ())
-
-        // Write where the oldest message begins, if said data is provided.
+        // Create data to write from combined message and suffix.
+        var dataToWrite = messageData + Data.endOfNewestMessageMarker
         if let offsetInFileOfOldestMessage = offsetInFileOfOldestMessage, offsetInFileOfOldestMessage.count > 0 {
-            try writer.__write(offsetInFileOfOldestMessage, error: ())
+            dataToWrite += offsetInFileOfOldestMessage
         }
 
-        // Back the file handle's offset back to the end of the message we just wrote.
+        // Calculate where the message ends so we can seek back to it later.
+        let endOfMessageOffset = writer.offsetInFile + Bytes(messageData.count)
+
+        // Write the complete messge data atomically.
+        try writer.__write(dataToWrite, error: ())
+
+        // Seek the file handle's offset back to the end of the message we just wrote.
         // This way the next time we write a message, we'll overwrite the last message marker.
         try writer.seek(toOffset: endOfMessageOffset)
     }
