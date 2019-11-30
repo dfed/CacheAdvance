@@ -1,26 +1,11 @@
 #!/bin/bash -l
 set -ex
 
+# Find the directory in which this script resides.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 if [ $ACTION == "swift-package" ]; then
-  swift package generate-xcodeproj --output generated/
-  if [ -n "$DESTINATION" ]; then
-    xcodebuild \
-      -project generated/CacheAdvance.xcodeproj \
-      -scheme "CacheAdvance-Package" \
-      -sdk $SDK \
-      -destination "$DESTINATION" \
-      -configuration Release \
-      -PBXBuildsContinueAfterErrors=0 \
-      $BUILD
-  else
-    xcodebuild \
-      -project generated/CacheAdvance.xcodeproj \
-      -scheme "CacheAdvance-Package" \
-      -sdk $SDK \
-      -configuration Release \
-      -PBXBuildsContinueAfterErrors=0 \
-      $BUILD
-  fi
+  $DIR/build.swift $SDK "$DESTINATION" $SHOULD_TEST
 fi
 
 if [ $ACTION == "pod-lint" ]; then
