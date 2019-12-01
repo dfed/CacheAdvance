@@ -91,6 +91,30 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertEqual(messages, lorumIpsumMessages)
     }
 
+    func test_append_multipleMessagesCanBeRetrievedTwiceFromNonOverwritingCache() throws {
+        let cache = try CacheAdvance<String>(
+            file: testFileLocation,
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillRoll: false),
+            shouldOverwriteOldMessages: false)
+        for message in lorumIpsumMessages {
+            try cache.append(message: message)
+        }
+
+        XCTAssertEqual(try cache.messages(), try cache.messages())
+    }
+
+    func test_append_multipleMessagesCanBeRetrievedTwiceFromOverwritingCache() throws {
+        let cache = try CacheAdvance<String>(
+            file: testFileLocation,
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillRoll: true) / 3,
+            shouldOverwriteOldMessages: true)
+        for message in lorumIpsumMessages {
+            try cache.append(message: message)
+        }
+
+        XCTAssertEqual(try cache.messages(), try cache.messages())
+    }
+
     func test_append_dropsLastMessageIfCacheDoesNotRollAndLastMessageDoesNotFit() throws {
         let cache = try CacheAdvance<String>(
             file: testFileLocation,
