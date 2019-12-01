@@ -69,8 +69,8 @@ public final class CacheAdvance<T: Codable> {
     public func append(message: T) throws {
         try setUpFileHandlesIfNecessary()
 
-        let encodedMessage = EncodableMessage(message: message, encoder: encoder)
-        let messageData = try encodedMessage.encodedData()
+        let encodableMessage = EncodableMessage(message: message, encoder: encoder)
+        let messageData = try encodableMessage.encodedData()
         let messageLength = Bytes(messageData.count)
 
         guard messageLength > 0 else {
