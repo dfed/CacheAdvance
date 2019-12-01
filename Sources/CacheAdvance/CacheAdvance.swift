@@ -65,7 +65,7 @@ public final class CacheAdvance<T: Codable> {
     public let file: URL
 
     /// Appends a message to the cache.
-    /// - Parameter message: A message to write to disk.
+    /// - Parameter message: A message to write to disk. Must be smaller than both `maximumBytes` and `MessageSpan.max`.
     public func append(message: T) throws {
         try setUpFileHandlesIfNecessary()
 
@@ -181,7 +181,7 @@ public final class CacheAdvance<T: Codable> {
     /// By the time this method returns, the `writer`'s `offsetInFile` is always set to the beginning of the written `endOfNewestMessageMarker`, such that the next message written will overwrite the marker.
     ///
     /// - Parameters:
-    ///   - messageData: an `EncodableMessage`'s encoded data. Must be smaller than both `maximumBytes` and `MessageSpan.max`.
+    ///   - messageData: an `EncodableMessage`'s encoded data.
     ///   - offsetInFileOfOldestMessage: An optional big-endian representation of the offset in the file where the oldest message begins.
     ///                                  This data is should only be included in caches that overwrite their oldest messages.
     private func write(messageData: Data, offsetInFileOfOldestMessage: Data?) throws {
