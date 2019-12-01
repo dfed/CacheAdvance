@@ -36,6 +36,26 @@ final class CacheAdvanceTests: XCTestCase {
 
     // MARK: Behavior Tests
 
+    func test_messages_canReadEmptyCacheThatDoesNotOverwriteOldestMessages() throws {
+        let cache = try CacheAdvance<String>(
+            file: testFileLocation,
+            maximumBytes: 50,
+            shouldOverwriteOldMessages: false)
+
+        let messages = try cache.messages()
+        XCTAssertEqual(messages, [])
+    }
+
+    func test_messages_canReadEmptyCacheThatOverwritesOldestMessages() throws {
+        let cache = try CacheAdvance<String>(
+            file: testFileLocation,
+            maximumBytes: 50,
+            shouldOverwriteOldMessages: true)
+
+        let messages = try cache.messages()
+        XCTAssertEqual(messages, [])
+    }
+
     func test_append_singleMessageThatFitsCanBeRetrieved() throws {
         let message = "This is a test"
         let cache = try CacheAdvance<String>(
