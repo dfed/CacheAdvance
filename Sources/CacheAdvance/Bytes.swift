@@ -43,7 +43,7 @@ extension Bytes {
     /// - Parameter megabytes: The number of megabytes to convert.
     ///
     /// - Note: `megabytes` are converted to `bytes` by multiplying by 1,000,000.
-    ///         This conversion matches how Apple's systems calcuate `bytes`.
+    ///         This conversion matches how Apple's systems measure megabytes.
     init(megabytes: UInt8) {
         self = Bytes(megabytes) * 1000000
     }
