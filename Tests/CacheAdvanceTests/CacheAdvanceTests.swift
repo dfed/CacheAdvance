@@ -80,7 +80,7 @@ final class CacheAdvanceTests: XCTestCase {
         }
 
         let messages = try cache.messages()
-        XCTAssertEqual(messages, [])
+        XCTAssertEqual(messages, [], "Expected failed first write to result in an empty cache")
     }
 
     func test_append_singleMessageThrowsIfDoesNotFitAndCacheRolls() throws {
@@ -95,7 +95,7 @@ final class CacheAdvanceTests: XCTestCase {
         }
 
         let messages = try cache.messages()
-        XCTAssertEqual(messages, [])
+        XCTAssertEqual(messages, [], "Expected failed first write to result in an empty cache")
     }
 
     func test_append_multipleMessagesCanBeRetrieved() throws {
