@@ -33,9 +33,9 @@ extension FileHandle {
 
             return message
 
-        case let .endOfNewestMessageMarker(offsetOfFirstMessage):
+        case let .endOfNewestMessageMarker(offsetOfOldestMessage):
             // Seek to the oldest message.
-            try seek(toOffset: offsetOfFirstMessage)
+            try seek(toOffset: offsetOfOldestMessage)
             // The next message is now the oldest.
             return nil
 
@@ -129,16 +129,16 @@ extension FileHandle {
             // We have reached the most recently written message.
             if cacheOverwritesOldMessages {
                 // We have a span marking the offset of the oldest message.
-                let offsetOfFirstMessageData = try __readDataUp(toLength: Data.bytesStorageLength)
-                guard let offsetOfFirstMessage = Bytes(offsetOfFirstMessageData) else {
+                let offsetOfOldestMessageData = try __readDataUp(toLength: Data.bytesStorageLength)
+                guard let offsetOfOldestMessage = Bytes(offsetOfOldestMessageData) else {
                     // The file is improperly formatted.
                     return .invalidFormat
                 }
-                return .endOfNewestMessageMarker(offsetOfFirstMessage: offsetOfFirstMessage)
+                return .endOfNewestMessageMarker(offsetOfOldestMessage: offsetOfOldestMessage)
 
             } else {
                 // The first message is always at the beginning of the file.
-                return .endOfNewestMessageMarker(offsetOfFirstMessage: 0)
+                return .endOfNewestMessageMarker(offsetOfOldestMessage: 0)
             }
         }
 
@@ -155,6 +155,6 @@ extension FileHandle {
 private enum NextMessageSpan {
     case span(MessageSpan)
     case emptyRead
-    case endOfNewestMessageMarker(offsetOfFirstMessage: Bytes)
+    case endOfNewestMessageMarker(offsetOfOldestMessage: Bytes)
     case invalidFormat
 }

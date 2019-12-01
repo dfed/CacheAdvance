@@ -47,7 +47,7 @@ public final class CacheAdvance<T: Codable> {
 
         lengthOfMessageSuffix = {
             if shouldOverwriteOldMessages {
-                /// The message suffix requires space for both `endOfNewestMessageMarker` and `offsetOfFirstMessage` after each message when rolling is enabled.
+                /// The message suffix requires space for both `endOfNewestMessageMarker` and `offsetOfOldestMessage` after each message when rolling is enabled.
                 return Bytes(Data.endOfNewestMessageMarker.count) + Bytes(Data.bytesStorageLength)
             } else {
                 /// The message suffix requires space for `endOfNewestMessageMarker` after each message.

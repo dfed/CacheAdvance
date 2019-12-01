@@ -152,7 +152,7 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertEqual(messages, lorumIpsumMessages)
     }
 
-    func test_append_dropsFirstMessageIfCacheRollsAndLastMessageDoesNotFitAndIsShorterThanFirstMessage() throws {
+    func test_append_dropsOldestMessageIfCacheRollsAndLastMessageDoesNotFitAndIsShorterThanOldestMessage() throws {
         let cache = try CacheAdvance<String>(
             file: testFileLocation,
             maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true),
@@ -169,7 +169,7 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertEqual(messages, Array(lorumIpsumMessages.dropFirst()) + [shortMessage])
     }
 
-    func test_append_dropsFirstTwoMessagesIfCacheRollsAndLastMessageDoesNotFitAndIsLargerThanFirstMessage() throws {
+    func test_append_dropsFirstTwoMessagesIfCacheRollsAndLastMessageDoesNotFitAndIsLargerThanOldestMessage() throws {
         let cache = try CacheAdvance<String>(
             file: testFileLocation,
             maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true),
