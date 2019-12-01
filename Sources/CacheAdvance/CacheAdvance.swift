@@ -108,7 +108,7 @@ public final class CacheAdvance<T: Codable> {
             // Prepare the reader before writing the message.
             try prepareReaderForWriting(dataOfLength: bytesNeededToStoreMessage)
 
-            // Create the marker for the offset representing the beggining of the message that will be the oldest once our write is done.
+            // Create the marker for the offset representing the beginning of the message that will be the oldest once our write is done.
             let offsetInFileOfOldestMessage = Data(Bytes(reader.offsetInFile))
 
             // Write the message and oldest message offset.
