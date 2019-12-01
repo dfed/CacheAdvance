@@ -56,7 +56,7 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertEqual(messages, [])
     }
 
-    func test_append_singleMessageThatFitsCanBeRetrieved() throws {
+    func test_append_singleMessageThatFits_canBeRetrieved() throws {
         let message = "This is a test"
         let cache = try CacheAdvance<String>(
             file: testFileLocation,
@@ -68,7 +68,7 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertEqual(messages, [message])
     }
 
-    func test_append_singleMessageFailsIfDoesNotFit() throws {
+    func test_append_singleMessageThatDoesNotFit_throwsError() throws {
         let message = "This is a test"
         let cache = try CacheAdvance<String>(
             file: testFileLocation,
