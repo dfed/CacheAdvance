@@ -31,6 +31,7 @@ public final class CacheAdvance<T: Codable> {
     ///   - shouldOverwriteOldMessages: When `true`, once the on-disk store exceeds maximumBytes, new entries will replace the oldest entry.
     ///
     /// - Warning: `maximumBytes` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache leads to undefined behavior.
+    /// - Warning: `shouldOverwriteOldMessages` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache leads to undefined behavior.
     public init(
         file: URL,
         maximumBytes: Bytes,
