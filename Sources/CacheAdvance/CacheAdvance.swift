@@ -157,6 +157,7 @@ public final class CacheAdvance<T: Codable> {
     }
 
     /// Advances the reader until there is room to store a new message without writing past the reader.
+    /// This method should only be called on a cache that overwrites old messages.
     /// - Parameter messageLength: the length of the next message that will be written.
     private func prepareReaderForWriting(dataOfLength messageLength: Bytes) throws {
         while writer.offsetInFile < reader.offsetInFile
