@@ -187,7 +187,7 @@ public final class CacheAdvance<T: Codable> {
     private func write(messageData: Data, offsetInFileOfOldestMessage: Data?) throws {
         // Create data to write from combined message and suffix.
         var dataToWrite = messageData + Data.endOfNewestMessageMarker
-        if let offsetInFileOfOldestMessage = offsetInFileOfOldestMessage, offsetInFileOfOldestMessage.count > 0 {
+        if let offsetInFileOfOldestMessage = offsetInFileOfOldestMessage {
             dataToWrite += offsetInFileOfOldestMessage
         }
 
