@@ -1,4 +1,4 @@
-language: objective-c
+language: swift
 install:
   - bundle install
   - brew outdated carthage || brew upgrade carthage
