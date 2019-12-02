@@ -44,8 +44,10 @@ if !destination.isEmpty {
     xcodeBuildArguments.append(destination)
 }
 if enableCodeCoverage {
-    xcodeBuildArguments.append("-enableCodeCoverage=YES")
-    xcodeBuildArguments.append("-derivedDataPath=.build/derivedData")
+    xcodeBuildArguments.append("-enableCodeCoverage")
+    xcodeBuildArguments.append("YES")
+    xcodeBuildArguments.append("-derivedDataPath")
+    xcodeBuildArguments.append(".build/derivedData")
 }
 xcodeBuildArguments.append("build")
 if shouldTest {
