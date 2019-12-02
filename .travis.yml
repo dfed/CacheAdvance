@@ -15,3 +15,5 @@ matrix:
     env: ACTION="swift-package";SDK="macosx10.15";DESTINATION="platform=OS X";BUILD="build"
   - osx_image: xcode11.2
     env: ACTION="swift-package";SDK="watchos6.1";DESTINATION="";BUILD="build"
+  - osx_image: xcode11.2
+    env: ACTION="carthage"
