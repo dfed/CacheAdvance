@@ -5,7 +5,7 @@ set -ex
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [ $ACTION == "swift-package" ]; then
-  $DIR/build.swift $SDK "$DESTINATION" $SHOULD_TEST
+  $DIR/build.swift $SDK "$DESTINATION" $SHOULD_TEST $ENABLE_CODE_COVERAGE
 fi
 
 if [ $ACTION == "pod-lint" ]; then
