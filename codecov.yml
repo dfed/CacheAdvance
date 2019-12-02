@@ -1,2 +1,7 @@
 codecov:
   require_ci_to_pass: yes
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: new
+  require_changes: no
