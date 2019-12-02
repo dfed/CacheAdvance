@@ -24,10 +24,7 @@ if [ $ACTION == "swift-package" ]; then
 fi
 
 if [ $ACTION == "pod-lint" ]; then
-  swift package generate-xcodeproj --output generated/
-  pushd generated/
   bundle exec pod lib lint --verbose --fail-fast --swift-version=$SWIFT_VERSION
-  popd
 fi
 
 if [ $ACTION == "carthage" ]; then
