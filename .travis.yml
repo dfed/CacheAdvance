@@ -7,7 +7,7 @@ script:
 matrix:
   include:
   - osx_image: xcode11.2
-    env: ACTION="swift-package";SDK="iphonesimulator";DESTINATION="platform=iOS Simulator,OS=13.2.2,name=iPad Pro (12.9-inch) (3rd generation)";SHOULD_TEST="true"
+    env: ACTION="swift-package";SDK="iphonesimulator";DESTINATION="platform=iOS Simulator,OS=13.2.2,name=iPad Pro (12.9-inch) (3rd generation)";SHOULD_TEST="true";ENABLE_CODE_COVERAGE="true"
     after_success:
       sh <(curl -s https://codecov.io/bash) -J '^CacheAdvance$' -D .build/derivedData
   - osx_image: xcode11.2
