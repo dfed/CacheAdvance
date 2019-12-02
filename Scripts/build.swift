@@ -2,7 +2,7 @@
 
 import Foundation
 
-// Usage: build.swift sdk destination should_test
+// Usage: build.swift sdk destination should_test?
 
 func execute(commandPath: String, arguments: [String]) throws {
     let task = Process()
@@ -20,8 +20,8 @@ enum TaskError: Error {
     case code(Int32)
 }
 
-guard CommandLine.arguments.count == 4 else {
-    print("Usage: build.swift sdk destination should_test")
+guard CommandLine.arguments.count > 3 else {
+    print("Usage: build.swift sdk destination should_test?")
     throw TaskError.code(1)
 }
 
@@ -29,10 +29,7 @@ try execute(commandPath: "/usr/bin/swift", arguments: ["package", "generate-xcod
 
 let sdk = CommandLine.arguments[1]
 let destination = CommandLine.arguments[2]
-guard let shouldTest = Bool(CommandLine.arguments[3]) else {
-    print("Usage: should_test argument should be a boolean")
-    throw TaskError.code(2)
-}
+let shouldTest = CommandLine.arguments.count > 3 ? Bool(CommandLine.arguments[3]) ?? false : false
 
 var xcodeBuildArguments = [
     "-project", "generated/CacheAdvance.xcodeproj",
