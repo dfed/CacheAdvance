@@ -40,7 +40,9 @@ extension FileHandle {
             return nil
 
         case .emptyRead:
-            // Seek back to the beginning of the file.
+            // We've encountered an empty read rather than a marker for the end of a newest message.
+            // This means we're in a cache that doesn't overwrite old messages. We know the next
+            // message is at the beginning of this file. Let's seek to it.
             try seek(toOffset: 0)
 
             if startingOffset != 0 {
