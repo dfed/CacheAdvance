@@ -7,11 +7,13 @@ script:
 matrix:
   include:
   - osx_image: xcode11.2
-    env: ACTION="swift-package";SDK="iphonesimulator";DESTINATION="platform=iOS Simulator,OS=13.2.2,name=iPad Pro (12.9-inch) (3rd generation)";BUILD="build test"
+    env: ACTION="swift-package";SDK="iphonesimulator";DESTINATION="platform=iOS Simulator,OS=13.2.2,name=iPad Pro (12.9-inch) (3rd generation)";SHOULD_TEST="true"
   - osx_image: xcode11.2
-    env: ACTION="swift-package";SDK="appletvsimulator13.2";DESTINATION="platform=tvOS Simulator,name=Apple TV";BUILD="build test"
+    env: ACTION="swift-package";SDK="appletvsimulator13.2";DESTINATION="platform=tvOS Simulator,name=Apple TV";SHOULD_TEST="true";ENABLE_CODE_COVERAGE="true"
+    after_success:
+      sh <(curl -s https://codecov.io/bash) -J '^CacheAdvance$' -D .build/derivedData -t 8344b011-6b2a-4b3d-a573-eaf49684318e
   - osx_image: xcode11.2
     # We can't run tests on macOS because CacheAdvance supports a minimum of macOS 10.15, and Travis CI's machines run on macOS 10.14.
-    env: ACTION="swift-package";SDK="macosx10.15";DESTINATION="platform=OS X";BUILD="build"
+    env: ACTION="swift-package";SDK="macosx10.15";DESTINATION="platform=OS X";SHOULD_TEST="false"
   - osx_image: xcode11.2
-    env: ACTION="swift-package";SDK="watchos6.1";DESTINATION="";BUILD="build"
+    env: ACTION="swift-package";SDK="watchos6.1";DESTINATION="";SHOULD_TEST="false"
