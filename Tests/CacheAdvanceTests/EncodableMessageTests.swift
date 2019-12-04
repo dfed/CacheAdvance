@@ -30,7 +30,7 @@ final class EncodableMessageTests: XCTestCase {
         let encodedMessage = EncodableMessage<String>(message: message, encoder: encoder)
         let encodedData = try encodedMessage.encodedData()
 
-        let prefix = encodedData.subdata(in: 0..<Data.messageSpanStorageLength)
+        let prefix = encodedData.subdata(in: 0..<MessageSpan.storageLength)
         XCTAssertEqual(MessageSpan(prefix), MessageSpan(data.count))
     }
 
@@ -39,7 +39,7 @@ final class EncodableMessageTests: XCTestCase {
         let data = try encoder.encode(message)
         let encodedMessage = EncodableMessage<String>(message: message, encoder: encoder)
         let encodedData = try encodedMessage.encodedData()
-        XCTAssertEqual(encodedData.count, data.count + Data.messageSpanStorageLength)
+        XCTAssertEqual(encodedData.count, data.count + MessageSpan.storageLength)
     }
 
     func test_encodedData_hasDataPostfix() throws {
@@ -47,7 +47,7 @@ final class EncodableMessageTests: XCTestCase {
         let data = try encoder.encode(message)
         let encodedMessage = EncodableMessage<String>(message: message, encoder: encoder)
         let encodedData = try encodedMessage.encodedData()
-        XCTAssertEqual(encodedData.advanced(by: Data.messageSpanStorageLength), data)
+        XCTAssertEqual(encodedData.advanced(by: MessageSpan.storageLength), data)
     }
 
     // MARK: Private

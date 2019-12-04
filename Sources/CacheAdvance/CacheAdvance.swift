@@ -48,10 +48,10 @@ public final class CacheAdvance<T: Codable> {
         lengthOfMessageSuffix = {
             if shouldOverwriteOldMessages {
                 /// The message suffix requires space for both `endOfNewestMessageMarker` and `offsetOfOldestMessage` after each message when rolling is enabled.
-                return Bytes(Data.endOfNewestMessageMarker.count) + Bytes(Data.bytesStorageLength)
+                return Bytes(MessageSpan.endOfNewestMessageMarker.count) + Bytes(Bytes.storageLength)
             } else {
                 /// The message suffix requires space for `endOfNewestMessageMarker` after each message.
-                return Bytes(Data.endOfNewestMessageMarker.count)
+                return Bytes(MessageSpan.endOfNewestMessageMarker.count)
             }
         }()
     }
@@ -187,7 +187,7 @@ public final class CacheAdvance<T: Codable> {
     ///                                  This data is should only be included in caches that overwrite their oldest messages.
     private func write(messageData: Data, offsetInFileOfOldestMessage: Data?) throws {
         // Create data to write from combined message and suffix.
-        var dataToWrite = messageData + Data.endOfNewestMessageMarker
+        var dataToWrite = messageData + MessageSpan.endOfNewestMessageMarker
         if let offsetInFileOfOldestMessage = offsetInFileOfOldestMessage {
             dataToWrite += offsetInFileOfOldestMessage
         }
