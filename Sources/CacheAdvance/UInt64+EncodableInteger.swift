@@ -19,7 +19,7 @@ import Foundation
 
 extension UInt64: EncodableInteger {
     
-    public static func swapBigIntToHost(_ x: UInt64) -> UInt64 {
+    static func swapBigIntToHost(_ x: UInt64) -> UInt64 {
         NSSwapBigLongLongToHost(x)
     }
 
