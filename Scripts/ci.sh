@@ -17,7 +17,5 @@ fi
 
 if [ $ACTION == "carthage" ]; then
   swift package generate-xcodeproj --output generated/
-  pushd generated/
-  carthage build --verbose --no-skip-current
-  popd
+  carthage build --project-directory generated/ --verbose --no-skip-current
 fi
