@@ -45,7 +45,7 @@ extension EncodableInteger {
     }
 
     /// The length of a contiguous data blob required to store this type.
-    public static var storageLength: Int { MemoryLayout<Self>.size }
+    static var storageLength: Int { MemoryLayout<Self>.size }
 
 }
 
