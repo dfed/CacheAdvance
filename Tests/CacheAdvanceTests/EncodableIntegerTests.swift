@@ -31,6 +31,6 @@ final class EncodableIntegerTests: XCTestCase {
 
     func test_init_returnsNilWhenInitializedFromDataOfIncorrectLength() {
         var expectedValue: UInt64 = 10
-        XCTAssertEqual(UInt64(Data(bytes: &expectedValue, count: UInt64.storageLength + 1)), nil)
+        XCTAssertNil(UInt64(Data(bytes: &expectedValue, count: UInt64.storageLength + 1)))
     }
 }
