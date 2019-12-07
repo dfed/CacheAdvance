@@ -18,7 +18,7 @@
 import Foundation
 
 /// A protocol representing an integer that can be encoded as data.
-protocol EncodableInteger {
+protocol EncodableInteger: ExpressibleByIntegerLiteral {
 
     /// Converts the big-endian value in x to the current endian format and returns the resulting value.
     static func swapBigIntToHost(_ x: Self) -> Self
