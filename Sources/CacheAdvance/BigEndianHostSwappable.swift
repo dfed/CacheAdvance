@@ -21,7 +21,7 @@ import Foundation
 protocol BigEndianHostSwappable: FixedWidthInteger {
 
     /// Converts the big-endian value in x to the current endian format and returns the resulting value.
-    static func swapBigIntToHost(_ x: Self) -> Self
+    static func swapToHost(_ x: Self) -> Self
 
 }
 
@@ -38,7 +38,7 @@ extension BigEndianHostSwappable {
         let decodedSize = withUnsafePointer(to: data) {
             return UnsafeRawBufferPointer(start: $0, count: Self.storageLength)
         }
-        self = Self.swapBigIntToHost(decodedSize.load(as: Self.self))
+        self = Self.swapToHost(decodedSize.load(as: Self.self))
     }
 
     /// The length of a contiguous data blob required to store this type.

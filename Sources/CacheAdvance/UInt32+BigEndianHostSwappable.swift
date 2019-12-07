@@ -19,7 +19,7 @@ import Foundation
 
 extension UInt32: BigEndianHostSwappable {
     
-    static func swapBigIntToHost(_ x: UInt32) -> UInt32 {
+    static func swapToHost(_ x: UInt32) -> UInt32 {
         NSSwapBigIntToHost(x)
     }
     
