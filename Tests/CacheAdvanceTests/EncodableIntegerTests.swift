@@ -20,7 +20,7 @@ import XCTest
 
 @testable import CacheAdvance
 
-final class EncodableIntegerTests: XCTestCase {
+final class BigEndianHostSwappableTests: XCTestCase {
 
     // MARK: Behavior Tests
 

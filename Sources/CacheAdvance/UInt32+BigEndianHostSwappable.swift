@@ -17,10 +17,10 @@
 
 import Foundation
 
-extension UInt64: EncodableInteger {
+extension UInt32: BigEndianHostSwappable {
     
-    static func swapBigIntToHost(_ x: UInt64) -> UInt64 {
-        NSSwapBigLongLongToHost(x)
+    static func swapBigIntToHost(_ x: UInt32) -> UInt32 {
+        NSSwapBigIntToHost(x)
     }
-
+    
 }

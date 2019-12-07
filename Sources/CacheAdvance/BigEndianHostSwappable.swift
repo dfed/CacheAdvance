@@ -18,17 +18,14 @@
 import Foundation
 
 /// A protocol representing an integer that can be encoded as data.
-protocol EncodableInteger: ExpressibleByIntegerLiteral {
+protocol BigEndianHostSwappable: FixedWidthInteger {
 
     /// Converts the big-endian value in x to the current endian format and returns the resulting value.
     static func swapBigIntToHost(_ x: Self) -> Self
 
-    /// The big-endian representation of self.
-    @inlinable var bigEndian: Self { get }
-
 }
 
-extension EncodableInteger {
+extension BigEndianHostSwappable {
 
     /// Initializes encodable data from a data blob.
     ///
@@ -53,7 +50,7 @@ extension Data {
 
     /// Initializes Data from a numeric value. The data will always be of length `Number.storageLength`.
     /// - Parameter value: the value to encode as data.
-    init<Number: EncodableInteger>(_ value: Number) {
+    init<Number: BigEndianHostSwappable>(_ value: Number) {
         var valueToEncode = value.bigEndian
         self.init(bytes: &valueToEncode, count: Number.storageLength)
     }
