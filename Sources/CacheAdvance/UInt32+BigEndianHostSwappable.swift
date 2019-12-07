@@ -1,5 +1,5 @@
 //
-//  Created by Dan Federman on 11/10/19.
+//  Created by Dan Federman on 12/3/19.
 //  Copyright © 2019 Dan Federman.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,10 @@
 
 import Foundation
 
-/// A storage unit that counts bytes.
-///
-/// - Warning: If this value is changed, previously persisted message encodings will not be readable.
-public typealias Bytes = UInt64
+extension UInt32: BigEndianHostSwappable {
+    
+    static func swapToHost(_ x: UInt32) -> UInt32 {
+        NSSwapBigIntToHost(x)
+    }
+    
+}

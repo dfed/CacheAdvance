@@ -120,18 +120,18 @@ extension FileHandle {
 
     /// Returns the next encoded message span, seeking to the end the span.
     private func nextEncodedMessageSpan(cacheOverwritesOldMessages: Bool) throws -> NextMessageSpan {
-        let messageSizeData = try __readDataUp(toLength: Data.messageSpanStorageLength)
+        let messageSizeData = try __readDataUp(toLength: MessageSpan.storageLength)
 
         guard messageSizeData.count > 0 else {
             // We haven't written anything to this file yet, or we've reached the end of the file.
             return .emptyRead
         }
 
-        guard messageSizeData != Data.endOfNewestMessageMarker else {
+        guard messageSizeData != MessageSpan.endOfNewestMessageMarker else {
             // We have reached the most recently written message.
             if cacheOverwritesOldMessages {
                 // We have a span marking the offset of the oldest message.
-                let offsetOfOldestMessageData = try __readDataUp(toLength: Data.bytesStorageLength)
+                let offsetOfOldestMessageData = try __readDataUp(toLength: Bytes.storageLength)
                 guard let offsetOfOldestMessage = Bytes(offsetOfOldestMessageData) else {
                     // The file is improperly formatted.
                     return .invalidFormat

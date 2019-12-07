@@ -424,7 +424,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     private func requiredByteCount<T: Codable>(for messages: [T], cacheWillOverwriteOldestMessages: Bool) throws -> UInt64 {
         let encoder = JSONEncoder()
-        let messageSpanSuffixLength = cacheWillOverwriteOldestMessages ? Bytes(Data.messageSpanStorageLength + Data.bytesStorageLength) : Bytes(Data.messageSpanStorageLength)
+        let messageSpanSuffixLength = cacheWillOverwriteOldestMessages ? Bytes(MessageSpan.storageLength + Bytes.storageLength) : Bytes(MessageSpan.storageLength)
         return try messageSpanSuffixLength + messages.reduce(0) { allocatedSize, message in
             let encodableMessage = EncodableMessage(message: message, encoder: encoder)
             let data = try encodableMessage.encodedData()
