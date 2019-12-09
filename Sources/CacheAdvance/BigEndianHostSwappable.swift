@@ -18,7 +18,7 @@
 import Foundation
 
 /// A protocol representing an integer that can be encoded as data.
-protocol BigEndianHostSwappable: FixedWidthInteger {
+protocol BigEndianHostSwappable where Self: FixedWidthInteger {
 
     /// Converts the big-endian value in x to the current endian format and returns the resulting value.
     static func swapToHost(_ x: Self) -> Self
