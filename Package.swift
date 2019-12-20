@@ -6,10 +6,10 @@ import PackageDescription
 let package = Package(
     name: "CacheAdvance",
     platforms: [
-        .iOS(.v13),
-        .tvOS(.v13),
-        .watchOS(.v6),
-        .macOS(.v10_15),
+        .iOS(.v12),
+        .tvOS(.v12),
+        .watchOS(.v5),
+        .macOS(.v10_14),
     ],
     products: [
         .library(
@@ -19,11 +19,21 @@ let package = Package(
     targets: [
         .target(
             name: "CacheAdvance",
-            dependencies: []),
+            dependencies: ["SwiftTryCatch"]
+        ),
         .testTarget(
             name: "CacheAdvanceTests",
-            dependencies: ["CacheAdvance"])
+            dependencies: ["CacheAdvance"]),
+        .target(
+            name: "SwiftTryCatch",
+            dependencies: [],
+            publicHeadersPath: "./",
+            swiftSettings: [SwiftSetting.define("-fobjc-arc-exceptions")]
+        ),
+        .testTarget(
+            name: "SwiftTryCatchTests",
+            dependencies: ["SwiftTryCatch"])
     ],
     swiftLanguageVersions: [.v5]
 )
-let version = Version(0, 0, 1)
+let version = Version(0, 0, 2)

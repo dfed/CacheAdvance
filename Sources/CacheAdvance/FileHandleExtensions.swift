@@ -21,12 +21,57 @@ extension FileHandle {
 
     // MARK: Internal
 
+    /// A method to read data from a file handle that is safe to call in Swift from any operation system version.
+    func readDataUp(toLength length: Int) throws -> Data {
+        if #available(iOS 13.0, tvOS 13.0, watchOS 6.0, OSX 15.0, *) {
+            return try __readDataUp(toLength: length)
+        } else {
+            return try ObjectiveC.unsafe { readData(ofLength: length) }
+        }
+    }
+
+    /// A method to write data to a file handle that is safe to call in Swift from any operation system version.
+    func write(data: Data) throws {
+        if #available(iOS 13.0, tvOS 13.0, watchOS 6.0, OSX 15.0, *) {
+            return try __write(data, error: ())
+        } else {
+            return try ObjectiveC.unsafe { write(data) }
+        }
+    }
+
+    /// A method to seek on a file handle that is safe to call in Swift from any operation system version.
+    func seek(to offset: UInt64) throws {
+        if #available(iOS 13.0, tvOS 13.0, watchOS 6.0, OSX 15.0, *) {
+            return try seek(toOffset: offset)
+        } else {
+            return try ObjectiveC.unsafe { seek(toFileOffset: offset) }
+        }
+    }
+
+    /// A method to close a file handle that is safe to call in Swift from any operation system version.
+    func closeHandle() throws {
+        if #available(iOS 13.0, tvOS 13.0, watchOS 6.0, OSX 15.0, *) {
+            return try close()
+        } else {
+            return try ObjectiveC.unsafe { closeFile() }
+        }
+    }
+
+    /// A method to truncate a file handle that is safe to call in Swift from any operation system version.
+    func truncate(at offset: UInt64) throws {
+        if #available(iOS 13.0, tvOS 13.0, watchOS 6.0, OSX 15.0, *) {
+            return try truncate(atOffset: offset)
+        } else {
+            return try ObjectiveC.unsafe { truncateFile(atOffset: offset) }
+        }
+    }
+
     /// Returns the next encodable message, seeking to the beginning of the next message.
     func nextEncodedMessage(cacheOverwritesOldMessages: Bool) throws -> Data? {
         let startingOffset = offsetInFile
         switch try nextEncodedMessageSpan(cacheOverwritesOldMessages: cacheOverwritesOldMessages) {
         case let .span(messageLength):
-            let message = try __readDataUp(toLength: Int(messageLength))
+            let message = try readDataUp(toLength: Int(messageLength))
             guard message.count > 0 else {
                 throw CacheAdvanceReadError.fileCorrupted
             }
@@ -35,7 +80,7 @@ extension FileHandle {
 
         case let .endOfNewestMessageMarker(offsetOfOldestMessage):
             // Seek to the oldest message.
-            try seek(toOffset: offsetOfOldestMessage)
+            try seek(to: offsetOfOldestMessage)
             // The next message is now the oldest.
             return nil
 
@@ -43,7 +88,7 @@ extension FileHandle {
             // We've encountered an empty read rather than a marker for the end of a newest message.
             // This means we're in a cache that doesn't overwrite old messages. We know the next
             // message is at the beginning of this file. Let's seek to it.
-            try seek(toOffset: 0)
+            try seek(to: 0)
 
             if startingOffset != 0 {
                 // We hit an empty read at the end of the file.
@@ -70,7 +115,7 @@ extension FileHandle {
             while try seekToNextMessage(shouldSeekToOldestMessageIfFound: true, cacheOverwritesOldMessages: true) {}
         } else {
             // The oldest message is always at the beginning of the cache.
-            try seek(toOffset: 0)
+            try seek(to: 0)
         }
     }
 
@@ -88,10 +133,10 @@ extension FileHandle {
             // We found the last message!
             if shouldSeekToOldestMessageIfFound {
                 // Seek to it.
-                try seek(toOffset: offsetOfNextMessage)
+                try seek(to: offsetOfNextMessage)
             } else {
                 // Seek back to where we started.
-                try seek(toOffset: startingOffset)
+                try seek(to: startingOffset)
             }
             return false
 
@@ -99,16 +144,16 @@ extension FileHandle {
             // The remaining file is empty.
             if shouldSeekToOldestMessageIfFound {
                 // The oldest message is at the beginning of the file.
-                try seek(toOffset: 0)
+                try seek(to: 0)
             } else {
                 // Seek back to where we started.
-                try seek(toOffset: startingOffset)
+                try seek(to: startingOffset)
             }
             return false
 
         case let .span(messageLength):
             // There's a valid message here. Seek ahead of it.
-            try seek(toOffset: offsetInFile + UInt64(messageLength))
+            try seek(to: offsetInFile + UInt64(messageLength))
             return true
 
         case .invalidFormat:
@@ -120,7 +165,7 @@ extension FileHandle {
 
     /// Returns the next encoded message span, seeking to the end the span.
     private func nextEncodedMessageSpan(cacheOverwritesOldMessages: Bool) throws -> NextMessageSpan {
-        let messageSizeData = try __readDataUp(toLength: MessageSpan.storageLength)
+        let messageSizeData = try readDataUp(toLength: MessageSpan.storageLength)
 
         guard messageSizeData.count > 0 else {
             // We haven't written anything to this file yet, or we've reached the end of the file.
@@ -131,7 +176,7 @@ extension FileHandle {
             // We have reached the most recently written message.
             if cacheOverwritesOldMessages {
                 // We have a span marking the offset of the oldest message.
-                let offsetOfOldestMessageData = try __readDataUp(toLength: Bytes.storageLength)
+                let offsetOfOldestMessageData = try readDataUp(toLength: Bytes.storageLength)
                 guard let offsetOfOldestMessage = Bytes(offsetOfOldestMessageData) else {
                     // The file is improperly formatted.
                     return .invalidFormat
