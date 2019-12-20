@@ -16,7 +16,9 @@
 //
 
 import Foundation
+#if SWIFT_PACKAGE_MANAGER
 import SwiftTryCatch
+#endif
 
 /// A class that enables Objective-C code that would normally be unsafe to call from Swift to be safe.
 final class ObjectiveC {

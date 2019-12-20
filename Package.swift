@@ -19,7 +19,8 @@ let package = Package(
     targets: [
         .target(
             name: "CacheAdvance",
-            dependencies: ["SwiftTryCatch"]
+            dependencies: ["SwiftTryCatch"],
+            swiftSettings: [.define("SWIFT_PACKAGE_MANAGER")]
         ),
         .testTarget(
             name: "CacheAdvanceTests",
