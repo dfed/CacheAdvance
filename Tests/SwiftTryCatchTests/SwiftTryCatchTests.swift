@@ -37,13 +37,15 @@ final class SwiftTryCatchTests: XCTestCase {
 
     func test_try_stopsExecutingOnRaise() {
         let doomedFileHandle = FileHandle(fileDescriptor: 101)
-        var didExecuteAfterRaisedException = false
+        var didStopAfterRaisedException = false
         SwiftTryCatch.try({
+            didStopAfterRaisedException = true
             // This will raise an exception.
             doomedFileHandle.readData(ofLength: 5)
-            didExecuteAfterRaisedException = false
+            didStopAfterRaisedException = false
         }, catch: { _ in })
-        XCTAssertFalse(didExecuteAfterRaisedException)
+
+        XCTAssertTrue(didStopAfterRaisedException)
     }
 
     func test_try_doesNotExecuteCatchIfNoExceptionThrown() {

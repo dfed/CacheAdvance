@@ -94,6 +94,7 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
         switch self {
         case .tvOS_12,
              .tvOS_13:
+            // We currently only have a after_success job to upload code coverage for our tvOS targets.
             return true
 
         case .iOS_12,

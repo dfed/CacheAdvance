@@ -29,6 +29,8 @@ let package = Package(
             name: "SwiftTryCatch",
             dependencies: [],
             publicHeadersPath: "./",
+            // Make Objective-C exceptions not leak, since we can now recover from them.
+            // For more info, see https://clang.llvm.org/docs/AutomaticReferenceCounting.html#exceptions
             swiftSettings: [SwiftSetting.define("-fobjc-arc-exceptions")]
         ),
         .testTarget(

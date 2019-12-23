@@ -17,16 +17,14 @@
 
 import Foundation
 
-struct TestableMessage: Codable, CustomStringConvertible, Equatable {
+struct TestableMessage: Codable, ExpressibleByStringLiteral, Equatable {
 
-    // MARK: Lifecycle
+    typealias StringLiteralType = String
 
-    init(_ description: String) {
-        self.description = description
+    init(stringLiteral value: Self.StringLiteralType) {
+        self.value = value
     }
 
-    // MARK: CustomStringConvertible
-
-    let description: String
+    let value: String
 
 }
