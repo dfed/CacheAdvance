@@ -21,3 +21,7 @@ matrix:
     env: ACTION="pod-lint";SWIFT_VERSION="5.1"
   - osx_image: xcode11.2
     env: ACTION="carthage"
+
+branches:
+  only:
+  - master
