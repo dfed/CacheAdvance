@@ -57,8 +57,8 @@ public final class CacheAdvance<T: Codable> {
     }
 
     deinit {
-        try? writer.close()
-        try? reader.close()
+        try? writer.closeHandle()
+        try? reader.closeHandle()
     }
 
     // MARK: Public
@@ -94,13 +94,13 @@ public final class CacheAdvance<T: Codable> {
                 // We'll need to start writing the file from the beginning of the file.
 
                 // Trim the file to the current position to remove soon-to-be-abandoned data from the file.
-                try writer.truncate(atOffset: writer.offsetInFile)
+                try writer.truncate(at: writer.offsetInFile)
 
                 // Set the offset back to the beginning of the file.
-                try writer.seek(toOffset: 0)
+                try writer.seek(to: 0)
 
                 // We know the oldest message is at the beginning of the file, since we just tossed out the rest of the file.
-                try reader.seek(toOffset: 0)
+                try reader.seek(to: 0)
 
                 // We know we're about to overwrite the oldest message, so advance the reader to the second oldest message.
                 try reader.seekToNextMessage(shouldSeekToOldestMessageIfFound: false, cacheOverwritesOldMessages: true)
@@ -149,7 +149,7 @@ public final class CacheAdvance<T: Codable> {
         // This is our first cache action.
         // We need to find out where we should write our next message.
         try reader.seekToEndOfNewestMessage(cacheOverwritesOldMessages: shouldOverwriteOldMessages)
-        try writer.seek(toOffset: reader.offsetInFile)
+        try writer.seek(to: reader.offsetInFile)
 
         // Now that we know where to write, we need to figure out where the oldest message is.
         try reader.seekToBeginningOfOldestMessage(cacheOverwritesOldMessages: shouldOverwriteOldMessages)
@@ -196,11 +196,11 @@ public final class CacheAdvance<T: Codable> {
         let endOfMessageOffset = writer.offsetInFile + Bytes(messageData.count)
 
         // Write the complete messge data atomically.
-        try writer.__write(dataToWrite, error: ())
+        try writer.write(data: dataToWrite)
 
         // Seek the file handle's offset back to the end of the message we just wrote.
         // This way the next time we write a message, we'll overwrite the last message marker.
-        try writer.seek(toOffset: endOfMessageOffset)
+        try writer.seek(to: endOfMessageOffset)
     }
 
     private let writer: FileHandle

@@ -25,9 +25,9 @@ final class EncodableMessageTests: XCTestCase {
     // MARK: Behavior Tests
 
     func test_encodedData_encodesCorrectSize() throws {
-        let message = "This is a test"
+        let message = TestableMessage("This is a test")
         let data = try encoder.encode(message)
-        let encodedMessage = EncodableMessage<String>(message: message, encoder: encoder)
+        let encodedMessage = EncodableMessage<TestableMessage>(message: message, encoder: encoder)
         let encodedData = try encodedMessage.encodedData()
 
         let prefix = encodedData.subdata(in: 0..<MessageSpan.storageLength)
@@ -35,17 +35,17 @@ final class EncodableMessageTests: XCTestCase {
     }
 
     func test_encodedData_isOfCorrectLength() throws {
-        let message = "This is a test"
+        let message = TestableMessage("This is a test")
         let data = try encoder.encode(message)
-        let encodedMessage = EncodableMessage<String>(message: message, encoder: encoder)
+        let encodedMessage = EncodableMessage<TestableMessage>(message: message, encoder: encoder)
         let encodedData = try encodedMessage.encodedData()
         XCTAssertEqual(encodedData.count, data.count + MessageSpan.storageLength)
     }
 
     func test_encodedData_hasDataPostfix() throws {
-        let message = "This is a test"
+        let message = TestableMessage("This is a test")
         let data = try encoder.encode(message)
-        let encodedMessage = EncodableMessage<String>(message: message, encoder: encoder)
+        let encodedMessage = EncodableMessage<TestableMessage>(message: message, encoder: encoder)
         let encodedData = try encodedMessage.encodedData()
         XCTAssertEqual(encodedData.advanced(by: MessageSpan.storageLength), data)
     }
