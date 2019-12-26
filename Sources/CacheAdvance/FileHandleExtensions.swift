@@ -23,7 +23,7 @@ extension FileHandle {
 
     /// A method to read data from a file handle that is safe to call in Swift from any operation system version.
     func readDataUp(toLength length: Int) throws -> Data {
-        if #available(iOS 13.0, tvOS 13.0, watchOS 6.0, OSX 15.0, *) {
+        if #available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *) {
             return try __readDataUp(toLength: length)
         } else {
             return try ObjectiveC.unsafe { readData(ofLength: length) }
@@ -32,7 +32,7 @@ extension FileHandle {
 
     /// A method to write data to a file handle that is safe to call in Swift from any operation system version.
     func write(data: Data) throws {
-        if #available(iOS 13.0, tvOS 13.0, watchOS 6.0, OSX 15.0, *) {
+        if #available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *) {
             return try __write(data, error: ())
         } else {
             return try ObjectiveC.unsafe { write(data) }
@@ -41,7 +41,7 @@ extension FileHandle {
 
     /// A method to seek on a file handle that is safe to call in Swift from any operation system version.
     func seek(to offset: UInt64) throws {
-        if #available(iOS 13.0, tvOS 13.0, watchOS 6.0, OSX 15.0, *) {
+        if #available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *) {
             return try seek(toOffset: offset)
         } else {
             return try ObjectiveC.unsafe { seek(toFileOffset: offset) }
@@ -50,7 +50,7 @@ extension FileHandle {
 
     /// A method to close a file handle that is safe to call in Swift from any operation system version.
     func closeHandle() throws {
-        if #available(iOS 13.0, tvOS 13.0, watchOS 6.0, OSX 15.0, *) {
+        if #available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *) {
             return try close()
         } else {
             return try ObjectiveC.unsafe { closeFile() }
@@ -59,7 +59,7 @@ extension FileHandle {
 
     /// A method to truncate a file handle that is safe to call in Swift from any operation system version.
     func truncate(at offset: UInt64) throws {
-        if #available(iOS 13.0, tvOS 13.0, watchOS 6.0, OSX 15.0, *) {
+        if #available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *) {
             return try truncate(atOffset: offset)
         } else {
             return try ObjectiveC.unsafe { truncateFile(atOffset: offset) }
