@@ -62,8 +62,9 @@ final class CacheHeaderHandle {
         try writeHeaderData()
     }
 
-    /// Reads the header data from the file.
-    func readHeaderData() throws {
+    /// Reads the header data from the file. Writes header information to disk if no header exists.
+    /// If the header data persisted to the file is not consistent with expectations, the file will be deleted.
+    func synchronizeHeaderData() throws {
         // Start at the beginning of the file.
         try handle.seek(to: 0)
 

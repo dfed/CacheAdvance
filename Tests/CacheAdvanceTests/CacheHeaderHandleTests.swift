@@ -36,19 +36,19 @@ final class CacheHeaderHandleTests: XCTestCase {
 
     // MARK: Behavior Tests
 
-    func test_readHeaderData_returnsSameVersionAsWasLastPersistedToDisk() throws {
+    func test_synchronizeHeaderData_returnsSameVersionAsWasLastPersistedToDisk() throws {
         let headerHandle1 = try createHeaderHandle(version: 2)
         try headerHandle1.updateOffsetInFileAtEndOfNewestMessage(to: 1000)
         try headerHandle1.updateOffsetInFileOfOldestMessage(to: 2000)
 
         let headerHandle2 = try createHeaderHandle(version: 2)
-        try headerHandle2.readHeaderData()
+        try headerHandle2.synchronizeHeaderData()
 
         XCTAssertEqual(headerHandle2.offsetInFileAtEndOfNewestMessage, headerHandle1.offsetInFileAtEndOfNewestMessage)
         XCTAssertEqual(headerHandle2.offsetInFileOfOldestMessage, headerHandle1.offsetInFileOfOldestMessage)
     }
 
-    func test_readHeaderData_returnsDefaultVersionWhenUnexpectedVersionIsOnDisk() throws {
+    func test_synchronizeHeaderData_returnsDefaultVersionWhenUnexpectedVersionIsOnDisk() throws {
         let headerHandle1 = try createHeaderHandle(version: 2)
         let defaultOffsetInFileAtEndOfNewestMessage = headerHandle1.offsetInFileAtEndOfNewestMessage
         let defaultOffsetInFileOfOldestMessage = headerHandle1.offsetInFileOfOldestMessage
@@ -59,13 +59,13 @@ final class CacheHeaderHandleTests: XCTestCase {
         XCTAssertNotEqual(headerHandle1.offsetInFileOfOldestMessage, defaultOffsetInFileOfOldestMessage)
 
         let headerHandle2 = try createHeaderHandle(version: 3)
-        try headerHandle2.readHeaderData()
+        try headerHandle2.synchronizeHeaderData()
 
         XCTAssertEqual(headerHandle2.offsetInFileAtEndOfNewestMessage, defaultOffsetInFileAtEndOfNewestMessage)
         XCTAssertEqual(headerHandle2.offsetInFileOfOldestMessage, defaultOffsetInFileOfOldestMessage)
     }
 
-    func test_readHeaderData_returnsNothingWhenMaximumBytesIsInconsistent() throws {
+    func test_synchronizeHeaderData_returnsNothingWhenMaximumBytesIsInconsistent() throws {
         let headerHandle1 = try createHeaderHandle(maximumBytes: 5000)
         let defaultOffsetInFileAtEndOfNewestMessage = headerHandle1.offsetInFileAtEndOfNewestMessage
         let defaultOffsetInFileOfOldestMessage = headerHandle1.offsetInFileOfOldestMessage
@@ -76,7 +76,7 @@ final class CacheHeaderHandleTests: XCTestCase {
         XCTAssertNotEqual(headerHandle1.offsetInFileOfOldestMessage, defaultOffsetInFileOfOldestMessage)
 
         let headerHandle2 = try createHeaderHandle(maximumBytes: 10000)
-        try headerHandle2.readHeaderData()
+        try headerHandle2.synchronizeHeaderData()
 
         XCTAssertEqual(headerHandle2.offsetInFileAtEndOfNewestMessage, defaultOffsetInFileAtEndOfNewestMessage)
         XCTAssertEqual(headerHandle2.offsetInFileOfOldestMessage, defaultOffsetInFileOfOldestMessage)

@@ -156,7 +156,7 @@ public final class CacheAdvance<T: Codable> {
         }
 
         // Read our header data.
-        try header.readHeaderData()
+        try header.synchronizeHeaderData()
 
         // Update the reader to know where the oldest message begins.
         reader.offsetInFileOfOldestMessage = header.offsetInFileOfOldestMessage
