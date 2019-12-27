@@ -203,6 +203,24 @@ final class CacheAdvanceTests: XCTestCase {
         func createCache() throws -> CacheAdvance<TestableMessage> {
             try CacheAdvance<TestableMessage>(
             file: testFileLocation,
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) + 500,
+            shouldOverwriteOldMessages: false)
+        }
+        let cache = try createCache()
+        for message in lorumIpsumMessages {
+            try cache.append(message: message)
+        }
+
+        let cachedMessages = try cache.messages()
+        let secondCache = try createCache()
+        try secondCache.append(message: "test")
+        XCTAssertEqual(cachedMessages + ["test"], try secondCache.messages())
+    }
+
+    func test_append_canWriteMessagesToCacheCreatedByADifferentOverridingCache() throws {
+        func createCache() throws -> CacheAdvance<TestableMessage> {
+            try CacheAdvance<TestableMessage>(
+            file: testFileLocation,
             maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) / 3,
             shouldOverwriteOldMessages: true)
         }

@@ -124,6 +124,10 @@ public final class CacheAdvance<T: Codable> {
             // Write the message.
             try write(messageData: messageData)
 
+            // Update the offsetInFileAtEndOfNewestMessage in our header now that we've written the message.
+            // If the application crashes between writing the message data and writing the header, we'll have lost the most recent message.
+            try header.updateOffsetInFileAtEndOfNewestMessage(to: writer.offsetInFile)
+
         } else {
             // We're out of room.
             throw CacheAdvanceWriteError.messageDataTooLarge
