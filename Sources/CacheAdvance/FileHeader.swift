@@ -19,6 +19,8 @@ import Foundation
 
 struct FileHeader {
 
+    // MARK: Lifecycle
+
     init(
         version: UInt8 = FileHeader.version,
         maximumBytes: Bytes,
@@ -33,6 +35,8 @@ struct FileHeader {
         self.offsetInFileAtEndOfNewestMessage = offsetInFileAtEndOfNewestMessage
     }
 
+    // MARK: Internal
+
     let version: UInt8
     let maximumBytes: Bytes
     let overwritesOldMessages: Bool
@@ -40,11 +44,9 @@ struct FileHeader {
     let offsetInFileAtEndOfNewestMessage: UInt64
 
     var asData: Data {
-        Data(version)
-            + Data(maximumBytes)
-            + Data(overwritesOldMessages)
-            + Data(offsetInFileOfOldestMessage)
-            + Data(offsetInFileAtEndOfNewestMessage)
+        Field.allCases.reduce(Data()) { header, field in
+            header + data(for: field)
+        }
     }
 
     /// The expected version of the header.
@@ -53,12 +55,62 @@ struct FileHeader {
 
     /// Calculates the offset in the file where the header should end.
     static var expectedEndOfHeaderInFile: UInt64 {
+        Field.endOfHeaderMarker.expectedEndOfFieldInFile
+    }
+
+    func data(for field: Field) -> Data {
+        switch field {
+            case .version:
+                return Data(version)
+            case .maximumBytes:
+                return Data(maximumBytes)
+            case .overwriteOldMessages:
+                return Data(overwritesOldMessages)
+            case .offsetInFileOfOldestMessage:
+                return Data(offsetInFileOfOldestMessage)
+            case .offsetInFileAtEndOfNewestMessage:
+                return Data(offsetInFileAtEndOfNewestMessage)
+            case .endOfHeaderMarker:
+                return Data()
+        }
+    }
+
+    enum Field: Int, CaseIterable {
         // Header format:
         // [headerVersion:UInt8][maximumBytes:UInt64][overwritesOldMessages:Bool][offsetInFileOfOldestMessage:UInt64][offsetInFileAtEndOfNewestMessage:UInt64]
-        UInt64(UInt8.storageLength) // headerVersion
-            + UInt64(Bytes.storageLength) // maximumBytes
-            + UInt64(Bool.storageLength) // overwriteOldMessages
-            + UInt64(UInt64.storageLength) // offsetInFileOfOldestMessage
-            + UInt64(UInt64.storageLength) // offsetInFileAtEndOfNewestMessage
+
+        case version = 0
+        case maximumBytes
+        case overwriteOldMessages
+        case offsetInFileOfOldestMessage
+        case offsetInFileAtEndOfNewestMessage
+        // This case must always be last.
+        case endOfHeaderMarker
+
+        var storageLength: Int {
+            switch self {
+            case .version:
+                return UInt8.storageLength
+            case .maximumBytes:
+                return Bytes.storageLength
+            case .overwriteOldMessages:
+                return Bool.storageLength
+            case .offsetInFileOfOldestMessage:
+                return UInt64.storageLength
+            case .offsetInFileAtEndOfNewestMessage:
+                return UInt64.storageLength
+            case .endOfHeaderMarker:
+                return 0
+            }
+        }
+
+        var expectedBeginningOfFieldInFile: UInt64 {
+            expectedEndOfFieldInFile - UInt64(storageLength)
+        }
+        var expectedEndOfFieldInFile: UInt64 {
+            Field.allCases.dropLast(Field.allCases.count - rawValue - 1).reduce(0) { totalOffset, currentField in
+                totalOffset + UInt64(currentField.storageLength)
+            }
+        }
     }
 }

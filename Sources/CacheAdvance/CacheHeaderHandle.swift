@@ -54,12 +54,22 @@ final class CacheHeaderHandle {
 
     func updateOffsetInFileOfOldestMessage(to offset: UInt64) throws {
         offsetInFileOfOldestMessage = offset
-        try writeHeaderData()
+
+        // Seek to the beginning of this field in the header.
+        try handle.seek(to: FileHeader.Field.offsetInFileOfOldestMessage.expectedBeginningOfFieldInFile)
+
+        // Write this updated value to disk.
+        try handle.write(data: currentHeader.data(for: .offsetInFileOfOldestMessage))
     }
 
     func updateOffsetInFileAtEndOfNewestMessage(to offset: UInt64) throws {
         offsetInFileAtEndOfNewestMessage = offset
-        try writeHeaderData()
+
+        // Seek to the beginning of this field in the header.
+        try handle.seek(to: FileHeader.Field.offsetInFileAtEndOfNewestMessage.expectedBeginningOfFieldInFile)
+
+        // Write this updated value to disk.
+        try handle.write(data: currentHeader.data(for: .offsetInFileAtEndOfNewestMessage))
     }
 
     /// Reads the header data from the file. Writes header information to disk if no header exists.
@@ -130,20 +140,21 @@ final class CacheHeaderHandle {
     private let maximumBytes: Bytes
     private let version: UInt8
 
-    /// Writes header data to the file.
-    private func writeHeaderData() throws {
-        // Seek to the beginning of the file before writing the header.
-        try handle.seek(to: 0)
-
-        // Create the header.
-        let header = FileHeader(
+    private var currentHeader: FileHeader {
+        FileHeader(
             version: version,
             maximumBytes: maximumBytes,
             overwritesOldMessages: overwritesOldMessages,
             offsetInFileOfOldestMessage: offsetInFileOfOldestMessage,
             offsetInFileAtEndOfNewestMessage: offsetInFileAtEndOfNewestMessage)
+    }
+
+    /// Writes header data to the file.
+    private func writeHeaderData() throws {
+        // Seek to the beginning of the file before writing the header.
+        try handle.seek(to: 0)
 
         // Write the header to disk.
-        try handle.write(data: header.asData)
+        try handle.write(data: currentHeader.asData)
     }
 }

@@ -38,6 +38,7 @@ final class CacheHeaderHandleTests: XCTestCase {
 
     func test_synchronizeHeaderData_returnsSameVersionAsWasLastPersistedToDisk() throws {
         let headerHandle1 = try createHeaderHandle(version: 2)
+        try headerHandle1.synchronizeHeaderData()
         try headerHandle1.updateOffsetInFileAtEndOfNewestMessage(to: 1000)
         try headerHandle1.updateOffsetInFileOfOldestMessage(to: 2000)
 
@@ -50,6 +51,7 @@ final class CacheHeaderHandleTests: XCTestCase {
 
     func test_synchronizeHeaderData_returnsDefaultVersionWhenUnexpectedVersionIsOnDisk() throws {
         let headerHandle1 = try createHeaderHandle(version: 2)
+        try headerHandle1.synchronizeHeaderData()
         let defaultOffsetInFileAtEndOfNewestMessage = headerHandle1.offsetInFileAtEndOfNewestMessage
         let defaultOffsetInFileOfOldestMessage = headerHandle1.offsetInFileOfOldestMessage
         try headerHandle1.updateOffsetInFileAtEndOfNewestMessage(to: 1000)
@@ -67,6 +69,7 @@ final class CacheHeaderHandleTests: XCTestCase {
 
     func test_synchronizeHeaderData_returnsNothingWhenMaximumBytesIsInconsistent() throws {
         let headerHandle1 = try createHeaderHandle(maximumBytes: 5000)
+        try headerHandle1.synchronizeHeaderData()
         let defaultOffsetInFileAtEndOfNewestMessage = headerHandle1.offsetInFileAtEndOfNewestMessage
         let defaultOffsetInFileOfOldestMessage = headerHandle1.offsetInFileOfOldestMessage
         try headerHandle1.updateOffsetInFileAtEndOfNewestMessage(to: 1000)
