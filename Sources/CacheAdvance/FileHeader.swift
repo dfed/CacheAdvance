@@ -102,7 +102,7 @@ struct FileHeader {
 
     enum Field: Int, CaseIterable {
         // Header format:
-        // [headerVersion:UInt8][maximumBytes:UInt64][overwritesOldMessages:Bool][offsetInFileOfOldestMessage:UInt64][offsetInFileAtEndOfNewestMessage:UInt64]
+        // [headerVersion:UInt8][maximumBytes:UInt64][overwritesOldMessages:Bool][offsetInFileOfOldestMessage:UInt64][offsetInFileAtEndOfNewestMessage:UInt64][reservedSpace]
 
         case version = 0
         case maximumBytes
