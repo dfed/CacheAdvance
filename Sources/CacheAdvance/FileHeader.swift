@@ -128,7 +128,7 @@ struct FileHeader {
             case .reservedSpace:
                 // Subtract from this value every time another additive field is added.
                 // We currently have a total of 64 bytes reserved for the header.
-                // We're only currently using 26 of them.
+                // We're currently using only 26 of them.
                 return 38
             case .endOfHeaderMarker:
                 return 0
