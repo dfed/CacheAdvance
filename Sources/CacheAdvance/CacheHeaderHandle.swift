@@ -79,7 +79,7 @@ final class CacheHeaderHandle {
         try handle.seek(to: 0)
 
         // Read the version of the header.
-        let headerVersionData = try handle.readDataUp(toLength: UInt8.storageLength)
+        let headerVersionData = try handle.readDataUp(toLength: FileHeader.Field.version.storageLength)
 
         if headerVersionData.isEmpty {
             // There is no header. Create a header to write to disk.
@@ -102,13 +102,13 @@ final class CacheHeaderHandle {
             }
 
             // Read the maximum number of bytes in this cache.
-            let maximumBytesData = try handle.readDataUp(toLength: UInt64.storageLength)
+            let maximumBytesData = try handle.readDataUp(toLength: FileHeader.Field.maximumBytes.storageLength)
             // Read whether we overwrite old messages.
-            let overwritesOldMessagesData = try handle.readDataUp(toLength: Bool.storageLength)
+            let overwritesOldMessagesData = try handle.readDataUp(toLength: FileHeader.Field.overwriteOldMessages.storageLength)
             // Read the offset in file of the oldest message.
-            let offsetInFileOfOldestMessageData = try handle.readDataUp(toLength: UInt64.storageLength)
+            let offsetInFileOfOldestMessageData = try handle.readDataUp(toLength: FileHeader.Field.offsetInFileOfOldestMessage.storageLength)
             // Read the offset in file at the end of the newest message.
-            let offsetInFileAtEndOfNewestMessageData = try handle.readDataUp(toLength: UInt64.storageLength)
+            let offsetInFileAtEndOfNewestMessageData = try handle.readDataUp(toLength: FileHeader.Field.offsetInFileAtEndOfNewestMessage.storageLength)
 
             guard
                 let encodedMaximumBytes = Bytes(maximumBytesData),
