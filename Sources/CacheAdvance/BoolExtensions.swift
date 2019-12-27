@@ -23,18 +23,13 @@ extension Bool {
     ///
     /// - Parameter data: A data blob representing encodable data. Must be of length `Self.storageLength`.
     init?(_ data: Data)  {
-        guard data.count == Bool.storageLength else {
-            // Data is of the incorrect size and can't represent a Bool.
+        guard let integerRepresentation = UInt8(data) else {
             return nil
         }
-        let decodedSize = withUnsafePointer(to: data) {
-            return UnsafeRawBufferPointer(start: $0, count: Bool.storageLength)
-        }
-        self = decodedSize.load(as: Bool.self)
+        self = integerRepresentation == 1 ? true : false
     }
 
-    /// The length of a contiguous data blob required to store this type.
-    static var storageLength: Int { MemoryLayout<Bool>.size }
+    static var storageLength: Int { UInt8.storageLength }
 }
 
 extension Data {
@@ -42,8 +37,7 @@ extension Data {
     /// Initializes Data from a numeric value. The data will always be of length 1.
     /// - Parameter value: the value to encode as data.
     init(_ value: Bool) {
-        var valueToEncode = value
-        self.init(bytes: &valueToEncode, count: Bool.storageLength)
+        self.init(UInt8(value ? 1 : 0))
     }
 
 }
