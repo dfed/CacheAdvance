@@ -29,8 +29,4 @@ final class BoolExtensionsTests: XCTestCase {
         XCTAssertEqual(Bool(Data(false)), false)
     }
 
-    func test_init_returnsNilWhenInitializedFromDataOfIncorrectLength() {
-        var expectedValue = true
-        XCTAssertNil(Bool(Data(bytes: &expectedValue, count: Bool.storageLength + 1)))
-    }
 }

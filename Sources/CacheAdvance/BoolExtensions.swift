@@ -19,14 +19,8 @@ import Foundation
 
 extension Bool {
 
-    /// Initializes encodable data from a data blob.
-    ///
-    /// - Parameter data: A data blob representing encodable data. Must be of length `Self.storageLength`.
-    init?(_ data: Data)  {
-        guard let integerRepresentation = UInt8(data) else {
-            return nil
-        }
-        self = integerRepresentation == 1 ? true : false
+    init(_ data: Data) {
+        self = UInt8(data) == 1 ? true : false
     }
 
     static var storageLength: Int { UInt8.storageLength }

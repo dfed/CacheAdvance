@@ -31,6 +31,6 @@ final class BigEndianHostSwappableTests: XCTestCase {
 
     func test_init_returnsNilWhenInitializedFromDataOfIncorrectLength() {
         var expectedValue: UInt64 = 10
-        XCTAssertNil(UInt64(Data(bytes: &expectedValue, count: UInt64.storageLength + 1)))
+        XCTAssertNil(UInt64(safe: (Data(bytes: &expectedValue, count: UInt64.storageLength + 1))))
     }
 }

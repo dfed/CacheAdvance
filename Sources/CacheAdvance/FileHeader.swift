@@ -35,6 +35,31 @@ struct FileHeader {
         self.offsetInFileAtEndOfNewestMessage = offsetInFileAtEndOfNewestMessage
     }
 
+    init?(from data: Data) {
+        guard data.count == FileHeader.expectedEndOfHeaderInFile else {
+            return nil
+        }
+
+        let versionData = data.subdata(in: FileHeader.Field.version.rangeOfFieldInFile)
+        let maximumBytesData = data.subdata(in: FileHeader.Field.maximumBytes.rangeOfFieldInFile)
+        let overwritesOldMessagesData = data.subdata(in: FileHeader.Field.overwriteOldMessages.rangeOfFieldInFile)
+        let offsetInFileOfOldestMessageData = data.subdata(in: FileHeader.Field.offsetInFileOfOldestMessage.rangeOfFieldInFile)
+        let offsetInFileAtEndOfNewestMessageData = data.subdata(in: FileHeader.Field.offsetInFileAtEndOfNewestMessage.rangeOfFieldInFile)
+
+        let version = UInt8(versionData)
+        let maximumBytes = Bytes(maximumBytesData)
+        let overwritesOldMessages = Bool(overwritesOldMessagesData)
+        let offsetInFileOfOldestMessage = UInt64(offsetInFileOfOldestMessageData)
+        let offsetInFileAtEndOfNewestMessage = UInt64(offsetInFileAtEndOfNewestMessageData)
+
+        self = FileHeader(
+            version: version,
+            maximumBytes: maximumBytes,
+            overwritesOldMessages: overwritesOldMessages,
+            offsetInFileOfOldestMessage: offsetInFileOfOldestMessage,
+            offsetInFileAtEndOfNewestMessage: offsetInFileAtEndOfNewestMessage)
+    }
+
     // MARK: Internal
 
     let version: UInt8
@@ -102,6 +127,9 @@ struct FileHeader {
             }
         }
 
+        var rangeOfFieldInFile: Range<Int> {
+            Int(expectedBeginningOfFieldInFile)..<Int(expectedEndOfFieldInFile)
+        }
         var expectedBeginningOfFieldInFile: UInt64 {
             expectedEndOfFieldInFile - UInt64(storageLength)
         }

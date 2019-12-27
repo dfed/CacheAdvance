@@ -78,58 +78,38 @@ final class CacheHeaderHandle {
         // Start at the beginning of the file.
         try handle.seek(to: 0)
 
-        // Read the version of the header.
-        let headerVersionData = try handle.readDataUp(toLength: FileHeader.Field.version.storageLength)
+        // Read the entire header.
+        let headerData = try handle.readDataUp(toLength: Int(FileHeader.expectedEndOfHeaderInFile))
 
-        if headerVersionData.isEmpty {
+        if headerData.isEmpty {
             // There is no header. Create a header to write to disk.
             try writeHeaderData()
 
         } else {
             guard
-                let headerVersion = UInt8(headerVersionData),
-                headerVersion == version
+                let fileHeader = FileHeader(from: headerData),
+                fileHeader.version == version
                 else
             {
                 // Our current file header version is 1.
                 // That means there is no prior header version we could attempt to read.
                 // We have no idea how to read this file. Nuke it.
-                try handle.truncate(at: 0)
-
-                // Now that we've started from scratch, write a new header.
-                try writeHeaderData()
+                try resetFile()
                 return
             }
-
-            // Read the maximum number of bytes in this cache.
-            let maximumBytesData = try handle.readDataUp(toLength: FileHeader.Field.maximumBytes.storageLength)
-            // Read whether we overwrite old messages.
-            let overwritesOldMessagesData = try handle.readDataUp(toLength: FileHeader.Field.overwriteOldMessages.storageLength)
-            // Read the offset in file of the oldest message.
-            let offsetInFileOfOldestMessageData = try handle.readDataUp(toLength: FileHeader.Field.offsetInFileOfOldestMessage.storageLength)
-            // Read the offset in file at the end of the newest message.
-            let offsetInFileAtEndOfNewestMessageData = try handle.readDataUp(toLength: FileHeader.Field.offsetInFileAtEndOfNewestMessage.storageLength)
 
             guard
-                let encodedMaximumBytes = Bytes(maximumBytesData),
-                encodedMaximumBytes == maximumBytes,
-                let encodedOverwritesOldMessages = Bool(overwritesOldMessagesData),
-                encodedOverwritesOldMessages == overwritesOldMessages,
-                let offsetInFileOfOldestMessage = UInt64(offsetInFileOfOldestMessageData),
-                let offsetInFileAtEndOfNewestMessage = UInt64(offsetInFileAtEndOfNewestMessageData)
+                fileHeader.maximumBytes == maximumBytes,
+                fileHeader.overwritesOldMessages == overwritesOldMessages
                 else
             {
-                // The header's values are not consistent with our expectations.
-                // We have no idea how to read this file. Nuke it.
-                try handle.truncate(at: 0)
-
-                // Now that we've started from scratch, write a new header.
-                try writeHeaderData()
+                // The header's values are not consistent with our expectations. Nuke it.
+                try resetFile()
                 return
             }
 
-            self.offsetInFileOfOldestMessage = offsetInFileOfOldestMessage
-            self.offsetInFileAtEndOfNewestMessage = offsetInFileAtEndOfNewestMessage
+            self.offsetInFileOfOldestMessage = fileHeader.offsetInFileOfOldestMessage
+            self.offsetInFileAtEndOfNewestMessage = fileHeader.offsetInFileAtEndOfNewestMessage
         }
     }
 
@@ -156,6 +136,13 @@ final class CacheHeaderHandle {
 
         // Write the header to disk.
         try handle.write(data: currentHeader.asData)
+    }
+
+    private func resetFile() throws {
+        try handle.truncate(at: 0)
+
+        // Now that we've started from scratch, write a new header.
+        try writeHeaderData()
     }
 
     private static let beginningOfHeaderFieldOffsetInFileOfOldestMessage = FileHeader.Field.offsetInFileOfOldestMessage.expectedBeginningOfFieldInFile
