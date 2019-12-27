@@ -221,7 +221,7 @@ final class CacheAdvanceTests: XCTestCase {
         func createCache() throws -> CacheAdvance<TestableMessage> {
             try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true),
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: false),
             shouldOverwriteOldMessages: false)
         }
         let cache = try createCache()
