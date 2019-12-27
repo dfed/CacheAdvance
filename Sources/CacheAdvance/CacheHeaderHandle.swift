@@ -27,10 +27,18 @@ final class CacheHeaderHandle {
     ///   - file: The file URL indicating the desired location of the on-disk store. This file should already exist.
     ///   - maximumBytes: The maximum size of the cache, in bytes. Logs larger than this size will fail to append to the store.
     ///   - overwritesOldMessages: When `true`,  the cache encodes a pointer to the oldest message after the newest message marker.
-    init(forReadingFrom file: URL, maximumBytes: Bytes, overwritesOldMessages: Bool) throws {
+    ///   - version: The file's expected header version.
+    init(
+        forReadingFrom file: URL,
+        maximumBytes: Bytes,
+        overwritesOldMessages: Bool,
+        version: UInt8 = FileHeader.version)
+        throws
+    {
         handle = try FileHandle(forUpdating: file)
         self.maximumBytes = maximumBytes
         self.overwritesOldMessages = overwritesOldMessages
+        self.version = version
         offsetInFileOfOldestMessage = FileHeader.expectedEndOfHeaderInFile
         offsetInFileAtEndOfNewestMessage = FileHeader.expectedEndOfHeaderInFile
     }
@@ -69,7 +77,7 @@ final class CacheHeaderHandle {
         } else {
             guard
                 let headerVersion = UInt8(headerVersionData),
-                headerVersion == FileHeader.version
+                headerVersion == version
                 else
             {
                 // Our current file header version is 1.
@@ -119,6 +127,7 @@ final class CacheHeaderHandle {
     private let handle: FileHandle
     private let overwritesOldMessages: Bool
     private let maximumBytes: Bytes
+    private let version: UInt8
 
     /// Writes header data to the file and returns the info.
     private func writeHeaderData() throws {
@@ -127,6 +136,7 @@ final class CacheHeaderHandle {
 
         // Create the header.
         let header = FileHeader(
+            version: version,
             maximumBytes: maximumBytes,
             overwritesOldMessages: overwritesOldMessages,
             offsetInFileOfOldestMessage: offsetInFileOfOldestMessage,

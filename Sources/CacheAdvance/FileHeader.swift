@@ -19,13 +19,28 @@ import Foundation
 
 struct FileHeader {
 
+    init(
+        version: UInt8 = FileHeader.version,
+        maximumBytes: Bytes,
+        overwritesOldMessages: Bool,
+        offsetInFileOfOldestMessage: UInt64,
+        offsetInFileAtEndOfNewestMessage: UInt64)
+    {
+        self.version = version
+        self.maximumBytes = maximumBytes
+        self.overwritesOldMessages = overwritesOldMessages
+        self.offsetInFileOfOldestMessage = offsetInFileOfOldestMessage
+        self.offsetInFileAtEndOfNewestMessage = offsetInFileAtEndOfNewestMessage
+    }
+
+    let version: UInt8
     let maximumBytes: Bytes
     let overwritesOldMessages: Bool
     let offsetInFileOfOldestMessage: UInt64
     let offsetInFileAtEndOfNewestMessage: UInt64
 
     var asData: Data {
-        Data(FileHeader.version)
+        Data(version)
             + Data(maximumBytes)
             + Data(overwritesOldMessages)
             + Data(offsetInFileOfOldestMessage)
