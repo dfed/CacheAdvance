@@ -54,9 +54,7 @@ struct FileHeader {
     static let version: UInt8 = 1
 
     /// Calculates the offset in the file where the header should end.
-    static var expectedEndOfHeaderInFile: UInt64 {
-        Field.endOfHeaderMarker.expectedEndOfFieldInFile
-    }
+    static var expectedEndOfHeaderInFile = Field.endOfHeaderMarker.expectedEndOfFieldInFile
 
     func data(for field: Field) -> Data {
         switch field {
