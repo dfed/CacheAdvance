@@ -75,7 +75,7 @@ struct FileHeader {
     }
 
     /// The expected version of the header.
-    /// Whenever the format of the header changes, update this value.
+    /// Whenever there is a breaking change to the header format, update this value.
     static let version: UInt8 = 1
 
     /// Calculates the offset in the file where the header should end.
@@ -83,18 +83,20 @@ struct FileHeader {
 
     func data(for field: Field) -> Data {
         switch field {
-            case .version:
-                return Data(version)
-            case .maximumBytes:
-                return Data(maximumBytes)
-            case .overwriteOldMessages:
-                return Data(overwritesOldMessages)
-            case .offsetInFileOfOldestMessage:
-                return Data(offsetInFileOfOldestMessage)
-            case .offsetInFileAtEndOfNewestMessage:
-                return Data(offsetInFileAtEndOfNewestMessage)
-            case .endOfHeaderMarker:
-                return Data()
+        case .version:
+            return Data(version)
+        case .maximumBytes:
+            return Data(maximumBytes)
+        case .overwriteOldMessages:
+            return Data(overwritesOldMessages)
+        case .offsetInFileOfOldestMessage:
+            return Data(offsetInFileOfOldestMessage)
+        case .offsetInFileAtEndOfNewestMessage:
+            return Data(offsetInFileAtEndOfNewestMessage)
+        case .reservedSpace:
+            return Data(repeating: 0, count: field.storageLength)
+        case .endOfHeaderMarker:
+            return Data()
         }
     }
 
@@ -107,6 +109,7 @@ struct FileHeader {
         case overwriteOldMessages
         case offsetInFileOfOldestMessage
         case offsetInFileAtEndOfNewestMessage
+        case reservedSpace
         // This case must always be last.
         case endOfHeaderMarker
 
@@ -122,6 +125,11 @@ struct FileHeader {
                 return UInt64.storageLength
             case .offsetInFileAtEndOfNewestMessage:
                 return UInt64.storageLength
+            case .reservedSpace:
+                // Subtract from this value every time another additive field is added.
+                // We currently have a total of 64 bytes reserved for the header.
+                // We're only currently using 26 of them.
+                return 38
             case .endOfHeaderMarker:
                 return 0
             }
