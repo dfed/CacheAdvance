@@ -92,10 +92,10 @@ final class CacheHeaderHandle {
             let offsetInFileAtEndOfNewestMessageData = try handle.readDataUp(toLength: UInt64.storageLength)
 
             guard
-                let maximumBytes = Bytes(maximumBytesData),
-                maximumBytes == self.maximumBytes,
-                let overwritesOldMessages = Bool(overwritesOldMessagesData),
-                overwritesOldMessages == self.overwritesOldMessages,
+                let encodedMaximumBytes = Bytes(maximumBytesData),
+                encodedMaximumBytes == maximumBytes,
+                let encodedOverwritesOldMessages = Bool(overwritesOldMessagesData),
+                encodedOverwritesOldMessages == overwritesOldMessages,
                 let offsetInFileOfOldestMessage = UInt64(offsetInFileOfOldestMessageData),
                 let offsetInFileAtEndOfNewestMessage = UInt64(offsetInFileAtEndOfNewestMessageData)
                 else
