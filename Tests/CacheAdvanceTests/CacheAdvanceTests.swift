@@ -201,7 +201,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_append_canWriteMessagesToCacheCreatedByADifferentCache() throws {
         func createCache() throws -> CacheAdvance<TestableMessage> {
-            return try CacheAdvance<TestableMessage>(
+            try CacheAdvance<TestableMessage>(
             file: testFileLocation,
             maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) / 3,
             shouldOverwriteOldMessages: true)
@@ -219,7 +219,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_messages_canReadMessagesWrittenByADifferentCache() throws {
         func createCache() throws -> CacheAdvance<TestableMessage> {
-            return try CacheAdvance<TestableMessage>(
+            try CacheAdvance<TestableMessage>(
             file: testFileLocation,
             maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true),
             shouldOverwriteOldMessages: false)
@@ -235,7 +235,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_messages_canReadMessagesWrittenByADifferentOverwritingCache() throws {
         func createCache() throws -> CacheAdvance<TestableMessage> {
-            return try CacheAdvance<TestableMessage>(
+            try CacheAdvance<TestableMessage>(
             file: testFileLocation,
             maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) / 3,
             shouldOverwriteOldMessages: true)
