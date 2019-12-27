@@ -199,7 +199,41 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertEqual(Array(lorumIpsumMessages.dropFirst(lorumIpsumMessages.count - messages.count)), messages)
     }
 
+    func test_append_canWriteMessagesToCacheCreatedByADifferentCache() throws {
+        func createCache() throws -> CacheAdvance<TestableMessage> {
+            return try CacheAdvance<TestableMessage>(
+            file: testFileLocation,
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) / 3,
+            shouldOverwriteOldMessages: true)
+        }
+        let cache = try createCache()
+        for message in lorumIpsumMessages {
+            try cache.append(message: message)
+        }
+
+        let cachedMessages = try cache.messages()
+        let secondCache = try createCache()
+        try secondCache.append(message: "test")
+        XCTAssertEqual(cachedMessages + ["test"], try secondCache.messages())
+    }
+
     func test_messages_canReadMessagesWrittenByADifferentCache() throws {
+        func createCache() throws -> CacheAdvance<TestableMessage> {
+            return try CacheAdvance<TestableMessage>(
+            file: testFileLocation,
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true),
+            shouldOverwriteOldMessages: false)
+        }
+        let cache = try createCache()
+        for message in lorumIpsumMessages {
+            try cache.append(message: message)
+        }
+
+        let secondCache = try createCache()
+        XCTAssertEqual(try cache.messages(), try secondCache.messages())
+    }
+
+    func test_messages_canReadMessagesWrittenByADifferentOverwritingCache() throws {
         func createCache() throws -> CacheAdvance<TestableMessage> {
             return try CacheAdvance<TestableMessage>(
             file: testFileLocation,
@@ -424,11 +458,13 @@ final class CacheAdvanceTests: XCTestCase {
 
     private func requiredByteCount<T: Codable>(for messages: [T], cacheWillOverwriteOldestMessages: Bool) throws -> UInt64 {
         let encoder = JSONEncoder()
-        let messageSpanSuffixLength = cacheWillOverwriteOldestMessages ? Bytes(MessageSpan.storageLength + Bytes.storageLength) : Bytes(MessageSpan.storageLength)
-        return try messageSpanSuffixLength + messages.reduce(0) { allocatedSize, message in
-            let encodableMessage = EncodableMessage(message: message, encoder: encoder)
-            let data = try encodableMessage.encodedData()
-            return allocatedSize + UInt64(data.count)
+        let messageSpanSuffixLength = Bytes(MessageSpan.storageLength)
+        return try FileHeader.expectedEndOfHeaderInFile
+            + messageSpanSuffixLength
+            + messages.reduce(0) { allocatedSize, message in
+                let encodableMessage = EncodableMessage(message: message, encoder: encoder)
+                let data = try encodableMessage.encodedData()
+                return allocatedSize + UInt64(data.count)
         }
     }
 

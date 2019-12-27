@@ -30,8 +30,8 @@ public final class CacheAdvance<T: Codable> {
     ///   - maximumBytes: The maximum size of the cache, in bytes. Logs larger than this size will fail to append to the store.
     ///   - shouldOverwriteOldMessages: When `true`, once the on-disk store exceeds maximumBytes, new entries will replace the oldest entry.
     ///
-    /// - Warning: `maximumBytes` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache leads to undefined behavior.
-    /// - Warning: `shouldOverwriteOldMessages` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache leads to undefined behavior.
+    /// - Warning: `maximumBytes` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache will lead to data loss.
+    /// - Warning: `shouldOverwriteOldMessages` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache will lead to data loss.
     public init(
         file: URL,
         maximumBytes: Bytes,
@@ -43,22 +43,15 @@ public final class CacheAdvance<T: Codable> {
         self.shouldOverwriteOldMessages = shouldOverwriteOldMessages
 
         writer = try FileHandle(forWritingTo: file)
-        reader = try FileHandle(forReadingFrom: file)
+        reader = try CacheReader(forReadingFrom: file, overwriteOldMessages: shouldOverwriteOldMessages)
+        header = try CacheHeaderHandle(forReadingFrom: file, maximumBytes: maximumBytes, overwritesOldMessages: shouldOverwriteOldMessages)
 
-        lengthOfMessageSuffix = {
-            if shouldOverwriteOldMessages {
-                /// The message suffix requires space for both `endOfNewestMessageMarker` and `offsetOfOldestMessage` after each message when rolling is enabled.
-                return Bytes(MessageSpan.endOfNewestMessageMarker.count) + Bytes(Bytes.storageLength)
-            } else {
-                /// The message suffix requires space for `endOfNewestMessageMarker` after each message.
-                return Bytes(MessageSpan.endOfNewestMessageMarker.count)
-            }
-        }()
+        /// The message suffix requires space for `endOfNewestMessageMarker` after each message.
+        lengthOfMessageSuffix = Bytes(MessageSpan.endOfNewestMessageMarker.count)
     }
 
     deinit {
         try? writer.closeHandle()
-        try? reader.closeHandle()
     }
 
     // MARK: Public
@@ -66,7 +59,7 @@ public final class CacheAdvance<T: Codable> {
     public let file: URL
 
     /// Appends a message to the cache.
-    /// - Parameter message: A message to write to disk. Must be smaller than both `maximumBytes` and `MessageSpan.max`.
+    /// - Parameter message: A message to write to disk. Must be smaller than both `maximumBytes - FileHeader.expectedEndOfHeaderInFile` and `MessageSpan.max`.
     public func append(message: T) throws {
         try setUpFileHandlesIfNecessary()
 
@@ -82,7 +75,7 @@ public final class CacheAdvance<T: Codable> {
         }
 
         let bytesNeededToStoreMessage = messageLength + lengthOfMessageSuffix
-        guard bytesNeededToStoreMessage <= maximumBytes && bytesNeededToStoreMessage < Bytes(MessageSpan.max) else {
+        guard bytesNeededToStoreMessage <= maximumBytes - FileHeader.expectedEndOfHeaderInFile && bytesNeededToStoreMessage < Bytes(MessageSpan.max) else {
             // The message is too long to be written to a cache of this size.
             throw CacheAdvanceWriteError.messageDataTooLarge
         }
@@ -97,27 +90,39 @@ public final class CacheAdvance<T: Codable> {
                 try writer.truncate(at: writer.offsetInFile)
 
                 // Set the offset back to the beginning of the file.
-                try writer.seek(to: 0)
+                try writer.seek(to: FileHeader.expectedEndOfHeaderInFile)
 
                 // We know the oldest message is at the beginning of the file, since we just tossed out the rest of the file.
-                try reader.seek(to: 0)
+                reader.offsetInFileOfOldestMessage = FileHeader.expectedEndOfHeaderInFile
+                try reader.seekToBeginningOfOldestMessage()
 
                 // We know we're about to overwrite the oldest message, so advance the reader to the second oldest message.
-                try reader.seekToNextMessage(shouldSeekToOldestMessageIfFound: false, cacheOverwritesOldMessages: true)
+                try reader.seekToNextMessage()
             }
 
             // Prepare the reader before writing the message.
             try prepareReaderForWriting(dataOfLength: bytesNeededToStoreMessage)
 
             // Create the marker for the offset representing the beginning of the message that will be the oldest once our write is done.
-            let offsetInFileOfOldestMessage = Data(Bytes(reader.offsetInFile))
+            let offsetInFileOfOldestMessage = Bytes(reader.offsetInFile)
 
-            // Write the message and oldest message offset.
-            try write(messageData: messageData, offsetInFileOfOldestMessage: offsetInFileOfOldestMessage)
+            // Update the offsetInFileOfOldestMessage in our header before we write the message.
+            // If the application crashes between writing the header and writing the message data, we'll have lost the messages between the previous offsetInFileOfOldestMessage and the new offsetInFileOfOldestMessage.
+            try header.updateOffsetInFileOfOldestMessage(to: offsetInFileOfOldestMessage)
+
+            // Write the message.
+            try write(messageData: messageData)
+
+            // Let the reader know where the oldest message begins.
+            reader.offsetInFileOfOldestMessage = offsetInFileOfOldestMessage
+
+            // Update the offsetInFileAtEndOfNewestMessage in our header now that we've written the message.
+            // If the application crashes between writing the message data and writing the header, we'll have lost the most recent message.
+            try header.updateOffsetInFileAtEndOfNewestMessage(to: writer.offsetInFile)
 
         } else if cacheHasSpaceForNewMessageBeforeEndOfFile {
             // Write the message.
-            try write(messageData: messageData, offsetInFileOfOldestMessage: nil)
+            try write(messageData: messageData)
 
         } else {
             // We're out of room.
@@ -130,7 +135,7 @@ public final class CacheAdvance<T: Codable> {
         try setUpFileHandlesIfNecessary()
 
         var messages = [T]()
-        while let encodedMessage = try reader.nextEncodedMessage(cacheOverwritesOldMessages: shouldOverwriteOldMessages) {
+        while let encodedMessage = try reader.nextEncodedMessage() {
             messages.append(try decoder.decode(T.self, from: encodedMessage))
         }
 
@@ -146,13 +151,18 @@ public final class CacheAdvance<T: Codable> {
             return
         }
 
-        // This is our first cache action.
-        // We need to find out where we should write our next message.
-        try reader.seekToEndOfNewestMessage(cacheOverwritesOldMessages: shouldOverwriteOldMessages)
-        try writer.seek(to: reader.offsetInFile)
+        // Read our header data.
+        try header.readHeaderData()
 
-        // Now that we know where to write, we need to figure out where the oldest message is.
-        try reader.seekToBeginningOfOldestMessage(cacheOverwritesOldMessages: shouldOverwriteOldMessages)
+        // Update the reader to know where the oldest message begins.
+        reader.offsetInFileOfOldestMessage = header.offsetInFileOfOldestMessage
+
+        // This is our first cache action.
+        // Seek our writer to where we should write our next message.
+        try writer.seek(to: header.offsetInFileAtEndOfNewestMessage)
+
+        // Seek our reader to the oldest message.
+        try reader.seekToBeginningOfOldestMessage()
 
         hasSetUpFileHandles = true
     }
@@ -166,37 +176,28 @@ public final class CacheAdvance<T: Codable> {
         {
             // The current position of the writer is before the oldest message, which means that writing this message would write into the current message.
             // Advance to the next message.
-            try reader.seekToNextMessage(shouldSeekToOldestMessageIfFound: true, cacheOverwritesOldMessages: true)
+            try reader.seekToNextMessage()
         }
     }
 
     /// Writes message data to the cache.
     ///
     /// The message data  is written in the following format:
-    /// `[messageData][endOfNewestMessageMarker][offsetInFileOfOldestMessage]`
+    /// `[messageData][endOfNewestMessageMarker]`
     ///
     /// - `messageData` is an `EncodableMessage`'s encoded data.
     /// - `endOfNewestMessageMarker` is a big-endian encoded `MessageSpan` of length `messageSpanStorageLength`.
-    /// - `offsetInFileOfOldestMessage` is a big-endian encoded `Bytes` of length `bytesStorageLength`.
     ///
     /// By the time this method returns, the `writer`'s `offsetInFile` is always set to the beginning of the written `endOfNewestMessageMarker`, such that the next message written will overwrite the marker.
     ///
     /// - Parameters:
     ///   - messageData: an `EncodableMessage`'s encoded data.
-    ///   - offsetInFileOfOldestMessage: An optional big-endian representation of the offset in the file where the oldest message begins.
-    ///                                  This data is should only be included in caches that overwrite their oldest messages.
-    private func write(messageData: Data, offsetInFileOfOldestMessage: Data?) throws {
-        // Create data to write from combined message and suffix.
-        var dataToWrite = messageData + MessageSpan.endOfNewestMessageMarker
-        if let offsetInFileOfOldestMessage = offsetInFileOfOldestMessage {
-            dataToWrite += offsetInFileOfOldestMessage
-        }
-
+    private func write(messageData: Data) throws {
         // Calculate where the message ends so we can seek back to it later.
         let endOfMessageOffset = writer.offsetInFile + Bytes(messageData.count)
 
-        // Write the complete messge data atomically.
-        try writer.write(data: dataToWrite)
+        // Write the complete message data.
+        try writer.write(data: messageData + MessageSpan.endOfNewestMessageMarker)
 
         // Seek the file handle's offset back to the end of the message we just wrote.
         // This way the next time we write a message, we'll overwrite the last message marker.
@@ -204,7 +205,8 @@ public final class CacheAdvance<T: Codable> {
     }
 
     private let writer: FileHandle
-    private let reader: FileHandle
+    private let reader: CacheReader
+    private let header: CacheHeaderHandle
 
     private var hasSetUpFileHandles = false
     private let shouldOverwriteOldMessages: Bool
