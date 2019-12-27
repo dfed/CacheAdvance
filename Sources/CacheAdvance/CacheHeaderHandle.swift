@@ -130,7 +130,7 @@ final class CacheHeaderHandle {
     private let maximumBytes: Bytes
     private let version: UInt8
 
-    /// Writes header data to the file and returns the info.
+    /// Writes header data to the file.
     private func writeHeaderData() throws {
         // Seek to the beginning of the file before writing the header.
         try handle.seek(to: 0)
