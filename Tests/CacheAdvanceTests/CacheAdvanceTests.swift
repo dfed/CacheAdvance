@@ -203,7 +203,7 @@ final class CacheAdvanceTests: XCTestCase {
         func createCache() throws -> CacheAdvance<TestableMessage> {
             try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) + 500,
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: false) + 500,
             shouldOverwriteOldMessages: false)
         }
         let cache = try createCache()
