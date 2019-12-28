@@ -104,7 +104,7 @@ public final class CacheAdvance<T: Codable> {
             try prepareReaderForWriting(dataOfLength: bytesNeededToStoreMessage)
 
             // Create the marker for the offset representing the beginning of the message that will be the oldest once our write is done.
-            let offsetInFileOfOldestMessage = Bytes(reader.offsetInFile)
+            let offsetInFileOfOldestMessage = UInt64(reader.offsetInFile)
 
             // Update the offsetInFileOfOldestMessage in our header before we write the message.
             // If the application crashes between writing the header and writing the message data, we'll have lost the messages between the previous offsetInFileOfOldestMessage and the new offsetInFileOfOldestMessage.
@@ -198,7 +198,7 @@ public final class CacheAdvance<T: Codable> {
     ///   - messageData: an `EncodableMessage`'s encoded data.
     private func write(messageData: Data) throws {
         // Calculate where the message ends so we can seek back to it later.
-        let endOfMessageOffset = writer.offsetInFile + Bytes(messageData.count)
+        let endOfMessageOffset = writer.offsetInFile + UInt64(messageData.count)
 
         // Write the complete message data.
         try writer.write(data: messageData + MessageSpan.endOfNewestMessageMarker)
