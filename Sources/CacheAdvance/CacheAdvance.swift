@@ -116,17 +116,9 @@ public final class CacheAdvance<T: Codable> {
             // Let the reader know where the oldest message begins.
             reader.offsetInFileOfOldestMessage = offsetInFileOfOldestMessage
 
-            // Update the offsetInFileAtEndOfNewestMessage in our header now that we've written the message.
-            // If the application crashes between writing the message data and writing the header, we'll have lost the most recent message.
-            try header.updateOffsetInFileAtEndOfNewestMessage(to: writer.offsetInFile)
-
         } else if cacheHasSpaceForNewMessageBeforeEndOfFile {
             // Write the message.
             try write(messageData: messageData)
-
-            // Update the offsetInFileAtEndOfNewestMessage in our header now that we've written the message.
-            // If the application crashes between writing the message data and writing the header, we'll have lost the most recent message.
-            try header.updateOffsetInFileAtEndOfNewestMessage(to: writer.offsetInFile)
 
         } else {
             // We're out of room.
@@ -206,6 +198,10 @@ public final class CacheAdvance<T: Codable> {
         // Seek the file handle's offset back to the end of the message we just wrote.
         // This way the next time we write a message, we'll overwrite the last message marker.
         try writer.seek(to: endOfMessageOffset)
+
+        // Update the offsetInFileAtEndOfNewestMessage in our header now that we've written the message.
+        // If the application crashes between writing the message data and writing the header, we'll have lost the most recent message.
+        try header.updateOffsetInFileAtEndOfNewestMessage(to: writer.offsetInFile)
     }
 
     private let writer: FileHandle
