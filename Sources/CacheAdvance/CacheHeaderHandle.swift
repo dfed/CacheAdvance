@@ -82,7 +82,7 @@ final class CacheHeaderHandle {
         let headerData = try handle.readDataUp(toLength: Int(FileHeader.expectedEndOfHeaderInFile))
 
         if headerData.isEmpty {
-            // There is no header. Create a header to write to disk.
+            // There is no header. Write one to disk.
             try writeHeaderData()
 
         } else {
