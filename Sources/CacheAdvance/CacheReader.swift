@@ -122,16 +122,12 @@ final class CacheReader {
             return .endOfNewestMessageMarker
         }
 
-        guard
-            messageSizeData.count == MessageSpan.storageLength,
-            let messageSize = MessageSpan(safe: messageSizeData)
-            else
-        {
+        guard messageSizeData.count == MessageSpan.storageLength else {
             // The file is improperly formatted.
             return .invalidFormat
         }
 
-        return .span(messageSize)
+        return .span(MessageSpan(messageSizeData))
     }
 
     // MARK: Private
