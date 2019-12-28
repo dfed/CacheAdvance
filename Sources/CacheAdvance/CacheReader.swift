@@ -38,6 +38,7 @@ final class CacheReader {
     // MARK: Internal
 
     var offsetInFileOfOldestMessage: UInt64 = 0
+    var offsetInFileAtEndOfNewestMessage: UInt64 = 0
 
     var offsetInFile: UInt64 {
         reader.offsetInFile
@@ -110,16 +111,16 @@ final class CacheReader {
 
     /// Returns the next encoded message span, seeking to the end the span.
     private func nextEncodedMessageSpan() throws -> NextMessageSpan {
+        guard reader.offsetInFile != offsetInFileAtEndOfNewestMessage else {
+            // We have reached the most recently written message.
+            return .endOfNewestMessageMarker
+        }
+
         let messageSizeData = try reader.readDataUp(toLength: MessageSpan.storageLength)
 
         guard messageSizeData.count > 0 else {
             // We haven't written anything to this file yet, or we've reached the end of the file.
             return .emptyRead
-        }
-
-        guard messageSizeData != MessageSpan.endOfNewestMessageMarker else {
-            // We have reached the most recently written message.
-            return .endOfNewestMessageMarker
         }
 
         guard messageSizeData.count == MessageSpan.storageLength else {

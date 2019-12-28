@@ -476,9 +476,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     private func requiredByteCount<T: Codable>(for messages: [T], cacheWillOverwriteOldestMessages: Bool) throws -> UInt64 {
         let encoder = JSONEncoder()
-        let messageSpanSuffixLength = Bytes(MessageSpan.storageLength)
         return try FileHeader.expectedEndOfHeaderInFile
-            + messageSpanSuffixLength
             + messages.reduce(0) { allocatedSize, message in
                 let encodableMessage = EncodableMessage(message: message, encoder: encoder)
                 let data = try encodableMessage.encodedData()
