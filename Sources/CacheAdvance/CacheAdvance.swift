@@ -125,6 +125,9 @@ public final class CacheAdvance<T: Codable> {
             messages.append(try decoder.decode(T.self, from: encodedMessage))
         }
 
+        // Now that we've read all messages, seek back to the oldest message.
+        try reader.seekToBeginningOfOldestMessage()
+
         return messages
     }
 

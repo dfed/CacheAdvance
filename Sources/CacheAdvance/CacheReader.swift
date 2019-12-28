@@ -49,9 +49,7 @@ final class CacheReader {
         let startingOffset = offsetInFile
 
         guard startingOffset != offsetInFileAtEndOfNewestMessage else {
-            // Seek to the oldest message.
-            try reader.seek(to: offsetInFileOfOldestMessage)
-            // The next message is now the oldest.
+            // We're at the last message.
             return nil
         }
 
