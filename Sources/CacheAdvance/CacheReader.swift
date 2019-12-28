@@ -65,17 +65,11 @@ final class CacheReader {
             return message
 
         case .emptyRead:
-            // We've encountered an empty read rather than a marker for the end of a newest message.
-            // This means we're in a cache that doesn't overwrite old messages. We know the next
-            // message is at the end of the file header. Let's seek to it.
+            // We know the next message is at the end of the file header. Let's seek to it.
             try reader.seek(to: FileHeader.expectedEndOfHeaderInFile)
 
-            if startingOffset != FileHeader.expectedEndOfHeaderInFile {
-                // We hit an empty read at the end of the file.
-                // We know there's a message to read now that we're at the start of the file.
-                return try nextEncodedMessage()
-            }
-            return nil
+            // We know there's a message to read now that we're at the start of the file.
+            return try nextEncodedMessage()
 
         case .invalidFormat:
             throw CacheAdvanceReadError.fileCorrupted
@@ -92,16 +86,13 @@ final class CacheReader {
     @discardableResult
     func seekToNextMessage() throws -> Bool {
         switch try nextEncodedMessageSpan() {
-        case .emptyRead:
-            // The remaining file is empty, or we've hit the end of our messages.
-            // The next message is at the beginning of the file.
-            try reader.seek(to: FileHeader.expectedEndOfHeaderInFile)
-            return false
-
         case let .span(messageLength):
             // There's a valid message here. Seek ahead of it.
             try reader.seek(to: offsetInFile + UInt64(messageLength))
             return true
+
+        case .emptyRead:
+            return false
 
         case .invalidFormat:
             throw CacheAdvanceReadError.fileCorrupted
