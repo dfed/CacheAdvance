@@ -80,7 +80,7 @@ final class CacheReader {
     }
 
     /// Seeks to the next message. Returns `true` when the span skipped represented a message.
-    /// When `false` is returned, it signifies that the last message marker was passed.
+    /// When `false` is returned, it signifies that an empty read occurred.
     @discardableResult
     func seekToNextMessage() throws -> Bool {
         switch try nextEncodedMessageSpan() {
@@ -90,6 +90,8 @@ final class CacheReader {
             return true
 
         case .emptyRead:
+            // We hit an empty read. Seek to the next message.
+            try reader.seek(to: FileHeader.expectedEndOfHeaderInFile)
             return false
 
         case .invalidFormat:
