@@ -48,6 +48,13 @@ final class FileHeaderTests: XCTestCase {
         XCTAssertEqual(fileHeader.offsetInFileAtEndOfNewestMessage, fileHeaderFromData?.offsetInFileAtEndOfNewestMessage)
     }
 
+    func test_expectedEndOfHeaderInFile_hasCorrectLengthForHeaderVersion1() {
+        XCTAssertEqual(
+            FileHeader.expectedEndOfHeaderInFile,
+            64,
+            "Header length has changed from expected 64 bytes for header version 1. This represents a breaking change.")
+    }
+
     // MARK: Private
 
     private func createFileHeader(
