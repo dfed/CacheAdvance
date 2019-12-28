@@ -130,8 +130,6 @@ final class CacheReader {
         return .span(MessageSpan(messageSizeData))
     }
 
-    // MARK: Private
-
     private let reader: FileHandle
     private let overwriteOldMessages: Bool
 
