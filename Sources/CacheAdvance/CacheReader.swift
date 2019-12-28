@@ -47,6 +47,14 @@ final class CacheReader {
     /// Returns the next encodable message, seeking to the beginning of the next message.
     func nextEncodedMessage() throws -> Data? {
         let startingOffset = offsetInFile
+
+        guard startingOffset != offsetInFileAtEndOfNewestMessage else {
+            // Seek to the oldest message.
+            try reader.seek(to: offsetInFileOfOldestMessage)
+            // The next message is now the oldest.
+            return nil
+        }
+
         switch try nextEncodedMessageSpan() {
         case let .span(messageLength):
             let message = try reader.readDataUp(toLength: Int(messageLength))
@@ -55,12 +63,6 @@ final class CacheReader {
             }
 
             return message
-
-        case .endOfNewestMessageMarker:
-            // Seek to the oldest message.
-            try reader.seek(to: offsetInFileOfOldestMessage)
-            // The next message is now the oldest.
-            return nil
 
         case .emptyRead:
             // We've encountered an empty read rather than a marker for the end of a newest message.
@@ -90,8 +92,7 @@ final class CacheReader {
     @discardableResult
     func seekToNextMessage() throws -> Bool {
         switch try nextEncodedMessageSpan() {
-        case .endOfNewestMessageMarker,
-             .emptyRead:
+        case .emptyRead:
             // The remaining file is empty, or we've hit the end of our messages.
             // The next message is at the beginning of the file.
             try reader.seek(to: FileHeader.expectedEndOfHeaderInFile)
@@ -111,11 +112,6 @@ final class CacheReader {
 
     /// Returns the next encoded message span, seeking to the end the span.
     private func nextEncodedMessageSpan() throws -> NextMessageSpan {
-        guard reader.offsetInFile != offsetInFileAtEndOfNewestMessage else {
-            // We have reached the most recently written message.
-            return .endOfNewestMessageMarker
-        }
-
         let messageSizeData = try reader.readDataUp(toLength: MessageSpan.storageLength)
 
         guard messageSizeData.count > 0 else {
@@ -139,6 +135,5 @@ final class CacheReader {
 private enum NextMessageSpan {
     case span(MessageSpan)
     case emptyRead
-    case endOfNewestMessageMarker
     case invalidFormat
 }
