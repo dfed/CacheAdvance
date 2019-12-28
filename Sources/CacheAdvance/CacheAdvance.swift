@@ -100,11 +100,11 @@ public final class CacheAdvance<T: Codable> {
             // If the application crashes between writing the header and writing the message data, we'll have lost the messages between the previous offsetInFileOfOldestMessage and the new offsetInFileOfOldestMessage.
             try header.updateOffsetInFileOfOldestMessage(to: offsetInFileOfOldestMessage)
 
-            // Write the message.
-            try write(messageData: messageData)
-
             // Let the reader know where the oldest message begins.
             reader.offsetInFileOfOldestMessage = offsetInFileOfOldestMessage
+
+            // Write the message.
+            try write(messageData: messageData)
 
         } else if cacheHasSpaceForNewMessageBeforeEndOfFile {
             // Write the message.
