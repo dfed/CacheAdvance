@@ -189,7 +189,7 @@ final class CacheAdvanceTests: XCTestCase {
     func test_append_dropsOldMessagesAsNecessary() throws {
         let cache = try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) / 3,
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) / 4,
             shouldOverwriteOldMessages: true)
         for message in lorumIpsumMessages {
             try cache.append(message: message)
@@ -221,7 +221,7 @@ final class CacheAdvanceTests: XCTestCase {
         func createCache() throws -> CacheAdvance<TestableMessage> {
             try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) / 3,
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) / 5 + 500,
             shouldOverwriteOldMessages: true)
         }
         let cache = try createCache()
@@ -239,7 +239,7 @@ final class CacheAdvanceTests: XCTestCase {
         func createCache() throws -> CacheAdvance<TestableMessage> {
             try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) / 3,
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) / 6 + 500,
             shouldOverwriteOldMessages: true)
         }
         let cache = try createCache()
@@ -272,7 +272,7 @@ final class CacheAdvanceTests: XCTestCase {
         func createCache() throws -> CacheAdvance<TestableMessage> {
             try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) / 3,
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) / 7,
             shouldOverwriteOldMessages: true)
         }
         let cache = try createCache()
