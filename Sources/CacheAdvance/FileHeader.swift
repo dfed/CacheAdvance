@@ -79,7 +79,7 @@ struct FileHeader {
     static let version: UInt8 = 1
 
     /// Calculates the offset in the file where the header should end.
-    static var expectedEndOfHeaderInFile = Field.endOfHeaderMarker.expectedEndOfFieldInFile
+    static var expectedEndOfHeaderInFile = Field(rawValue: Field.allCases.endIndex)!.expectedEndOfFieldInFile
 
     func data(for field: Field) -> Data {
         switch field {
@@ -95,8 +95,6 @@ struct FileHeader {
             return Data(offsetInFileAtEndOfNewestMessage)
         case .reservedSpace:
             return Data(repeating: 0, count: field.storageLength)
-        case .endOfHeaderMarker:
-            return Data()
         }
     }
 
@@ -104,14 +102,12 @@ struct FileHeader {
         // Header format:
         // [headerVersion:UInt8][maximumBytes:UInt64][overwritesOldMessages:Bool][offsetInFileOfOldestMessage:UInt64][offsetInFileAtEndOfNewestMessage:UInt64][reservedSpace]
 
-        case version = 0
+        case version = 1
         case maximumBytes
         case overwriteOldMessages
         case offsetInFileOfOldestMessage
         case offsetInFileAtEndOfNewestMessage
         case reservedSpace
-        // This case must always be last.
-        case endOfHeaderMarker
 
         var storageLength: Int {
             switch self {
@@ -130,8 +126,6 @@ struct FileHeader {
                 // We currently have a total of 64 bytes reserved for the header.
                 // We're currently using only 26 of them.
                 return 38
-            case .endOfHeaderMarker:
-                return 0
             }
         }
 
@@ -142,7 +136,7 @@ struct FileHeader {
             expectedEndOfFieldInFile - UInt64(storageLength)
         }
         var expectedEndOfFieldInFile: UInt64 {
-            Field.allCases.dropLast(Field.allCases.count - rawValue - 1).reduce(0) { totalOffset, currentField in
+            Field.allCases.dropLast(Field.allCases.count - rawValue).reduce(0) { totalOffset, currentField in
                 totalOffset + UInt64(currentField.storageLength)
             }
         }
