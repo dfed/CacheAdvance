@@ -160,7 +160,7 @@ final class CacheAdvanceTests: XCTestCase {
         }
 
         let messages = try cache.messages()
-        XCTAssertEqual(Array(Self.lorumIpsumMessages.dropFirst(Self.lorumIpsumMessages.count - messages.count)), messages)
+        XCTAssertEqual(expectedMessagesInOverwritingCache(givenOriginal: Self.lorumIpsumMessages, newMessageCount: messages.count), messages)
     }
 
     func test_append_canWriteMessagesToCacheCreatedByADifferentCache() throws {
@@ -176,26 +176,35 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_append_canWriteMessagesToCacheCreatedByADifferentOverridingCache() throws {
-        let cache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: 5.5)
-        for message in Self.lorumIpsumMessages.dropLast() {
-            try cache.append(message: message)
-        }
+        for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
+            let cache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: maximumByteDivisor)
+            for message in Self.lorumIpsumMessages.dropLast() {
+                try cache.append(message: message)
+            }
 
-        let cachedMessages = try cache.messages()
-        let secondCache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: 5.5)
-        try secondCache.append(message: Self.lorumIpsumMessages.last!)
-        XCTAssertEqual(cachedMessages + [Self.lorumIpsumMessages.last!], try secondCache.messages())
+            let cachedMessages = try cache.messages()
+
+            let secondCache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: maximumByteDivisor)
+            try secondCache.append(message: Self.lorumIpsumMessages.last!)
+            let secondCacheMessages = try secondCache.messages()
+
+            XCTAssertEqual(expectedMessagesInOverwritingCache(givenOriginal: cachedMessages + [Self.lorumIpsumMessages.last!], newMessageCount: secondCacheMessages.count), secondCacheMessages)
+        }
     }
 
     func test_append_canWriteMessagesAfterRetrievingMessages() throws {
-        let cache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: 6.5)
-        for message in Self.lorumIpsumMessages.dropLast() {
-            try cache.append(message: message)
-        }
+        for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
+            let cache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: maximumByteDivisor)
+            for message in Self.lorumIpsumMessages.dropLast() {
+                try cache.append(message: message)
+            }
 
-        let cachedMessages = try cache.messages()
-        try cache.append(message: Self.lorumIpsumMessages.last!)
-        XCTAssertEqual(cachedMessages + [Self.lorumIpsumMessages.last!], try cache.messages())
+            let cachedMessages = try cache.messages()
+            try cache.append(message: Self.lorumIpsumMessages.last!)
+
+            let cachedMessagesAfterAppend = try cache.messages()
+            XCTAssertEqual(expectedMessagesInOverwritingCache(givenOriginal: cachedMessages + [Self.lorumIpsumMessages.last!], newMessageCount: cachedMessagesAfterAppend.count), cachedMessagesAfterAppend)
+        }
     }
 
     func test_messages_canReadMessagesWrittenByADifferentCache() throws {
@@ -209,13 +218,15 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_messages_canReadMessagesWrittenByADifferentOverwritingCache() throws {
-        let cache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: 7)
-        for message in Self.lorumIpsumMessages {
-            try cache.append(message: message)
-        }
+        for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
+            let cache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: maximumByteDivisor)
+            for message in Self.lorumIpsumMessages {
+                try cache.append(message: message)
+            }
 
-        let secondCache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: 7)
-        XCTAssertEqual(try cache.messages(), try secondCache.messages())
+            let secondCache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: maximumByteDivisor)
+            XCTAssertEqual(try cache.messages(), try secondCache.messages())
+        }
     }
 
     private static let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("CacheAdvanceTests")
@@ -448,6 +459,14 @@ final class CacheAdvanceTests: XCTestCase {
             file: file,
             maximumBytes: Bytes(Double(try requiredByteCount(for: messages)) / maximumByteDivisor) - maximumByteSubtractor,
             shouldOverwriteOldMessages: shouldOverwriteOldMessages)
+    }
+
+    private func expectedMessagesInOverwritingCache(
+        givenOriginal messages: [TestableMessage],
+        newMessageCount: Int)
+        -> [TestableMessage]
+    {
+        Array(messages.dropFirst(messages.count - newMessageCount))
     }
 
 }
