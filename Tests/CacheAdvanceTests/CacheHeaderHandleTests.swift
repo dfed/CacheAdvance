@@ -45,8 +45,8 @@ final class CacheHeaderHandleTests: XCTestCase {
         let headerHandle2 = try createHeaderHandle(version: 2)
         try headerHandle2.synchronizeHeaderData()
 
-        XCTAssertEqual(headerHandle2.offsetInFileAtEndOfNewestMessage, headerHandle1.offsetInFileAtEndOfNewestMessage)
-        XCTAssertEqual(headerHandle2.offsetInFileOfOldestMessage, headerHandle1.offsetInFileOfOldestMessage)
+        XCTAssertEqual(headerHandle2.offsetInFileAtEndOfNewestMessage, 1000)
+        XCTAssertEqual(headerHandle2.offsetInFileOfOldestMessage, 2000)
     }
 
     func test_synchronizeHeaderData_returnsDefaultVersionWhenUnexpectedVersionIsOnDisk() throws {
