@@ -67,7 +67,7 @@ public final class CacheAdvance<T: Codable> {
         let bytesNeededToStoreMessage = messageLength
         guard bytesNeededToStoreMessage <= maximumBytes - FileHeader.expectedEndOfHeaderInFile && bytesNeededToStoreMessage < Bytes(MessageSpan.max) else {
             // The message is too long to be written to a cache of this size.
-            throw CacheAdvanceWriteError.messageDataTooLarge
+            throw CacheAdvanceError.messageDataTooLarge
         }
 
         let cacheHasSpaceForNewMessageBeforeEndOfFile = writer.offsetInFile + bytesNeededToStoreMessage <= maximumBytes
@@ -112,7 +112,7 @@ public final class CacheAdvance<T: Codable> {
 
         } else {
             // We're out of room.
-            throw CacheAdvanceWriteError.messageDataTooLarge
+            throw CacheAdvanceError.messageDataTooLarge
         }
     }
 

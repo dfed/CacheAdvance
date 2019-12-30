@@ -57,7 +57,7 @@ final class CacheReader {
         case let .span(messageLength):
             let message = try reader.readDataUp(toLength: Int(messageLength))
             guard message.count > 0 else {
-                throw CacheAdvanceReadError.fileCorrupted
+                throw CacheAdvanceError.fileCorrupted
             }
 
             return message
@@ -70,7 +70,7 @@ final class CacheReader {
             return try nextEncodedMessage()
 
         case .invalidFormat:
-            throw CacheAdvanceReadError.fileCorrupted
+            throw CacheAdvanceError.fileCorrupted
         }
     }
 
@@ -95,7 +95,7 @@ final class CacheReader {
             return false
 
         case .invalidFormat:
-            throw CacheAdvanceReadError.fileCorrupted
+            throw CacheAdvanceError.fileCorrupted
         }
     }
 
