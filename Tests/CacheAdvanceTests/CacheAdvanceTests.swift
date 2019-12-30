@@ -154,13 +154,15 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_append_dropsOldMessagesAsNecessary() throws {
-        let cache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: 4)
-        for message in Self.lorumIpsumMessages {
-            try cache.append(message: message)
-        }
+        for maximumByteDivisor in stride(from: 1, to: 20, by: 0.1) {
+            let cache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: maximumByteDivisor)
+            for message in Self.lorumIpsumMessages {
+                try cache.append(message: message)
+            }
 
-        let messages = try cache.messages()
-        XCTAssertEqual(expectedMessagesInOverwritingCache(givenOriginal: Self.lorumIpsumMessages, newMessageCount: messages.count), messages)
+            let messages = try cache.messages()
+            XCTAssertEqual(expectedMessagesInOverwritingCache(givenOriginal: Self.lorumIpsumMessages, newMessageCount: messages.count), messages)
+        }
     }
 
     func test_append_canWriteMessagesToCacheCreatedByADifferentCache() throws {
