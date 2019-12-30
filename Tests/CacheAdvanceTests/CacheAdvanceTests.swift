@@ -22,18 +22,6 @@ import XCTest
 
 final class CacheAdvanceTests: XCTestCase {
 
-    // MARK: XCTestCase
-
-    override func setUp() {
-        super.setUp()
-        FileManager.default.createFile(atPath: Self.testFileLocation.path, contents: nil, attributes: nil)
-    }
-
-    override func tearDown() {
-        super.tearDown()
-        try? FileManager.default.removeItem(at: Self.testFileLocation)
-    }
-
     // MARK: Behavior Tests
 
     func test_messages_canReadEmptyCacheThatDoesNotOverwriteOldestMessages() throws {
@@ -172,7 +160,7 @@ final class CacheAdvanceTests: XCTestCase {
         }
 
         let cachedMessages = try cache.messages()
-        let secondCache = try createCache()
+        let secondCache = try createCache(zeroOutExistingFile: false)
         try secondCache.append(message: Self.lorumIpsumMessages.last!)
         XCTAssertEqual(cachedMessages + [Self.lorumIpsumMessages.last!], try secondCache.messages())
     }
@@ -215,7 +203,7 @@ final class CacheAdvanceTests: XCTestCase {
             try cache.append(message: message)
         }
 
-        let secondCache = try createCache()
+        let secondCache = try createCache(zeroOutExistingFile: false)
         XCTAssertEqual(try cache.messages(), try secondCache.messages())
     }
 
@@ -226,7 +214,7 @@ final class CacheAdvanceTests: XCTestCase {
         }
         XCTAssertThrowsError(try cache.append(message: Self.lorumIpsumMessages.last!))
 
-        let secondCache = try createCache(maximumByteSubtractor: 1)
+        let secondCache = try createCache(maximumByteSubtractor: 1, zeroOutExistingFile: false)
         XCTAssertEqual(try cache.messages(), try secondCache.messages())
     }
 
@@ -237,12 +225,11 @@ final class CacheAdvanceTests: XCTestCase {
                 try cache.append(message: message)
             }
 
-            let secondCache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: maximumByteDivisor)
+            let secondCache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: maximumByteDivisor, zeroOutExistingFile: false)
             XCTAssertEqual(try cache.messages(), try secondCache.messages())
         }
     }
 
-    private static let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("CacheAdvanceTests")
     private static let lorumIpsumMessages: [TestableMessage] = [
         "Lorem ipsum dolor sit amet,",
         "consectetur adipiscing elit.",
@@ -460,14 +447,18 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     private func createCache(
-        file: URL = CacheAdvanceTests.testFileLocation,
+        file: URL = FileManager.default.temporaryDirectory.appendingPathComponent("CacheAdvanceTests"),
         messages: [TestableMessage] = CacheAdvanceTests.lorumIpsumMessages,
         shouldOverwriteOldMessages: Bool = false,
         maximumByteDivisor: Double = 1,
-        maximumByteSubtractor: Bytes = 0)
+        maximumByteSubtractor: Bytes = 0,
+        zeroOutExistingFile: Bool = true)
         throws
         -> CacheAdvance<TestableMessage>
     {
+        if zeroOutExistingFile {
+            FileManager.default.createFile(atPath: file.path, contents: nil, attributes: nil)
+        }
         return try CacheAdvance<TestableMessage>(
             file: file,
             maximumBytes: Bytes(Double(try requiredByteCount(for: messages)) / maximumByteDivisor) - maximumByteSubtractor,
