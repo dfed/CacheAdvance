@@ -67,7 +67,7 @@ final class CacheHeaderHandleTests: XCTestCase {
         XCTAssertEqual(headerHandle2.offsetInFileOfOldestMessage, defaultOffsetInFileOfOldestMessage)
     }
 
-    func test_synchronizeHeaderData_returnsNothingWhenMaximumBytesIsInconsistent() throws {
+    func test_synchronizeHeaderData_resetsFieldsToDefaultWhenMaximumBytesIsInconsistent() throws {
         let headerHandle1 = try createHeaderHandle(maximumBytes: 5000)
         try headerHandle1.synchronizeHeaderData()
         let defaultOffsetInFileAtEndOfNewestMessage = headerHandle1.offsetInFileAtEndOfNewestMessage
