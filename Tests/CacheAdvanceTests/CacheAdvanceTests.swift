@@ -217,6 +217,17 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertEqual(try cache.messages(), try secondCache.messages())
     }
 
+    func test_messages_canReadMessagesWrittenByADifferentFullCache() throws {
+        let cache = try createCache(maximumByteSubtractor: 1)
+        for message in Self.lorumIpsumMessages.dropLast() {
+            try cache.append(message: message)
+        }
+        XCTAssertThrowsError(try cache.append(message: Self.lorumIpsumMessages.last!))
+
+        let secondCache = try createCache(maximumByteSubtractor: 1)
+        XCTAssertEqual(try cache.messages(), try secondCache.messages())
+    }
+
     func test_messages_canReadMessagesWrittenByADifferentOverwritingCache() throws {
         for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
             let cache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: maximumByteDivisor)
