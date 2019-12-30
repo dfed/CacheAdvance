@@ -66,7 +66,7 @@ final class CacheHeaderHandle {
         offsetInFileAtEndOfNewestMessage = offset
 
         // Seek to the beginning of this field in the header.
-        try handle.seek(to: CacheHeaderHandle.beginningOfHeaderField_offsetInAtEndOfNewestMessage)
+        try handle.seek(to: CacheHeaderHandle.beginningOfHeaderField_offsetInFileAtEndOfNewestMessage)
 
         // Write this updated value to disk.
         try handle.write(data: currentHeader.data(for: .offsetInFileAtEndOfNewestMessage))
@@ -146,5 +146,5 @@ final class CacheHeaderHandle {
     }
 
     private static let beginningOfHeaderField_offsetInFileOfOldestMessage = FileHeader.Field.offsetInFileOfOldestMessage.expectedBeginningOfFieldInFile
-    private static let beginningOfHeaderField_offsetInAtEndOfNewestMessage = FileHeader.Field.offsetInFileAtEndOfNewestMessage.expectedBeginningOfFieldInFile
+    private static let beginningOfHeaderField_offsetInFileAtEndOfNewestMessage = FileHeader.Field.offsetInFileAtEndOfNewestMessage.expectedBeginningOfFieldInFile
 }
