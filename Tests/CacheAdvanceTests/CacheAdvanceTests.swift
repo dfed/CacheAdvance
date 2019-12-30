@@ -60,7 +60,7 @@ final class CacheAdvanceTests: XCTestCase {
         let message: TestableMessage = "This is a test"
         let cache = try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: [message], cacheWillOverwriteOldestMessages: false),
+            maximumBytes: try requiredByteCount(for: [message]),
             shouldOverwriteOldMessages: false)
         try cache.append(message: message)
 
@@ -72,7 +72,7 @@ final class CacheAdvanceTests: XCTestCase {
         let message: TestableMessage = "This is a test"
         let cache = try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: [message], cacheWillOverwriteOldestMessages: false) - 1,
+            maximumBytes: try requiredByteCount(for: [message]) - 1,
             shouldOverwriteOldMessages: false)
 
         XCTAssertThrowsError(try cache.append(message: message)) {
@@ -87,7 +87,7 @@ final class CacheAdvanceTests: XCTestCase {
         let message: TestableMessage = "This is a test"
         let cache = try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: [message], cacheWillOverwriteOldestMessages: true) - 1,
+            maximumBytes: try requiredByteCount(for: [message]) - 1,
             shouldOverwriteOldMessages: true)
 
         XCTAssertThrowsError(try cache.append(message: message)) {
@@ -101,7 +101,7 @@ final class CacheAdvanceTests: XCTestCase {
     func test_append_multipleMessagesCanBeRetrieved() throws {
         let cache = try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: false),
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages),
             shouldOverwriteOldMessages: false)
         for message in lorumIpsumMessages {
             try cache.append(message: message)
@@ -114,7 +114,7 @@ final class CacheAdvanceTests: XCTestCase {
     func test_append_multipleMessagesCanBeRetrievedTwiceFromNonOverwritingCache() throws {
         let cache = try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: false),
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages),
             shouldOverwriteOldMessages: false)
         for message in lorumIpsumMessages {
             try cache.append(message: message)
@@ -126,7 +126,7 @@ final class CacheAdvanceTests: XCTestCase {
     func test_append_multipleMessagesCanBeRetrievedTwiceFromOverwritingCache() throws {
         let cache = try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) / 3,
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages) / 3,
             shouldOverwriteOldMessages: true)
         for message in lorumIpsumMessages {
             try cache.append(message: message)
@@ -138,7 +138,7 @@ final class CacheAdvanceTests: XCTestCase {
     func test_append_dropsLastMessageIfCacheDoesNotRollAndLastMessageDoesNotFit() throws {
         let cache = try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: false),
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages),
             shouldOverwriteOldMessages: false)
         for message in lorumIpsumMessages {
             try cache.append(message: message)
@@ -155,7 +155,7 @@ final class CacheAdvanceTests: XCTestCase {
     func test_append_dropsOldestMessageIfCacheRollsAndLastMessageDoesNotFitAndIsShorterThanOldestMessage() throws {
         let cache = try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true),
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages),
             shouldOverwriteOldMessages: true)
         for message in lorumIpsumMessages {
             try cache.append(message: message)
@@ -172,7 +172,7 @@ final class CacheAdvanceTests: XCTestCase {
     func test_append_dropsFirstTwoMessagesIfCacheRollsAndLastMessageDoesNotFitAndIsLargerThanOldestMessage() throws {
         let cache = try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true),
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages),
             shouldOverwriteOldMessages: true)
         for message in lorumIpsumMessages {
             try cache.append(message: message)
@@ -189,7 +189,7 @@ final class CacheAdvanceTests: XCTestCase {
     func test_append_dropsOldMessagesAsNecessary() throws {
         let cache = try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) / 4,
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages) / 4,
             shouldOverwriteOldMessages: true)
         for message in lorumIpsumMessages {
             try cache.append(message: message)
@@ -203,7 +203,7 @@ final class CacheAdvanceTests: XCTestCase {
         func createCache() throws -> CacheAdvance<TestableMessage> {
             try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: false),
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages),
             shouldOverwriteOldMessages: false)
         }
         let cache = try createCache()
@@ -221,7 +221,7 @@ final class CacheAdvanceTests: XCTestCase {
         func createCache() throws -> CacheAdvance<TestableMessage> {
             try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: Bytes(Double(try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true)) / 5.5),
+            maximumBytes: Bytes(Double(try requiredByteCount(for: lorumIpsumMessages)) / 5.5),
             shouldOverwriteOldMessages: true)
         }
         let cache = try createCache()
@@ -239,7 +239,7 @@ final class CacheAdvanceTests: XCTestCase {
         func createCache() throws -> CacheAdvance<TestableMessage> {
             try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: Bytes(Double(try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true)) / 6.5),
+            maximumBytes: Bytes(Double(try requiredByteCount(for: lorumIpsumMessages)) / 6.5),
             shouldOverwriteOldMessages: true)
         }
         let cache = try createCache()
@@ -256,7 +256,7 @@ final class CacheAdvanceTests: XCTestCase {
         func createCache() throws -> CacheAdvance<TestableMessage> {
             try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: false),
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages),
             shouldOverwriteOldMessages: false)
         }
         let cache = try createCache()
@@ -272,7 +272,7 @@ final class CacheAdvanceTests: XCTestCase {
         func createCache() throws -> CacheAdvance<TestableMessage> {
             try CacheAdvance<TestableMessage>(
             file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages, cacheWillOverwriteOldestMessages: true) / 7,
+            maximumBytes: try requiredByteCount(for: lorumIpsumMessages) / 7,
             shouldOverwriteOldMessages: true)
         }
         let cache = try createCache()
@@ -491,7 +491,7 @@ final class CacheAdvanceTests: XCTestCase {
         "at tempus arcu sagittis quis.",
     ]
 
-    private func requiredByteCount<T: Codable>(for messages: [T], cacheWillOverwriteOldestMessages: Bool) throws -> UInt64 {
+    private func requiredByteCount<T: Codable>(for messages: [T]) throws -> UInt64 {
         let encoder = JSONEncoder()
         return try FileHeader.expectedEndOfHeaderInFile
             + messages.reduce(0) { allocatedSize, message in
