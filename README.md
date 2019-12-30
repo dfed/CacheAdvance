@@ -35,6 +35,8 @@ By the time the above method exits, the message will have been persisted to disk
 
 A CacheAdvance instance that does not overwrite old messages will throw a `CacheAdvanceError.messageDataTooLarge` if appending a message would exceed the cache's `maximumBytes`. A CacheAdvance instance that does overwrite old messages will throw a `CacheAdvanceError.messageDataTooLarge` if the message would require more than `maximumBytes` to store even after evicting all older messages from the cache.
 
+To ensure that caches can be read from 32bit devices, messages should not be larger than 2GB in size.
+
 ### Retrieving messages from disk
 
 ```swift
