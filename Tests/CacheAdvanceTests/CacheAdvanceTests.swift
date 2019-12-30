@@ -26,31 +26,25 @@ final class CacheAdvanceTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
+        FileManager.default.createFile(atPath: Self.testFileLocation.path, contents: nil, attributes: nil)
     }
 
     override func tearDown() {
         super.tearDown()
-        try? FileManager.default.removeItem(at: testFileLocation)
+        try? FileManager.default.removeItem(at: Self.testFileLocation)
     }
 
     // MARK: Behavior Tests
 
     func test_messages_canReadEmptyCacheThatDoesNotOverwriteOldestMessages() throws {
-        let cache = try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: 50,
-            shouldOverwriteOldMessages: false)
+        let cache = try createCache()
 
         let messages = try cache.messages()
         XCTAssertEqual(messages, [])
     }
 
     func test_messages_canReadEmptyCacheThatOverwritesOldestMessages() throws {
-        let cache = try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: 50,
-            shouldOverwriteOldMessages: true)
+        let cache = try createCache(shouldOverwriteOldMessages: true)
 
         let messages = try cache.messages()
         XCTAssertEqual(messages, [])
@@ -58,10 +52,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_append_singleMessageThatFits_canBeRetrieved() throws {
         let message: TestableMessage = "This is a test"
-        let cache = try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: [message]),
-            shouldOverwriteOldMessages: false)
+        let cache = try createCache(messages: [message])
         try cache.append(message: message)
 
         let messages = try cache.messages()
@@ -70,10 +61,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_append_singleMessageThatDoesNotFit_throwsError() throws {
         let message: TestableMessage = "This is a test"
-        let cache = try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: [message]) - 1,
-            shouldOverwriteOldMessages: false)
+        let cache = try createCache(messages: [message], maximumByteSubtractor: 1)
 
         XCTAssertThrowsError(try cache.append(message: message)) {
             XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.messageDataTooLarge)
@@ -85,10 +73,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_append_singleMessageThrowsIfDoesNotFitAndCacheRolls() throws {
         let message: TestableMessage = "This is a test"
-        let cache = try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: [message]) - 1,
-            shouldOverwriteOldMessages: true)
+        let cache = try createCache(messages: [message], shouldOverwriteOldMessages: true, maximumByteSubtractor: 1)
 
         XCTAssertThrowsError(try cache.append(message: message)) {
             XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.messageDataTooLarge)
@@ -99,24 +84,18 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_append_multipleMessagesCanBeRetrieved() throws {
-        let cache = try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages),
-            shouldOverwriteOldMessages: false)
-        for message in lorumIpsumMessages {
+        let cache = try createCache()
+        for message in Self.lorumIpsumMessages {
             try cache.append(message: message)
         }
 
         let messages = try cache.messages()
-        XCTAssertEqual(messages, lorumIpsumMessages)
+        XCTAssertEqual(messages, Self.lorumIpsumMessages)
     }
 
     func test_append_multipleMessagesCanBeRetrievedTwiceFromNonOverwritingCache() throws {
-        let cache = try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages),
-            shouldOverwriteOldMessages: false)
-        for message in lorumIpsumMessages {
+        let cache = try createCache()
+        for message in Self.lorumIpsumMessages {
             try cache.append(message: message)
         }
 
@@ -124,11 +103,8 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_append_multipleMessagesCanBeRetrievedTwiceFromOverwritingCache() throws {
-        let cache = try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages) / 3,
-            shouldOverwriteOldMessages: true)
-        for message in lorumIpsumMessages {
+        let cache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: 3)
+        for message in Self.lorumIpsumMessages {
             try cache.append(message: message)
         }
 
@@ -136,11 +112,8 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_append_dropsLastMessageIfCacheDoesNotRollAndLastMessageDoesNotFit() throws {
-        let cache = try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages),
-            shouldOverwriteOldMessages: false)
-        for message in lorumIpsumMessages {
+        let cache = try createCache()
+        for message in Self.lorumIpsumMessages {
             try cache.append(message: message)
         }
 
@@ -149,118 +122,85 @@ final class CacheAdvanceTests: XCTestCase {
         }
 
         let messages = try cache.messages()
-        XCTAssertEqual(messages, lorumIpsumMessages)
+        XCTAssertEqual(messages, Self.lorumIpsumMessages)
     }
 
     func test_append_dropsOldestMessageIfCacheRollsAndLastMessageDoesNotFitAndIsShorterThanOldestMessage() throws {
-        let cache = try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages),
-            shouldOverwriteOldMessages: true)
-        for message in lorumIpsumMessages {
+        let cache = try createCache(shouldOverwriteOldMessages: true)
+        for message in Self.lorumIpsumMessages {
             try cache.append(message: message)
         }
 
-        // Append a message that is shorter than the first message in lorumIpsumMessages.
+        // Append a message that is shorter than the first message in Self.lorumIpsumMessages.
         let shortMessage: TestableMessage = "Short message"
         try cache.append(message: shortMessage)
 
         let messages = try cache.messages()
-        XCTAssertEqual(messages, Array(lorumIpsumMessages.dropFirst()) + [shortMessage])
+        XCTAssertEqual(messages, Array(Self.lorumIpsumMessages.dropFirst()) + [shortMessage])
     }
 
     func test_append_dropsFirstTwoMessagesIfCacheRollsAndLastMessageDoesNotFitAndIsLargerThanOldestMessage() throws {
-        let cache = try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages),
-            shouldOverwriteOldMessages: true)
-        for message in lorumIpsumMessages {
+        let cache = try createCache(shouldOverwriteOldMessages: true)
+        for message in Self.lorumIpsumMessages {
             try cache.append(message: message)
         }
 
-        // Append a message that is slightly longer than the first message in lorumIpsumMessages.
-        let barelyLongerMessage = TestableMessage(stringLiteral: lorumIpsumMessages[0].value + "hi")
+        // Append a message that is slightly longer than the first message in Self.lorumIpsumMessages.
+        let barelyLongerMessage = TestableMessage(stringLiteral: Self.lorumIpsumMessages[0].value + "hi")
         try cache.append(message: barelyLongerMessage)
 
         let messages = try cache.messages()
-        XCTAssertEqual(messages, Array(lorumIpsumMessages.dropFirst(2)) + [barelyLongerMessage])
+        XCTAssertEqual(messages, Array(Self.lorumIpsumMessages.dropFirst(2)) + [barelyLongerMessage])
     }
 
     func test_append_dropsOldMessagesAsNecessary() throws {
-        let cache = try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages) / 4,
-            shouldOverwriteOldMessages: true)
-        for message in lorumIpsumMessages {
+        let cache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: 4)
+        for message in Self.lorumIpsumMessages {
             try cache.append(message: message)
         }
 
         let messages = try cache.messages()
-        XCTAssertEqual(Array(lorumIpsumMessages.dropFirst(lorumIpsumMessages.count - messages.count)), messages)
+        XCTAssertEqual(Array(Self.lorumIpsumMessages.dropFirst(Self.lorumIpsumMessages.count - messages.count)), messages)
     }
 
     func test_append_canWriteMessagesToCacheCreatedByADifferentCache() throws {
-        func createCache() throws -> CacheAdvance<TestableMessage> {
-            try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages),
-            shouldOverwriteOldMessages: false)
-        }
         let cache = try createCache()
-        for message in lorumIpsumMessages.dropLast() {
+        for message in Self.lorumIpsumMessages.dropLast() {
             try cache.append(message: message)
         }
 
         let cachedMessages = try cache.messages()
         let secondCache = try createCache()
-        try secondCache.append(message: lorumIpsumMessages.last!)
-        XCTAssertEqual(cachedMessages + [lorumIpsumMessages.last!], try secondCache.messages())
+        try secondCache.append(message: Self.lorumIpsumMessages.last!)
+        XCTAssertEqual(cachedMessages + [Self.lorumIpsumMessages.last!], try secondCache.messages())
     }
 
     func test_append_canWriteMessagesToCacheCreatedByADifferentOverridingCache() throws {
-        func createCache() throws -> CacheAdvance<TestableMessage> {
-            try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: Bytes(Double(try requiredByteCount(for: lorumIpsumMessages)) / 5.5),
-            shouldOverwriteOldMessages: true)
-        }
-        let cache = try createCache()
-        for message in lorumIpsumMessages.dropLast() {
+        let cache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: 5.5)
+        for message in Self.lorumIpsumMessages.dropLast() {
             try cache.append(message: message)
         }
 
         let cachedMessages = try cache.messages()
-        let secondCache = try createCache()
-        try secondCache.append(message: lorumIpsumMessages.last!)
-        XCTAssertEqual(cachedMessages + [lorumIpsumMessages.last!], try secondCache.messages())
+        let secondCache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: 5.5)
+        try secondCache.append(message: Self.lorumIpsumMessages.last!)
+        XCTAssertEqual(cachedMessages + [Self.lorumIpsumMessages.last!], try secondCache.messages())
     }
 
     func test_append_canWriteMessagesAfterRetrievingMessages() throws {
-        func createCache() throws -> CacheAdvance<TestableMessage> {
-            try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: Bytes(Double(try requiredByteCount(for: lorumIpsumMessages)) / 6.5),
-            shouldOverwriteOldMessages: true)
-        }
-        let cache = try createCache()
-        for message in lorumIpsumMessages.dropLast() {
+        let cache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: 6.5)
+        for message in Self.lorumIpsumMessages.dropLast() {
             try cache.append(message: message)
         }
 
         let cachedMessages = try cache.messages()
-        try cache.append(message: lorumIpsumMessages.last!)
-        XCTAssertEqual(cachedMessages + [lorumIpsumMessages.last!], try cache.messages())
+        try cache.append(message: Self.lorumIpsumMessages.last!)
+        XCTAssertEqual(cachedMessages + [Self.lorumIpsumMessages.last!], try cache.messages())
     }
 
     func test_messages_canReadMessagesWrittenByADifferentCache() throws {
-        func createCache() throws -> CacheAdvance<TestableMessage> {
-            try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages),
-            shouldOverwriteOldMessages: false)
-        }
         let cache = try createCache()
-        for message in lorumIpsumMessages {
+        for message in Self.lorumIpsumMessages {
             try cache.append(message: message)
         }
 
@@ -269,23 +209,17 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_messages_canReadMessagesWrittenByADifferentOverwritingCache() throws {
-        func createCache() throws -> CacheAdvance<TestableMessage> {
-            try CacheAdvance<TestableMessage>(
-            file: testFileLocation,
-            maximumBytes: try requiredByteCount(for: lorumIpsumMessages) / 7,
-            shouldOverwriteOldMessages: true)
-        }
-        let cache = try createCache()
-        for message in lorumIpsumMessages {
+        let cache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: 7)
+        for message in Self.lorumIpsumMessages {
             try cache.append(message: message)
         }
 
-        let secondCache = try createCache()
+        let secondCache = try createCache(shouldOverwriteOldMessages: true, maximumByteDivisor: 7)
         XCTAssertEqual(try cache.messages(), try secondCache.messages())
     }
 
-    private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("CacheAdvanceTests")
-    private let lorumIpsumMessages: [TestableMessage] = [
+    private static let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("CacheAdvanceTests")
+    private static let lorumIpsumMessages: [TestableMessage] = [
         "Lorem ipsum dolor sit amet,",
         "consectetur adipiscing elit.",
         "Etiam sagittis neque massa,",
@@ -499,6 +433,21 @@ final class CacheAdvanceTests: XCTestCase {
                 let data = try encodableMessage.encodedData()
                 return allocatedSize + UInt64(data.count)
         }
+    }
+
+    private func createCache(
+        file: URL = CacheAdvanceTests.testFileLocation,
+        messages: [TestableMessage] = CacheAdvanceTests.lorumIpsumMessages,
+        shouldOverwriteOldMessages: Bool = false,
+        maximumByteDivisor: Double = 1,
+        maximumByteSubtractor: Bytes = 0)
+        throws
+        -> CacheAdvance<TestableMessage>
+    {
+        return try CacheAdvance<TestableMessage>(
+            file: file,
+            maximumBytes: Bytes(Double(try requiredByteCount(for: messages)) / maximumByteDivisor) - maximumByteSubtractor,
+            shouldOverwriteOldMessages: shouldOverwriteOldMessages)
     }
 
 }
