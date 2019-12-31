@@ -75,13 +75,9 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
         case .iOS_12,
              .iOS_13,
              .tvOS_12,
-             .tvOS_13:
+             .tvOS_13,
+             .macOS_10_15:
             return true
-
-        case .macOS_10_15:
-            // We can't run tests on macOS 10.15 because CacheAdvance assumes macOS 10.15 APIs are available, and Travis CI's machines run on macOS 10.14.
-            // For more information, see https://github.com/dfed/CacheAdvance/issues/2
-            return false
 
         case .watchOS_5,
              .watchOS_6:
