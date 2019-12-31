@@ -24,13 +24,9 @@ final class BigEndianHostSwappableTests: XCTestCase {
 
     // MARK: Behavior Tests
 
-    func test_init_canBeInitializedFromEncodedDta() {
+    func test_init_canBeInitializedFromEncodedData() {
         let expectedValue: UInt64 = 10
         XCTAssertEqual(UInt64(Data(expectedValue)), expectedValue)
     }
 
-    func test_init_returnsNilWhenInitializedFromDataOfIncorrectLength() {
-        var expectedValue: UInt64 = 10
-        XCTAssertNil(UInt64(Data(bytes: &expectedValue, count: UInt64.storageLength + 1)))
-    }
 }

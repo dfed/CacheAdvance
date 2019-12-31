@@ -15,12 +15,10 @@
 //  limitations under the License.
 //
 
-import Foundation
-
-/// A storage unit that counts bytes. Used for describing a maximum cache size.
-///
-/// This type should only be used when interacting with public API. This type enables changing how
-/// the maximum file size is stored in a future breaking change without changing much code internally.
-///
-/// - Warning: If this value is changed, previously persisted message encodings will not be readable.
-public typealias Bytes = UInt64
+public enum CacheAdvanceError: Error, Equatable {
+    /// Thrown when the message being appended is larger than maximum bytes.
+    case messageDataTooLarge
+    /// Thrown when the cache file is of an unexpected format.
+    /// A corrupted file should be deleted. Corruption can occur if an application crashes while writing to the file.
+    case fileCorrupted
+}

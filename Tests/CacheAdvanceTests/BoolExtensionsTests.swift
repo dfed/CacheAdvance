@@ -1,5 +1,5 @@
 //
-//  Created by Dan Federman on 11/10/19.
+//  Created by Dan Federman on 12/27/19.
 //  Copyright © 2019 Dan Federman.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,15 +15,18 @@
 //  limitations under the License.
 //
 
-public enum CacheAdvanceReadError: Error, Equatable {
-    /// Thrown when the cache file is of an unexpected format.
-    /// A corrupted file should be deleted. Corruption can occur if an application crashes while writing to the file.
-    case fileCorrupted
-}
+import Foundation
+import XCTest
 
-public enum CacheAdvanceWriteError: Error, Equatable {
-    /// Thrown when the message being appended is larger than maximum bytes.
-    case messageDataTooLarge
-    /// Thrown when the message being appended could not be decoded.
-    case messageCorrupted
+@testable import CacheAdvance
+
+final class BoolExtensionsTests: XCTestCase {
+
+    // MARK: Behavior Tests
+
+    func test_init_canBeInitializedFromEncodedData() {
+        XCTAssertEqual(Bool(Data(true)), true)
+        XCTAssertEqual(Bool(Data(false)), false)
+    }
+
 }

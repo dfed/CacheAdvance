@@ -21,10 +21,3 @@ import Foundation
 /// 
 /// - Warning: If this value is changed, previously persisted message encodings will not be readable.
 typealias MessageSpan = UInt32
-
-extension MessageSpan {
-
-    /// A marker written at the end of the newest message written to disk.
-    static let endOfNewestMessageMarker = Data(MessageSpan.zero)
-
-}

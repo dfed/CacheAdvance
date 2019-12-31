@@ -1,5 +1,5 @@
 //
-//  Created by Dan Federman on 11/10/19.
+//  Created by Dan Federman on 12/25/19.
 //  Copyright © 2019 Dan Federman.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +17,21 @@
 
 import Foundation
 
-/// A storage unit that counts bytes. Used for describing a maximum cache size.
-///
-/// This type should only be used when interacting with public API. This type enables changing how
-/// the maximum file size is stored in a future breaking change without changing much code internally.
-///
-/// - Warning: If this value is changed, previously persisted message encodings will not be readable.
-public typealias Bytes = UInt64
+extension Bool {
+
+    init(_ data: Data) {
+        self = UInt8(data) == 1 ? true : false
+    }
+
+    static var storageLength: Int { UInt8.storageLength }
+}
+
+extension Data {
+
+    /// Initializes Data from a numeric value. The data will always be of length 1.
+    /// - Parameter value: the value to encode as data.
+    init(_ value: Bool) {
+        self.init(UInt8(value ? 1 : 0))
+    }
+
+}
