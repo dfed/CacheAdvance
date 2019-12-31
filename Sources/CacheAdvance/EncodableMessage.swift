@@ -40,6 +40,10 @@ struct EncodableMessage<T: Codable> {
     /// The encoded message, prefixed with the size of the message blob.
     func encodedData() throws -> Data {
         let messageData = try encoder.encode(message)
+        guard messageData.count < MessageSpan.max else {
+            // We can't encode the length this message in a MessageSpan.
+            throw CacheAdvanceError.messageDataTooLarge
+        }
         let encodedSize = Data(MessageSpan(messageData.count))
         return encodedSize + messageData
     }

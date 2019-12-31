@@ -62,10 +62,13 @@ public final class CacheAdvance<T: Codable> {
 
         let encodableMessage = EncodableMessage(message: message, encoder: encoder)
         let messageData = try encodableMessage.encodedData()
-        let messageLength = Bytes(messageData.count)
+        let bytesNeededToStoreMessage = Bytes(messageData.count)
 
-        let bytesNeededToStoreMessage = messageLength
-        guard bytesNeededToStoreMessage <= maximumBytes - FileHeader.expectedEndOfHeaderInFile && bytesNeededToStoreMessage < Bytes(MessageSpan.max) else {
+        guard
+            bytesNeededToStoreMessage <= maximumBytes - FileHeader.expectedEndOfHeaderInFile // Make sure we have room in this file for this message.
+                && bytesNeededToStoreMessage < Int32.max // Make sure we can read this message back out with Int on a 32-bit device.
+            else
+        {
             // The message is too long to be written to a cache of this size.
             throw CacheAdvanceError.messageDataTooLarge
         }
