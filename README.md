@@ -74,7 +74,7 @@ The first 64bytes of a CacheAdvance is reserved for storing metadata about the f
 
 ### Swift Package Manager
 
-To install Relativity in your iOS project with [Swift Package Manager](https://github.com/apple/swift-package-manager), the following lines can be added to your `Package.swift` file:
+To install CacheAdvance in your iOS project with [Swift Package Manager](https://github.com/apple/swift-package-manager), the following lines can be added to your `Package.swift` file:
 
 ```swift
 dependencies: [
@@ -84,7 +84,7 @@ dependencies: [
 
 ### CocoaPods
 
-To install Relativity in your iOS project with [CocoaPods](http://cocoapods.org), add the following to your `Podfile`:
+To install CacheAdvance in your iOS project with [CocoaPods](http://cocoapods.org), add the following to your `Podfile`:
 
 ```
 platform :ios, '12.0'
@@ -93,7 +93,7 @@ pod 'CacheAdvance', '~> 0.1'
 
 ### Carthage
 
-To install Relativity in your iOS project with [Carthage](https://github.com/Carthage/Carthage), add the following to your `Cartfile`:
+To install CacheAdvance in your iOS project with [Carthage](https://github.com/Carthage/Carthage), add the following to your `Cartfile`:
 
 ```ogdl
 github "dfed/CacheAdvance"
@@ -103,7 +103,7 @@ Run `carthage` to build the framework and drag the built `CacheAdvance.framework
 
 ### Submodules
 
-To use git submodules, checkout the submodule with `git submodule add git@github.com:dfed/CacheAdvance.git`, drag CacheAdvance.xcodeproj to your project, and add Relativity as a build dependency.
+To use git submodules, checkout the submodule with `git submodule add git@github.com:dfed/CacheAdvance.git`, drag CacheAdvance.xcodeproj to your project, and add CacheAdvance as a build dependency.
 
 ## Contributing
 
