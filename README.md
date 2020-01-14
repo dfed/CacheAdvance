@@ -113,7 +113,7 @@ Thanks, and happy caching!
 
 ## Developing
 
-Run `swift package generate-xcodeproj` from the root of the repository to generate an Xcode project.
+Double-click on `Package.swift` in the root of the repository to open the project in Xcode.
 
 ## Attribution
 
