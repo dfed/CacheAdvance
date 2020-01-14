@@ -111,6 +111,10 @@ I’m glad you’re interested in CacheAdvance, and I’d love to see where you 
 
 Thanks, and happy caching!
 
+## Developing
+
+Double-click on `Package.swift` in the root of the repository to open the project in Xcode.
+
 ## Attribution
 
 Shout out to [Peter Westen](https://twitter.com/pwesten) who inspired the creation of this library.
