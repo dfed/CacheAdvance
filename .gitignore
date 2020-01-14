@@ -20,3 +20,6 @@ DerivedData
 .swiftpm/
 generated/
 *coverage.txt
+
+# We can generate the project from the package. No need to check it in.
+CacheAdvance.xcodeproj/
