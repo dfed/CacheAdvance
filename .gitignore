@@ -21,5 +21,5 @@ DerivedData
 generated/
 *coverage.txt
 
-# We can generate the project from the package. No need to check it in.
+# We can generate Xcode projects from the Swift packages.
 *.xcodeproj/
