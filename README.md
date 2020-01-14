@@ -111,6 +111,10 @@ I’m glad you’re interested in CacheAdvance, and I’d love to see where you 
 
 Thanks, and happy caching!
 
+## Developing
+
+Run `swift package generate-xcodeproj` from the root of the repository to generate an Xcode project.
+
 ## Attribution
 
 Shout out to [Peter Westen](https://twitter.com/pwesten) who inspired the creation of this library.
