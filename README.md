@@ -21,7 +21,7 @@ let myCache = try CacheAdvance<MyMessageType>(
 ```
 To begin caching messages, you need to create a CacheAdvance instance with:
 
-* A file URL – this URL must represent a file that has already been created. You can create a file by using `FileManager`'s [createFile(atPath:contents:attributes)](https://developer.apple.com/documentation/foundation/filemanager/1410695-createfile) API.
+* A file URL – this URL must represent a file that has already been created. You can create a file by using `FileManager`'s [createFile(atPath:contents:attributes:)](https://developer.apple.com/documentation/foundation/filemanager/1410695-createfile) API.
 * A maximum number of bytes on disk the cache can consume.
 * Whether the cache should overwrite old messages. If you need to preserve every message, set this value to `false`. If you care only about preserving recent messages, set this value to `true`.
 
