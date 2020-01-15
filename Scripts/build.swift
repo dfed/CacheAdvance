@@ -102,6 +102,10 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
         }
     }
 
+    var derivedDataPath: String {
+        ".build/derivedData/" + description
+    }
+
     var description: String {
         rawValue
     }
@@ -137,7 +141,7 @@ for rawPlatform in rawPlatforms {
         xcodeBuildArguments.append("-enableCodeCoverage")
         xcodeBuildArguments.append("YES")
         xcodeBuildArguments.append("-derivedDataPath")
-        xcodeBuildArguments.append(".build/derivedData")
+        xcodeBuildArguments.append(platform.derivedDataPath)
     }
     xcodeBuildArguments.append("build")
     if platform.shouldTest {
