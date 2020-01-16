@@ -8,18 +8,20 @@ matrix:
   include:
   - osx_image: xcode11.2
     env: ACTION="swift-package";PLATFORMS="iOS_12,iOS_13";
+    after_success:
+      - bash <(curl -s https://codecov.io/bash) -J '^CacheAdvance$' -D .build/derivedData/iOS_12 -t 8344b011-6b2a-4b3d-a573-eaf49684318e
+      - bash <(curl -s https://codecov.io/bash) -J '^CacheAdvance$' -D .build/derivedData/iOS_13 -t 8344b011-6b2a-4b3d-a573-eaf49684318e
 
   - osx_image: xcode11.2
-    env: ACTION="swift-package";PLATFORMS="tvOS_12";
+    env: ACTION="swift-package";PLATFORMS="tvOS_12,tvOS_13";
     after_success:
-      bash <(curl -s https://codecov.io/bash) -J '^CacheAdvance$' -D .build/derivedData -t 8344b011-6b2a-4b3d-a573-eaf49684318e
-  - osx_image: xcode11.2
-    env: ACTION="swift-package";PLATFORMS="tvOS_13";
-    after_success:
-      bash <(curl -s https://codecov.io/bash) -J '^CacheAdvance$' -D .build/derivedData -t 8344b011-6b2a-4b3d-a573-eaf49684318e
+      - bash <(curl -s https://codecov.io/bash) -J '^CacheAdvance$' -D .build/derivedData/tvOS_12 -t 8344b011-6b2a-4b3d-a573-eaf49684318e
+      - bash <(curl -s https://codecov.io/bash) -J '^CacheAdvance$' -D .build/derivedData/tvOS_13 -t 8344b011-6b2a-4b3d-a573-eaf49684318e
 
   - osx_image: xcode11.2
     env: ACTION="swift-package";PLATFORMS="macOS_10_15";
+    after_success:
+      - bash <(curl -s https://codecov.io/bash) -J '^CacheAdvance$' -D .build/derivedData/macOS_10_15 -t 8344b011-6b2a-4b3d-a573-eaf49684318e
 
   - osx_image: xcode11.2
     env: ACTION="swift-package";PLATFORMS="watchOS_5,watchOS_6";
