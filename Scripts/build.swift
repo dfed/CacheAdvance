@@ -115,6 +115,7 @@ for rawPlatform in rawPlatforms {
         "-scheme", "CacheAdvance-Package",
         "-sdk", platform.sdk,
         "-configuration", "Release",
+        "-derivedDataPath", platform.derivedDataPath,
         "-PBXBuildsContinueAfterErrors=0",
     ]
     if !platform.destination.isEmpty {
@@ -124,8 +125,6 @@ for rawPlatform in rawPlatforms {
     if platform.shouldTest {
         xcodeBuildArguments.append("-enableCodeCoverage")
         xcodeBuildArguments.append("YES")
-        xcodeBuildArguments.append("-derivedDataPath")
-        xcodeBuildArguments.append(platform.derivedDataPath)
     }
     xcodeBuildArguments.append("build")
     if platform.shouldTest {
