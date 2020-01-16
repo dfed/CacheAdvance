@@ -86,20 +86,8 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
         }
     }
 
-    var enableCodeCoverage: Bool {
-        switch self {
-        case .tvOS_12,
-             .tvOS_13:
-            // We currently only have a after_success job to upload code coverage for our tvOS targets.
-            return true
-
-        case .iOS_12,
-             .iOS_13,
-             .macOS_10_15,
-             .watchOS_5,
-             .watchOS_6:
-            return false
-        }
+    var derivedDataPath: String {
+        ".build/derivedData/" + description
     }
 
     var description: String {
@@ -127,17 +115,16 @@ for rawPlatform in rawPlatforms {
         "-scheme", "CacheAdvance-Package",
         "-sdk", platform.sdk,
         "-configuration", "Release",
+        "-derivedDataPath", platform.derivedDataPath,
         "-PBXBuildsContinueAfterErrors=0",
     ]
     if !platform.destination.isEmpty {
         xcodeBuildArguments.append("-destination")
         xcodeBuildArguments.append(platform.destination)
     }
-    if platform.enableCodeCoverage {
+    if platform.shouldTest {
         xcodeBuildArguments.append("-enableCodeCoverage")
         xcodeBuildArguments.append("YES")
-        xcodeBuildArguments.append("-derivedDataPath")
-        xcodeBuildArguments.append(".build/derivedData")
     }
     xcodeBuildArguments.append("build")
     if platform.shouldTest {
