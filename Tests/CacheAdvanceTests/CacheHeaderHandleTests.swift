@@ -97,6 +97,8 @@ final class CacheHeaderHandleTests: XCTestCase {
         try handle.seek(to: 0)
         let headerData = try handle.readDataUp(toLength: Int(FileHeader.expectedEndOfHeaderInFile))
         XCTAssertEqual(headerData.count, Int(FileHeader.expectedEndOfHeaderInFile))
+
+        try handle.closeHandle()
     }
 
     func test_validateMetadata_versionMismatch_returnsFalse() throws {
