@@ -72,6 +72,32 @@ final class CacheHeaderHandle {
         try handle.write(data: currentHeader.data(for: .offsetInFileAtEndOfNewestMessage))
     }
 
+    /// Checks if the static header metadata of this object matches another file header. Static metadata are the properties of the header
+    /// that need to remain the same for the entire lifetime of a cache file.
+    ///
+    /// - Parameter fileHeader: A representation of the header data in an existing cache file.
+    ///
+    /// - Returns: `true` if this object's static metadata matches that of `fileHeader`; otherwise `false`.
+    func validateMetadata(against fileHeader: FileHeader) -> Bool {
+        guard fileHeader.version == version else {
+            // Our current file header version is 1.
+            // That means there is no prior header version we could attempt to read.
+            // We have no idea how to read this file.
+            return false
+        }
+
+        guard
+            fileHeader.maximumBytes == maximumBytes,
+            fileHeader.overwritesOldMessages == overwritesOldMessages
+            else
+        {
+            // The header's values are not consistent with our expectations.
+            return false
+        }
+
+        return true
+    }
+
     /// Reads the header data from the file. Writes header information to disk if no header exists.
     /// If the header data persisted to the file is not consistent with expectations, the file will be deleted.
     func synchronizeHeaderData() throws {
@@ -86,24 +112,14 @@ final class CacheHeaderHandle {
             try writeHeaderData()
 
         } else {
-            guard
-                let fileHeader = FileHeader(from: headerData),
-                fileHeader.version == version
-                else
-            {
-                // Our current file header version is 1.
-                // That means there is no prior header version we could attempt to read.
-                // We have no idea how to read this file. Nuke it.
+            guard let fileHeader = FileHeader(from: headerData) else {
+                // We can't read the header data. Let's start over.
                 try resetFile()
                 return
             }
 
-            guard
-                fileHeader.maximumBytes == maximumBytes,
-                fileHeader.overwritesOldMessages == overwritesOldMessages
-                else
-            {
-                // The header's values are not consistent with our expectations. Nuke it.
+            guard validateMetadata(against: fileHeader) else {
+                // The header is invalid. Nuke it.
                 try resetFile()
                 return
             }

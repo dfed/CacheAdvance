@@ -85,6 +85,70 @@ final class CacheHeaderHandleTests: XCTestCase {
         XCTAssertEqual(headerHandle2.offsetInFileOfOldestMessage, defaultOffsetInFileOfOldestMessage)
     }
 
+    func test_validateMetadata_versionMismatch_returnsFalse() throws {
+        let fileHeader = FileHeader(
+            version: 1,
+            maximumBytes: 1000,
+            overwritesOldMessages: true,
+            offsetInFileOfOldestMessage: FileHeader.expectedEndOfHeaderInFile,
+            offsetInFileAtEndOfNewestMessage: 500)
+
+        let sut = try createHeaderHandle(
+            maximumBytes: 1000,
+            overwritesOldMessages: true,
+            version: 2)
+
+        XCTAssertFalse(sut.validateMetadata(against: fileHeader))
+    }
+
+    func test_validateMetadata_maximumBytesMismatch_returnsFalse() throws {
+        let fileHeader = FileHeader(
+            version: 1,
+            maximumBytes: 1000,
+            overwritesOldMessages: true,
+            offsetInFileOfOldestMessage: FileHeader.expectedEndOfHeaderInFile,
+            offsetInFileAtEndOfNewestMessage: 500)
+
+        let sut = try createHeaderHandle(
+            maximumBytes: 2000,
+            overwritesOldMessages: true,
+            version: 1)
+
+        XCTAssertFalse(sut.validateMetadata(against: fileHeader))
+    }
+
+    func test_validateMetadata_overwritesOldMessagesMismatch_returnsFalse() throws {
+        let fileHeader = FileHeader(
+            version: 1,
+            maximumBytes: 1000,
+            overwritesOldMessages: true,
+            offsetInFileOfOldestMessage: FileHeader.expectedEndOfHeaderInFile,
+            offsetInFileAtEndOfNewestMessage: 500)
+
+        let sut = try createHeaderHandle(
+            maximumBytes: 1000,
+            overwritesOldMessages: false,
+            version: 1)
+
+        XCTAssertFalse(sut.validateMetadata(against: fileHeader))
+    }
+
+    func test_validateMetadata_noMismatches_returnsTrue() throws {
+        let fileHeader = FileHeader(
+            version: 1,
+            maximumBytes: 1000,
+            overwritesOldMessages: true,
+            offsetInFileOfOldestMessage: FileHeader.expectedEndOfHeaderInFile,
+            offsetInFileAtEndOfNewestMessage: 500)
+
+        let sut = try createHeaderHandle(
+            maximumBytes: 1000,
+            overwritesOldMessages: true,
+            version: 1)
+
+        XCTAssertTrue(sut.validateMetadata(against: fileHeader))
+    }
+
     // MARK: Private
 
     private func createHeaderHandle(
