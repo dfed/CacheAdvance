@@ -101,7 +101,7 @@ final class CacheHeaderHandleTests: XCTestCase {
         try handle.closeHandle()
     }
 
-    func test_validateMetadata_versionMismatch_returnsFalse() throws {
+    func test_canOpenFile_versionMismatch_returnsFalse() throws {
         let fileHeader = FileHeader(
             version: 1,
             maximumBytes: 1000,
@@ -114,10 +114,10 @@ final class CacheHeaderHandleTests: XCTestCase {
             overwritesOldMessages: true,
             version: 2)
 
-        XCTAssertFalse(sut.validateMetadata(against: fileHeader))
+        XCTAssertFalse(sut.canOpenFile(with: fileHeader))
     }
 
-    func test_validateMetadata_maximumBytesMismatch_returnsFalse() throws {
+    func test_canOpenFile_maximumBytesMismatch_returnsFalse() throws {
         let fileHeader = FileHeader(
             version: 1,
             maximumBytes: 1000,
@@ -130,10 +130,10 @@ final class CacheHeaderHandleTests: XCTestCase {
             overwritesOldMessages: true,
             version: 1)
 
-        XCTAssertFalse(sut.validateMetadata(against: fileHeader))
+        XCTAssertFalse(sut.canOpenFile(with: fileHeader))
     }
 
-    func test_validateMetadata_overwritesOldMessagesMismatch_returnsFalse() throws {
+    func test_canOpenFile_overwritesOldMessagesMismatch_returnsFalse() throws {
         let fileHeader = FileHeader(
             version: 1,
             maximumBytes: 1000,
@@ -146,10 +146,10 @@ final class CacheHeaderHandleTests: XCTestCase {
             overwritesOldMessages: false,
             version: 1)
 
-        XCTAssertFalse(sut.validateMetadata(against: fileHeader))
+        XCTAssertFalse(sut.canOpenFile(with: fileHeader))
     }
 
-    func test_validateMetadata_noMismatches_returnsTrue() throws {
+    func test_canOpenFile_noMismatches_returnsTrue() throws {
         let fileHeader = FileHeader(
             version: 1,
             maximumBytes: 1000,
@@ -162,7 +162,7 @@ final class CacheHeaderHandleTests: XCTestCase {
             overwritesOldMessages: true,
             version: 1)
 
-        XCTAssertTrue(sut.validateMetadata(against: fileHeader))
+        XCTAssertTrue(sut.canOpenFile(with: fileHeader))
     }
 
     // MARK: Private

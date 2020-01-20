@@ -78,7 +78,7 @@ final class CacheHeaderHandle {
     /// - Parameter fileHeader: A representation of the header data in an existing cache file.
     ///
     /// - Returns: `true` if this object's static metadata matches that of `fileHeader`; otherwise `false`.
-    func validateMetadata(against fileHeader: FileHeader) -> Bool {
+    func canOpenFile(with fileHeader: FileHeader) -> Bool {
         guard fileHeader.version == version else {
             // Our current file header version is 1.
             // That means there is no prior header version we could attempt to read.
@@ -118,7 +118,7 @@ final class CacheHeaderHandle {
                 return
             }
 
-            guard validateMetadata(against: fileHeader) else {
+            guard canOpenFile(with: fileHeader) else {
                 // The header is invalid. Nuke it.
                 try resetFile()
                 return
