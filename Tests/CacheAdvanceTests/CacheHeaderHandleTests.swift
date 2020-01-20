@@ -90,8 +90,8 @@ final class CacheHeaderHandleTests: XCTestCase {
         let handle = try FileHandle(forUpdating: testFileLocation)
         handle.write(Data(repeating: 0, count: Int(FileHeader.expectedEndOfHeaderInFile) - 1))
 
-        let headerHandle1 = try createHeaderHandle()
-        try headerHandle1.synchronizeHeaderData()
+        let headerHandle = try createHeaderHandle()
+        try headerHandle.synchronizeHeaderData()
 
         // Verify that the file is now the size of the header. This means that we rewrote the file.
         try handle.seek(to: 0)
