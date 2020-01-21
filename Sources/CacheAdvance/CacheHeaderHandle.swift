@@ -114,26 +114,20 @@ final class CacheHeaderHandle {
     func synchronizeHeaderData() throws {
         let headerData = try readHeaderData()
 
-        if headerData.isEmpty {
-            // There is no header. Write one to disk.
-            try writeHeaderData()
-
-        } else {
-            guard let fileHeader = FileHeader(from: headerData) else {
-                // We can't read the header data. Let's start over.
-                try resetFile()
-                return
-            }
-
-            guard canOpenFile(with: fileHeader) else {
-                // The header is invalid. Nuke it.
-                try resetFile()
-                return
-            }
-
-            self.offsetInFileOfOldestMessage = fileHeader.offsetInFileOfOldestMessage
-            self.offsetInFileAtEndOfNewestMessage = fileHeader.offsetInFileAtEndOfNewestMessage
+        guard let fileHeader = FileHeader(from: headerData) else {
+            // We can't read the header data. Let's start over.
+            try resetFile()
+            return
         }
+
+        guard canOpenFile(with: fileHeader) else {
+            // The header is invalid. Nuke it.
+            try resetFile()
+            return
+        }
+
+        self.offsetInFileOfOldestMessage = fileHeader.offsetInFileOfOldestMessage
+        self.offsetInFileAtEndOfNewestMessage = fileHeader.offsetInFileAtEndOfNewestMessage
     }
 
     // MARK: Private
