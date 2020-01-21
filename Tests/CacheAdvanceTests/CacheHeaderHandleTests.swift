@@ -85,6 +85,22 @@ final class CacheHeaderHandleTests: XCTestCase {
         XCTAssertEqual(headerHandle2.offsetInFileOfOldestMessage, defaultOffsetInFileOfOldestMessage)
     }
 
+    func test_synchronizeHeaderData_resetsFileWhenFileIsEmpty() throws {
+        let handle = try FileHandle(forReadingFrom: testFileLocation)
+        let fileData = try handle.readDataUp(toLength: 1)
+        XCTAssertTrue(fileData.isEmpty)
+
+        let headerHandle = try createHeaderHandle()
+        try headerHandle.synchronizeHeaderData()
+
+        // Verify that the file is now the size of the header. This means that we rewrote the file.
+        try handle.seek(to: 0)
+        let headerData = try handle.readDataUp(toLength: Int(FileHeader.expectedEndOfHeaderInFile))
+        XCTAssertEqual(headerData.count, Int(FileHeader.expectedEndOfHeaderInFile))
+
+        try handle.closeHandle()
+    }
+
     func test_synchronizeHeaderData_resetsFileWhenFileHeaderCannotBeCreated() throws {
         // Write a file that is too short for us to parse a `FileHeader` object.
         let handle = try FileHandle(forUpdating: testFileLocation)

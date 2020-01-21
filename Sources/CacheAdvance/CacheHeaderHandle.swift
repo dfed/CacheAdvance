@@ -52,6 +52,17 @@ final class CacheHeaderHandle {
     private(set) var offsetInFileOfOldestMessage: UInt64
     private(set) var offsetInFileAtEndOfNewestMessage: UInt64
 
+    /// Attempts to read the header data of the file.
+    ///
+    /// - Returns: As much of the header data as exists. The returned data may not form a complete header.
+    func readHeaderData() throws -> Data {
+        // Start at the beginning of the file.
+        try handle.seek(to: 0)
+
+        // Read the entire header.
+        return try handle.readDataUp(toLength: Int(FileHeader.expectedEndOfHeaderInFile))
+    }
+
     func updateOffsetInFileOfOldestMessage(to offset: UInt64) throws {
         offsetInFileOfOldestMessage = offset
 
@@ -101,32 +112,22 @@ final class CacheHeaderHandle {
     /// Reads the header data from the file. Writes header information to disk if no header exists.
     /// If the header data persisted to the file is not consistent with expectations, the file will be deleted.
     func synchronizeHeaderData() throws {
-        // Start at the beginning of the file.
-        try handle.seek(to: 0)
+        let headerData = try readHeaderData()
 
-        // Read the entire header.
-        let headerData = try handle.readDataUp(toLength: Int(FileHeader.expectedEndOfHeaderInFile))
-
-        if headerData.isEmpty {
-            // There is no header. Write one to disk.
-            try writeHeaderData()
-
-        } else {
-            guard let fileHeader = FileHeader(from: headerData) else {
-                // We can't read the header data. Let's start over.
-                try resetFile()
-                return
-            }
-
-            guard canOpenFile(with: fileHeader) else {
-                // The header is invalid. Nuke it.
-                try resetFile()
-                return
-            }
-
-            self.offsetInFileOfOldestMessage = fileHeader.offsetInFileOfOldestMessage
-            self.offsetInFileAtEndOfNewestMessage = fileHeader.offsetInFileAtEndOfNewestMessage
+        guard let fileHeader = FileHeader(from: headerData) else {
+            // We can't read the header data. Let's start over.
+            try resetFile()
+            return
         }
+
+        guard canOpenFile(with: fileHeader) else {
+            // The header is invalid. Nuke it.
+            try resetFile()
+            return
+        }
+
+        self.offsetInFileOfOldestMessage = fileHeader.offsetInFileOfOldestMessage
+        self.offsetInFileAtEndOfNewestMessage = fileHeader.offsetInFileAtEndOfNewestMessage
     }
 
     // MARK: Private
