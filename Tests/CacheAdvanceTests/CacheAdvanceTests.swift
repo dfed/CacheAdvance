@@ -24,6 +24,47 @@ final class CacheAdvanceTests: XCTestCase {
 
     // MARK: Behavior Tests
 
+    func test_isEmpty_returnsTrueWhenCacheIsEmpty() throws {
+        let cache = try createCache()
+
+        XCTAssertTrue(try cache.isEmpty())
+    }
+
+    func test_isEmpty_returnsFalseWhenCacheHasASingleMessage() throws {
+        let message: TestableMessage = "This is a test"
+        let cache = try createCache(messages: [message])
+        try cache.append(message: message)
+
+        XCTAssertFalse(try cache.isEmpty())
+    }
+
+    func test_isEmpty_returnsFalseWhenOpenedOnCacheThatHasASingleMessage() throws {
+        let message: TestableMessage = "This is a test"
+        let cache = try createCache()
+        try cache.append(message: message)
+
+        let sameCache = try createCache(zeroOutExistingFile: false)
+
+        XCTAssertFalse(try sameCache.isEmpty())
+    }
+
+    func test_isEmpty_returnsFalseWhenCacheThatDoesNotOverwriteIsFull() throws {
+        let message: TestableMessage = "This is a test"
+        let cache = try createCache(messages: [message])
+        try cache.append(message: message)
+
+        XCTAssertFalse(try cache.isEmpty())
+    }
+
+    func test_isEmpty_returnsFalseWhenCacheThatOverwritesIsFull() throws {
+        let cache = try createCache(shouldOverwriteOldMessages: true)
+        for message in Self.lorumIpsumMessages {
+            try cache.append(message: message)
+        }
+
+        XCTAssertFalse(try cache.isEmpty())
+    }
+
     func test_messages_canReadEmptyCacheThatDoesNotOverwriteOldestMessages() throws {
         let cache = try createCache()
 
