@@ -52,7 +52,7 @@ final class CacheAdvanceTests: XCTestCase {
         let cache = try createCache(messages: [message], maximumByteSubtractor: 1)
 
         XCTAssertThrowsError(try cache.append(message: message)) {
-            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.messageDataTooLarge)
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.messageLargerThanCacheCapacity)
         }
 
         let messages = try cache.messages()
@@ -64,7 +64,7 @@ final class CacheAdvanceTests: XCTestCase {
         let cache = try createCache(messages: [message], shouldOverwriteOldMessages: true, maximumByteSubtractor: 1)
 
         XCTAssertThrowsError(try cache.append(message: message)) {
-            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.messageDataTooLarge)
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.messageLargerThanCacheCapacity)
         }
 
         let messages = try cache.messages()
@@ -106,7 +106,7 @@ final class CacheAdvanceTests: XCTestCase {
         }
 
         XCTAssertThrowsError(try cache.append(message: "This message won't fit")) {
-            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.messageDataTooLarge)
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.messageLargerThanRemainingCacheSize)
         }
 
         let messages = try cache.messages()

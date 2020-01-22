@@ -16,8 +16,10 @@
 //
 
 public enum CacheAdvanceError: Error, Equatable {
-    /// Thrown when the message being appended is larger than maximum bytes.
-    case messageDataTooLarge
+    /// Thrown when the message being appended is too large to be stored in a cache of this size.
+    case messageLargerThanCacheCapacity
+    /// Thrown when a message being appended to a cache that does not overwrite old messages is too large to store in the remaining space.
+    case messageLargerThanRemainingCacheSize
     /// Thrown when the cache file is of an unexpected format.
     /// A corrupted file should be deleted. Corruption can occur if an application crashes while writing to the file.
     case fileCorrupted

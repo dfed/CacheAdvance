@@ -42,7 +42,7 @@ struct EncodableMessage<T: Codable> {
         let messageData = try encoder.encode(message)
         guard messageData.count < MessageSpan.max else {
             // We can't encode the length this message in a MessageSpan.
-            throw CacheAdvanceError.messageDataTooLarge
+            throw CacheAdvanceError.messageLargerThanCacheCapacity
         }
         let encodedSize = Data(MessageSpan(messageData.count))
         return encodedSize + messageData
