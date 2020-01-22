@@ -119,6 +119,13 @@ public final class CacheAdvance<T: Codable> {
         }
     }
 
+    /// - Returns: `true` when there are no messages written to the file.
+    public func isEmpty() throws -> Bool {
+        try setUpFileHandlesIfNecessary()
+
+        return header.offsetInFileAtEndOfNewestMessage == FileHeader.expectedEndOfHeaderInFile
+    }
+
     /// Fetches all messages from the cache.
     public func messages() throws -> [T] {
         try setUpFileHandlesIfNecessary()
