@@ -26,25 +26,25 @@ public final class CacheAdvance<T: Codable> {
     /// Creates a new instance of the receiver.
     ///
     /// - Parameters:
-    ///   - file: The file URL indicating the desired location of the on-disk store. This file should already exist.
+    ///   - fileURL: The file URL indicating the desired location of the on-disk store. This file should already exist.
     ///   - maximumBytes: The maximum size of the cache, in bytes. Logs larger than this size will fail to append to the store.
     ///   - shouldOverwriteOldMessages: When `true`, once the on-disk store exceeds maximumBytes, new entries will replace the oldest entry.
     ///
     /// - Warning: `maximumBytes` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache will lead to data loss.
     /// - Warning: `shouldOverwriteOldMessages` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache will lead to data loss.
     public init(
-        file: URL,
+        fileURL: URL,
         maximumBytes: Bytes,
         shouldOverwriteOldMessages: Bool)
         throws
     {
-        self.file = file
+        self.fileURL = fileURL
         self.maximumBytes = maximumBytes
         self.shouldOverwriteOldMessages = shouldOverwriteOldMessages
 
-        writer = try FileHandle(forWritingTo: file)
-        reader = try CacheReader(forReadingFrom: file, overwriteOldMessages: shouldOverwriteOldMessages)
-        header = try CacheHeaderHandle(forReadingFrom: file, maximumBytes: maximumBytes, overwritesOldMessages: shouldOverwriteOldMessages)
+        writer = try FileHandle(forWritingTo: fileURL)
+        reader = try CacheReader(forReadingFrom: fileURL, overwriteOldMessages: shouldOverwriteOldMessages)
+        header = try CacheHeaderHandle(forReadingFrom: fileURL, maximumBytes: maximumBytes, overwritesOldMessages: shouldOverwriteOldMessages)
     }
 
     deinit {
@@ -53,7 +53,7 @@ public final class CacheAdvance<T: Codable> {
 
     // MARK: Public
 
-    public let file: URL
+    public let fileURL: URL
 
     /// Appends a message to the cache.
     /// - Parameter message: A message to write to disk. Must be smaller than both `maximumBytes - FileHeader.expectedEndOfHeaderInFile` and `MessageSpan.max`.

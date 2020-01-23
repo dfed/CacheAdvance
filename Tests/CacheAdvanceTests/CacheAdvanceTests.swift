@@ -501,7 +501,7 @@ final class CacheAdvanceTests: XCTestCase {
             FileManager.default.createFile(atPath: file.path, contents: nil, attributes: nil)
         }
         return try CacheAdvance<TestableMessage>(
-            file: file,
+            fileURL: file,
             maximumBytes: Bytes(Double(try requiredByteCount(for: messages)) / maximumByteDivisor) - maximumByteSubtractor,
             shouldOverwriteOldMessages: overwritesOldMessages)
     }
