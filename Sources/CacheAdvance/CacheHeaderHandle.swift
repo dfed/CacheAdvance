@@ -50,6 +50,7 @@ final class CacheHeaderHandle {
     // MARK: Internal
 
     let maximumBytes: Bytes
+    let overwritesOldMessages: Bool
     private(set) var offsetInFileOfOldestMessage: UInt64
     private(set) var offsetInFileAtEndOfNewestMessage: UInt64
 
@@ -118,7 +119,6 @@ final class CacheHeaderHandle {
     // MARK: Private
 
     private let handle: FileHandle
-    private let overwritesOldMessages: Bool
     private let version: UInt8
 
     private var persistedMetadata: Metadata?

@@ -39,10 +39,9 @@ public final class CacheAdvance<T: Codable> {
         throws
     {
         self.fileURL = fileURL
-        self.shouldOverwriteOldMessages = shouldOverwriteOldMessages
 
         writer = try FileHandle(forWritingTo: fileURL)
-        reader = try CacheReader(forReadingFrom: fileURL, overwriteOldMessages: shouldOverwriteOldMessages)
+        reader = try CacheReader(forReadingFrom: fileURL)
         header = try CacheHeaderHandle(forReadingFrom: fileURL, maximumBytes: maximumBytes, overwritesOldMessages: shouldOverwriteOldMessages)
     }
 
@@ -83,7 +82,7 @@ public final class CacheAdvance<T: Codable> {
         }
 
         let cacheHasSpaceForNewMessageBeforeEndOfFile = writer.offsetInFile + bytesNeededToStoreMessage <= header.maximumBytes
-        if shouldOverwriteOldMessages {
+        if header.overwritesOldMessages {
             if !cacheHasSpaceForNewMessageBeforeEndOfFile {
                 // This message can't be written without exceeding our maximum file length.
                 // We'll need to start writing the file from the beginning of the file.
@@ -208,7 +207,6 @@ public final class CacheAdvance<T: Codable> {
     private let header: CacheHeaderHandle
 
     private var hasSetUpFileHandles = false
-    private let shouldOverwriteOldMessages: Bool
 
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()
