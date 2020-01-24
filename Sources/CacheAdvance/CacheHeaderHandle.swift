@@ -24,18 +24,19 @@ final class CacheHeaderHandle {
     /// Creates a new instance of the receiver.
     ///
     /// - Parameters:
-    ///   - file: The file URL indicating the desired location of the on-disk store. This file should already exist.
+    ///   - fileURL: The file URL indicating the desired location of the on-disk store. This file should already exist.
     ///   - maximumBytes: The maximum size of the cache, in bytes. Logs larger than this size will fail to append to the store.
     ///   - overwritesOldMessages: When `true`,  the cache encodes a pointer to the oldest message after the newest message marker.
     ///   - version: The file's expected header version.
     init(
-        forReadingFrom file: URL,
+        forReadingFrom fileURL: URL,
         maximumBytes: Bytes,
         overwritesOldMessages: Bool,
         version: UInt8 = FileHeader.version)
         throws
     {
-        handle = try FileHandle(forUpdating: file)
+        self.fileURL = fileURL
+        handle = try FileHandle(forUpdating: fileURL)
         self.maximumBytes = maximumBytes
         self.overwritesOldMessages = overwritesOldMessages
         self.version = version
@@ -49,6 +50,7 @@ final class CacheHeaderHandle {
 
     // MARK: Internal
 
+    let fileURL: URL
     let maximumBytes: Bytes
     let overwritesOldMessages: Bool
     private(set) var offsetInFileOfOldestMessage: UInt64

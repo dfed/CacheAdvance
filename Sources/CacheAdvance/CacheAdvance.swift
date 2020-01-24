@@ -40,9 +40,10 @@ public final class CacheAdvance<T: Codable> {
     {
         self.fileURL = fileURL
 
+        let header = try CacheHeaderHandle(forReadingFrom: fileURL, maximumBytes: maximumBytes, overwritesOldMessages: shouldOverwriteOldMessages)
+        self.header = header
+        reader = try CacheReader(forCacheWith: header)
         writer = try FileHandle(forWritingTo: fileURL)
-        reader = try CacheReader(forReadingFrom: fileURL)
-        header = try CacheHeaderHandle(forReadingFrom: fileURL, maximumBytes: maximumBytes, overwritesOldMessages: shouldOverwriteOldMessages)
     }
 
     deinit {
@@ -138,15 +139,7 @@ public final class CacheAdvance<T: Codable> {
     public func messages() throws -> [T] {
         try setUpFileHandlesIfNecessary()
 
-        var messages = [T]()
-        while let encodedMessage = try reader.nextEncodedMessage() {
-            messages.append(try decoder.decode(T.self, from: encodedMessage))
-        }
-
-        // Now that we've read all messages, seek back to the oldest message.
-        try reader.seekToBeginningOfOldestMessage()
-
-        return messages
+        return try reader.messages()
     }
 
     // MARK: Private
@@ -208,6 +201,5 @@ public final class CacheAdvance<T: Codable> {
 
     private var hasSetUpFileHandles = false
 
-    private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()
 }

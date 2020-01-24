@@ -17,19 +17,51 @@
 
 import Foundation
 
-final class CacheReader {
+public final class CacheReader {
 
     // MARK: Initialization
 
     /// Creates a new instance of the receiver.
     ///
-    /// - Parameter file: The file URL indicating the desired location of the on-disk store. This file should already exist.
-    init(forReadingFrom file: URL) throws {
-        reader = try FileHandle(forReadingFrom: file)
+    /// - Parameter fileURL: The file URL indicating the desired location of the on-disk store. This file should already exist.
+    public init(fileURL: URL)
+        throws
+    {
+        reader = try FileHandle(forReadingFrom: fileURL)
+        // Make up numbers for maximumBytes and overwritesOldMessages. They aren't necessary for reading.
+        header = try CacheHeaderHandle(
+            forReadingFrom: fileURL,
+            maximumBytes: 0,
+            overwritesOldMessages: false)
+    }
+
+    /// Creates a new instance of the receiver.
+    ///
+    /// - Parameter header: The header for the cache the reader will read from.
+    init(forCacheWith header: CacheHeaderHandle) throws {
+        reader = try FileHandle(forReadingFrom: header.fileURL)
+        self.header = header
     }
 
     deinit {
         try? reader.closeHandle()
+    }
+
+    // MARK: Public
+
+    /// Fetches all messages from the cache.
+    public func messages<T: Decodable>() throws -> [T] {
+        try setUpIfNecessary()
+
+        var messages = [T]()
+        while let encodedMessage = try nextEncodedMessage() {
+            messages.append(try decoder.decode(T.self, from: encodedMessage))
+        }
+
+        // Now that we've read all messages, seek back to the oldest message.
+        try seekToBeginningOfOldestMessage()
+
+        return messages
     }
 
     // MARK: Internal
@@ -43,6 +75,8 @@ final class CacheReader {
 
     /// Returns the next encodable message, seeking to the beginning of the next message.
     func nextEncodedMessage() throws -> Data? {
+        try setUpIfNecessary()
+
         let startingOffset = offsetInFile
 
         guard startingOffset != offsetInFileAtEndOfNewestMessage else {
@@ -73,11 +107,15 @@ final class CacheReader {
 
     /// Seeks to the beginning of the oldest message in the file.
     func seekToBeginningOfOldestMessage() throws {
+        try setUpIfNecessary()
+
         try reader.seek(to: offsetInFileOfOldestMessage)
     }
 
     /// Seeks to the next message. Returns `true` when the span skipped represented a message.
     func seekToNextMessage() throws {
+        try setUpIfNecessary()
+
         switch try nextEncodedMessageSpan() {
         case let .span(messageLength):
             // There's a valid message here. Seek ahead of it.
@@ -96,6 +134,8 @@ final class CacheReader {
 
     /// Returns the next encoded message span, seeking to the end the span.
     private func nextEncodedMessageSpan() throws -> NextMessageSpan {
+        try setUpIfNecessary()
+
         let messageSizeData = try reader.readDataUp(toLength: MessageSpan.storageLength)
 
         guard messageSizeData.count > 0 else {
@@ -111,7 +151,26 @@ final class CacheReader {
         return .span(MessageSpan(messageSizeData))
     }
 
+    private func setUpIfNecessary() throws {
+        guard offsetInFileOfOldestMessage == 0 && offsetInFileAtEndOfNewestMessage == 0 else {
+            // We've already set up our header.
+            return
+        }
+
+        // Read our header data.
+        try header.synchronizeHeaderData()
+
+        // Update ourselves with data from the header
+        offsetInFileOfOldestMessage = header.offsetInFileOfOldestMessage
+        offsetInFileAtEndOfNewestMessage = header.offsetInFileAtEndOfNewestMessage
+
+        // Seek to the oldest message.
+        try seekToBeginningOfOldestMessage()
+    }
+
     private let reader: FileHandle
+    private let header: CacheHeaderHandle
+    private let decoder = JSONDecoder()
 
 }
 

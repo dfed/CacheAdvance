@@ -45,6 +45,13 @@ let cachedMessages = try myCache.messages()
 
 This method reads all cached messages from disk into memory.
 
+If you want to read messages that were previously cached and do not need to write new messages, you can utilize a `CacheReader` to read all cached messages into memory:
+
+```swift
+let myReader = try CacheReader(fileURL: FileManager.default.temporaryDirectory.appendingPathComponent("MyCache"))
+let cachedMessages = try myReader.messages()
+```
+
 ### Thread safety
 
 CacheAdvances are not thread safe: a single CacheAdvance instance should always be interacted with from a single, serial queue. Since CacheAdvance reads from and writes to the disk synchronously, it is best to interact with a CacheAdvance on a background queue to prevent blocking the main queue.
