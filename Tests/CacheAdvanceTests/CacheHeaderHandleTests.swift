@@ -49,7 +49,7 @@ final class CacheHeaderHandleTests: XCTestCase {
         XCTAssertEqual(headerHandle2.offsetInFileOfOldestMessage, 2000)
     }
 
-    func test_synchronizeHeaderData_returnsDefaultVersionWhenUnexpectedVersionIsOnDisk() throws {
+    func test_synchronizeHeaderData_throwsFileCorruptedWhenDefaultVersionWhenUnexpectedVersionIsOnDisk() throws {
         let headerHandle1 = try createHeaderHandle(version: 2)
         try headerHandle1.synchronizeHeaderData()
         let defaultOffsetInFileAtEndOfNewestMessage = headerHandle1.offsetInFileAtEndOfNewestMessage
@@ -61,13 +61,12 @@ final class CacheHeaderHandleTests: XCTestCase {
         XCTAssertNotEqual(headerHandle1.offsetInFileOfOldestMessage, defaultOffsetInFileOfOldestMessage)
 
         let headerHandle2 = try createHeaderHandle(version: 3)
-        try headerHandle2.synchronizeHeaderData()
-
-        XCTAssertEqual(headerHandle2.offsetInFileAtEndOfNewestMessage, defaultOffsetInFileAtEndOfNewestMessage)
-        XCTAssertEqual(headerHandle2.offsetInFileOfOldestMessage, defaultOffsetInFileOfOldestMessage)
+        XCTAssertThrowsError(try headerHandle2.synchronizeHeaderData()) {
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileCorrupted)
+        }
     }
 
-    func test_synchronizeHeaderData_resetsFieldsToDefaultWhenMaximumBytesIsInconsistent() throws {
+    func test_synchronizeHeaderData_doesNotThrowWhenMaximumBytesIsInconsistent() throws {
         let headerHandle1 = try createHeaderHandle(maximumBytes: 5000)
         try headerHandle1.synchronizeHeaderData()
         let defaultOffsetInFileAtEndOfNewestMessage = headerHandle1.offsetInFileAtEndOfNewestMessage
@@ -79,13 +78,10 @@ final class CacheHeaderHandleTests: XCTestCase {
         XCTAssertNotEqual(headerHandle1.offsetInFileOfOldestMessage, defaultOffsetInFileOfOldestMessage)
 
         let headerHandle2 = try createHeaderHandle(maximumBytes: 10000)
-        try headerHandle2.synchronizeHeaderData()
-
-        XCTAssertEqual(headerHandle2.offsetInFileAtEndOfNewestMessage, defaultOffsetInFileAtEndOfNewestMessage)
-        XCTAssertEqual(headerHandle2.offsetInFileOfOldestMessage, defaultOffsetInFileOfOldestMessage)
+        XCTAssertNoThrow(try headerHandle2.synchronizeHeaderData())
     }
 
-    func test_synchronizeHeaderData_resetsFileWhenFileIsEmpty() throws {
+    func test_synchronizeHeaderData_writesHeaderWhenFileIsEmpty() throws {
         let handle = try FileHandle(forReadingFrom: testFileLocation)
         let fileData = try handle.readDataUp(toLength: 1)
         XCTAssertTrue(fileData.isEmpty)
@@ -101,84 +97,114 @@ final class CacheHeaderHandleTests: XCTestCase {
         try handle.closeHandle()
     }
 
-    func test_synchronizeHeaderData_resetsFileWhenFileHeaderCannotBeCreated() throws {
+    func test_synchronizeHeaderData_throwsFileCorruptedWhenFileHeaderCannotBeCreated() throws {
         // Write a file that is too short for us to parse a `FileHeader` object.
         let handle = try FileHandle(forUpdating: testFileLocation)
         handle.write(Data(repeating: 0, count: Int(FileHeader.expectedEndOfHeaderInFile) - 1))
 
         let headerHandle = try createHeaderHandle()
-        try headerHandle.synchronizeHeaderData()
-
-        // Verify that the file is now the size of the header. This means that we rewrote the file.
-        try handle.seek(to: 0)
-        let headerData = try handle.readDataUp(toLength: Int(FileHeader.expectedEndOfHeaderInFile))
-        XCTAssertEqual(headerData.count, Int(FileHeader.expectedEndOfHeaderInFile))
+        XCTAssertThrowsError(try headerHandle.synchronizeHeaderData()) {
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileCorrupted)
+        }
 
         try handle.closeHandle()
     }
 
     func test_canOpenFile_versionMismatch_returnsFalse() throws {
-        let fileHeader = FileHeader(
-            version: 1,
+        let originalHeader = try createHeaderHandle(
             maximumBytes: 1000,
             overwritesOldMessages: true,
-            offsetInFileOfOldestMessage: FileHeader.expectedEndOfHeaderInFile,
-            offsetInFileAtEndOfNewestMessage: 500)
+            version: 1)
+        try originalHeader.synchronizeHeaderData()
 
         let sut = try createHeaderHandle(
             maximumBytes: 1000,
             overwritesOldMessages: true,
             version: 2)
 
-        XCTAssertFalse(sut.canOpenFile(with: fileHeader))
+        XCTAssertFalse(try sut.canOpenFile())
     }
 
-    func test_canOpenFile_maximumBytesMismatch_returnsFalse() throws {
-        let fileHeader = FileHeader(
-            version: 1,
+    func test_canOpenFile_emptyFile_throwsFileCorrupted() throws {
+        let sut = try createHeaderHandle(
             maximumBytes: 1000,
             overwritesOldMessages: true,
-            offsetInFileOfOldestMessage: FileHeader.expectedEndOfHeaderInFile,
-            offsetInFileAtEndOfNewestMessage: 500)
+            version: 2)
+
+        XCTAssertThrowsError(try sut.canOpenFile()) {
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileCorrupted)
+        }
+    }
+
+    func test_canWriteToFile_maximumBytesMismatch_returnsFalse() throws {
+        let originalHeader = try createHeaderHandle(
+            maximumBytes: 1000,
+            overwritesOldMessages: true,
+            version: 1)
+        try originalHeader.synchronizeHeaderData()
 
         let sut = try createHeaderHandle(
             maximumBytes: 2000,
             overwritesOldMessages: true,
             version: 1)
 
-        XCTAssertFalse(sut.canOpenFile(with: fileHeader))
+        XCTAssertFalse(try sut.canWriteToFile())
     }
 
-    func test_canOpenFile_overwritesOldMessagesMismatch_returnsFalse() throws {
-        let fileHeader = FileHeader(
-            version: 1,
+    func test_canWriteToFile_overwritesOldMessagesMismatch_returnsFalse() throws {
+        let originalHeader = try createHeaderHandle(
             maximumBytes: 1000,
             overwritesOldMessages: true,
-            offsetInFileOfOldestMessage: FileHeader.expectedEndOfHeaderInFile,
-            offsetInFileAtEndOfNewestMessage: 500)
+            version: 1)
+        try originalHeader.synchronizeHeaderData()
 
         let sut = try createHeaderHandle(
             maximumBytes: 1000,
             overwritesOldMessages: false,
             version: 1)
 
-        XCTAssertFalse(sut.canOpenFile(with: fileHeader))
+        XCTAssertFalse(try sut.canWriteToFile())
+    }
+
+    func test_canWriteToFile_versionMismatch_returnsFalse() throws {
+        let originalHeader = try createHeaderHandle(
+            maximumBytes: 1000,
+            overwritesOldMessages: true,
+            version: 1)
+        try originalHeader.synchronizeHeaderData()
+
+        let sut = try createHeaderHandle(
+            maximumBytes: 1000,
+            overwritesOldMessages: true,
+            version: 2)
+
+        XCTAssertFalse(try sut.canWriteToFile())
+    }
+
+    func test_canWriteToFile_emptyFile_returnsFalse() throws {
+        let sut = try createHeaderHandle(
+            maximumBytes: 1000,
+            overwritesOldMessages: true,
+            version: 2)
+
+        XCTAssertThrowsError(try sut.canWriteToFile()) {
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileCorrupted)
+        }
     }
 
     func test_canOpenFile_noMismatches_returnsTrue() throws {
-        let fileHeader = FileHeader(
-            version: 1,
+        let originalHeader = try createHeaderHandle(
             maximumBytes: 1000,
             overwritesOldMessages: true,
-            offsetInFileOfOldestMessage: FileHeader.expectedEndOfHeaderInFile,
-            offsetInFileAtEndOfNewestMessage: 500)
+            version: 1)
+        try originalHeader.synchronizeHeaderData()
 
         let sut = try createHeaderHandle(
             maximumBytes: 1000,
             overwritesOldMessages: true,
             version: 1)
 
-        XCTAssertTrue(sut.canOpenFile(with: fileHeader))
+        XCTAssertTrue(try sut.canOpenFile())
     }
 
     // MARK: Private

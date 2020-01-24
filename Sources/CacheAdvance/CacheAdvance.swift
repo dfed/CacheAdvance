@@ -30,8 +30,8 @@ public final class CacheAdvance<T: Codable> {
     ///   - maximumBytes: The maximum size of the cache, in bytes. Logs larger than this size will fail to append to the store.
     ///   - shouldOverwriteOldMessages: When `true`, once the on-disk store exceeds maximumBytes, new entries will replace the oldest entry.
     ///
-    /// - Warning: `maximumBytes` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache will lead to data loss.
-    /// - Warning: `shouldOverwriteOldMessages` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache will lead to data loss.
+    /// - Warning: `maximumBytes` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache will prevent appending new messages to this cache.
+    /// - Warning: `shouldOverwriteOldMessages` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache will prevent appending new messages to this cache.
     public init(
         fileURL: URL,
         maximumBytes: Bytes,
@@ -39,7 +39,6 @@ public final class CacheAdvance<T: Codable> {
         throws
     {
         self.fileURL = fileURL
-        self.maximumBytes = maximumBytes
         self.shouldOverwriteOldMessages = shouldOverwriteOldMessages
 
         writer = try FileHandle(forWritingTo: fileURL)
@@ -55,17 +54,27 @@ public final class CacheAdvance<T: Codable> {
 
     public let fileURL: URL
 
+    /// Checks if the all the header metadata provided at initialization matches the persisted header. If not, the cache is not writable.
+    /// - Returns: `true` if the cache is writable.
+    public func isWritable() throws -> Bool {
+        try setUpFileHandlesIfNecessary()
+        return try header.canWriteToFile()
+    }
+
     /// Appends a message to the cache.
     /// - Parameter message: A message to write to disk. Must be smaller than both `maximumBytes - FileHeader.expectedEndOfHeaderInFile` and `MessageSpan.max`.
     public func append(message: T) throws {
         try setUpFileHandlesIfNecessary()
+        guard try header.canWriteToFile() else {
+            throw CacheAdvanceError.fileNotWritable
+        }
 
         let encodableMessage = EncodableMessage(message: message, encoder: encoder)
         let messageData = try encodableMessage.encodedData()
         let bytesNeededToStoreMessage = Bytes(messageData.count)
 
         guard
-            bytesNeededToStoreMessage <= maximumBytes - FileHeader.expectedEndOfHeaderInFile // Make sure we have room in this file for this message.
+            bytesNeededToStoreMessage <= header.maximumBytes - FileHeader.expectedEndOfHeaderInFile // Make sure we have room in this file for this message.
                 && bytesNeededToStoreMessage < Int32.max // Make sure we can read this message back out with Int on a 32-bit device.
             else
         {
@@ -73,7 +82,7 @@ public final class CacheAdvance<T: Codable> {
             throw CacheAdvanceError.messageLargerThanCacheCapacity
         }
 
-        let cacheHasSpaceForNewMessageBeforeEndOfFile = writer.offsetInFile + bytesNeededToStoreMessage <= maximumBytes
+        let cacheHasSpaceForNewMessageBeforeEndOfFile = writer.offsetInFile + bytesNeededToStoreMessage <= header.maximumBytes
         if shouldOverwriteOldMessages {
             if !cacheHasSpaceForNewMessageBeforeEndOfFile {
                 // This message can't be written without exceeding our maximum file length.
@@ -200,8 +209,6 @@ public final class CacheAdvance<T: Codable> {
 
     private var hasSetUpFileHandles = false
     private let shouldOverwriteOldMessages: Bool
-
-    private let maximumBytes: Bytes
 
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()

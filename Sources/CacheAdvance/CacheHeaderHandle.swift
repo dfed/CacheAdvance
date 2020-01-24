@@ -49,19 +49,9 @@ final class CacheHeaderHandle {
 
     // MARK: Internal
 
+    let maximumBytes: Bytes
     private(set) var offsetInFileOfOldestMessage: UInt64
     private(set) var offsetInFileAtEndOfNewestMessage: UInt64
-
-    /// Attempts to read the header data of the file.
-    ///
-    /// - Returns: As much of the header data as exists. The returned data may not form a complete header.
-    func readHeaderData() throws -> Data {
-        // Start at the beginning of the file.
-        try handle.seek(to: 0)
-
-        // Read the entire header.
-        return try handle.readDataUp(toLength: Int(FileHeader.expectedEndOfHeaderInFile))
-    }
 
     func updateOffsetInFileOfOldestMessage(to offset: UInt64) throws {
         offsetInFileOfOldestMessage = offset
@@ -83,30 +73,18 @@ final class CacheHeaderHandle {
         try handle.write(data: currentHeader.data(for: .offsetInFileAtEndOfNewestMessage))
     }
 
-    /// Checks if the static header metadata of this object matches another file header. Static metadata are the properties of the header
-    /// that need to remain the same for the entire lifetime of a cache file.
+    /// Checks if the expected header version matches the persisted header version.
     ///
-    /// - Parameter fileHeader: A representation of the header data in an existing cache file.
+    /// - Returns: `true` if this object's header version matches that of `fileHeader`; otherwise `false`.
+    func canOpenFile() throws -> Bool {
+        canOpenFile(with: try memoizedMetadata())
+    }
+
+    /// Checks if the all the header metadata provided at initialization matches the persisted header.
     ///
-    /// - Returns: `true` if this object's static metadata matches that of `fileHeader`; otherwise `false`.
-    func canOpenFile(with fileHeader: FileHeader) -> Bool {
-        guard fileHeader.version == version else {
-            // Our current file header version is 1.
-            // That means there is no prior header version we could attempt to read.
-            // We have no idea how to read this file.
-            return false
-        }
-
-        guard
-            fileHeader.maximumBytes == maximumBytes,
-            fileHeader.overwritesOldMessages == overwritesOldMessages
-            else
-        {
-            // The header's values are not consistent with our expectations.
-            return false
-        }
-
-        return true
+    /// - Returns: `true` if this object's static metadata matches that of the persisted `fileHeader`; otherwise `false`.
+    func canWriteToFile() throws -> Bool {
+        canWriteToFile(with: try memoizedMetadata())
     }
 
     /// Reads the header data from the file. Writes header information to disk if no header exists.
@@ -114,28 +92,36 @@ final class CacheHeaderHandle {
     func synchronizeHeaderData() throws {
         let headerData = try readHeaderData()
 
+        guard !headerData.isEmpty else {
+            // The file is empty. Write a header to disk.
+            try writeHeaderData()
+            persistedMetadata = Metadata(fileHeader: currentHeader)
+            return
+        }
+
         guard let fileHeader = FileHeader(from: headerData) else {
-            // We can't read the header data. Let's start over.
-            try resetFile()
-            return
+            // We can't read the header data.
+            throw CacheAdvanceError.fileCorrupted
         }
 
-        guard canOpenFile(with: fileHeader) else {
-            // The header is invalid. Nuke it.
-            try resetFile()
-            return
+        let persistedMetadata = Metadata(fileHeader: fileHeader)
+        guard canOpenFile(with: persistedMetadata) else {
+            // The header can't be understood.
+            throw CacheAdvanceError.fileCorrupted
         }
 
-        self.offsetInFileOfOldestMessage = fileHeader.offsetInFileOfOldestMessage
-        self.offsetInFileAtEndOfNewestMessage = fileHeader.offsetInFileAtEndOfNewestMessage
+        self.persistedMetadata = persistedMetadata
+        offsetInFileOfOldestMessage = fileHeader.offsetInFileOfOldestMessage
+        offsetInFileAtEndOfNewestMessage = fileHeader.offsetInFileAtEndOfNewestMessage
     }
 
     // MARK: Private
 
     private let handle: FileHandle
     private let overwritesOldMessages: Bool
-    private let maximumBytes: Bytes
     private let version: UInt8
+
+    private var persistedMetadata: Metadata?
 
     private var currentHeader: FileHeader {
         FileHeader(
@@ -144,6 +130,42 @@ final class CacheHeaderHandle {
             overwritesOldMessages: overwritesOldMessages,
             offsetInFileOfOldestMessage: offsetInFileOfOldestMessage,
             offsetInFileAtEndOfNewestMessage: offsetInFileAtEndOfNewestMessage)
+    }
+
+    /// Attempts to read the header data of the file.
+    ///
+    /// - Returns: As much of the header data as exists. The returned data may not form a complete header.
+    private func readHeaderData() throws -> Data {
+        // Start at the beginning of the file.
+        try handle.seek(to: 0)
+
+        // Read the entire header.
+        return try handle.readDataUp(toLength: Int(FileHeader.expectedEndOfHeaderInFile))
+    }
+
+    /// Checks if the expected header version matches the persisted header version.
+    ///
+    /// - Parameter persistedMetadata: The persisted header metadata.
+    /// - Returns: `true` if this object's header version matches that of `fileHeader`; otherwise `false`.
+    private func canOpenFile(with persistedMetadata: Metadata) -> Bool {
+        // Our current file header version is 1.
+        // That means there is only one header version we can understand.
+        // Our header version must be our expected version for us to open the file successfully.
+        persistedMetadata.version == version
+    }
+
+    /// Checks if the all the header metadata provided at initialization matches the persisted header.
+    ///
+    /// - Parameter persistedMetadata: The persisted header metadata.
+    /// - Returns: `true` if this object's static metadata matches that of the persisted `fileHeader`; otherwise `false`.
+    private func canWriteToFile(with persistedMetadata: Metadata) -> Bool {
+        guard canOpenFile(with: persistedMetadata) else {
+            // If we can't open the file, we can't write to it.
+            return false
+        }
+
+        return persistedMetadata.maximumBytes == maximumBytes
+            && persistedMetadata.overwritesOldMessages == overwritesOldMessages
     }
 
     /// Writes header data to the file.
@@ -155,13 +177,42 @@ final class CacheHeaderHandle {
         try handle.write(data: currentHeader.asData)
     }
 
-    private func resetFile() throws {
-        try handle.truncate(at: 0)
-
-        // Now that we've started from scratch, write a new header.
-        try writeHeaderData()
+    private func memoizedMetadata() throws -> Metadata {
+        if let persistedMetadata = self.persistedMetadata {
+            return persistedMetadata
+        } else {
+            return try Metadata(headerData: try readHeaderData())
+        }
     }
 
     private static let beginningOfHeaderField_offsetInFileOfOldestMessage = FileHeader.Field.offsetInFileOfOldestMessage.expectedBeginningOfFieldInFile
     private static let beginningOfHeaderField_offsetInFileAtEndOfNewestMessage = FileHeader.Field.offsetInFileAtEndOfNewestMessage.expectedBeginningOfFieldInFile
+
+    // MARK: Metadata
+
+    /// A snapshot of data read from a persisted file header.
+    private struct Metadata {
+
+        // MARK: Initialization
+
+        init(fileHeader: FileHeader) {
+            version = fileHeader.version
+            maximumBytes = fileHeader.maximumBytes
+            overwritesOldMessages = fileHeader.overwritesOldMessages
+        }
+
+        init(headerData: Data) throws {
+            guard let fileHeader = FileHeader(from: headerData) else {
+                // We can't read the header data.
+                throw CacheAdvanceError.fileCorrupted
+            }
+            self = .init(fileHeader: fileHeader)
+        }
+
+        // MARK: Properties
+
+        let version: UInt8
+        let maximumBytes: UInt64
+        let overwritesOldMessages: Bool
+    }
 }
