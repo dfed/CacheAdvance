@@ -355,6 +355,18 @@ final class CacheAdvanceTests: XCTestCase {
         }
     }
 
+    func test_messages_cacheThatOverwrites_canReadMessagesWrittenByANonOverwritingCache() throws {
+        for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
+            let cache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
+            for message in Self.lorumIpsumMessages {
+                try cache.append(message: message)
+            }
+
+            let secondCache = try createCache(overwritesOldMessages: false, zeroOutExistingFile: false)
+            XCTAssertEqual(try cache.messages(), try secondCache.messages())
+        }
+    }
+
     func test_messages_cacheThatDoesNotOverwrites_canReadMessagesWrittenByAnOverwritingCacheWithDifferentMaximumBytes() throws {
         for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
             let cache = try createCache(overwritesOldMessages: false)
