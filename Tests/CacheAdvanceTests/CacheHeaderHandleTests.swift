@@ -49,21 +49,21 @@ final class CacheHeaderHandleTests: XCTestCase {
         XCTAssertEqual(headerHandle2.offsetInFileOfOldestMessage, 2000)
     }
 
-    func test_synchronizeHeaderData_throwsFileCorruptedWhenDefaultVersionWhenUnexpectedVersionIsOnDisk() throws {
+    func test_synchronizeHeaderData_doesNotThrowWhenUnexpectedVersionIsOnDisk() throws {
         let headerHandle1 = try createHeaderHandle(version: 2)
         try headerHandle1.synchronizeHeaderData()
         let defaultOffsetInFileAtEndOfNewestMessage = headerHandle1.offsetInFileAtEndOfNewestMessage
         let defaultOffsetInFileOfOldestMessage = headerHandle1.offsetInFileOfOldestMessage
         try headerHandle1.updateOffsetInFileAtEndOfNewestMessage(to: 1000)
         try headerHandle1.updateOffsetInFileOfOldestMessage(to: 2000)
+        let fileData = try Data(contentsOf: testFileLocation)
 
         XCTAssertNotEqual(headerHandle1.offsetInFileAtEndOfNewestMessage, defaultOffsetInFileAtEndOfNewestMessage)
         XCTAssertNotEqual(headerHandle1.offsetInFileOfOldestMessage, defaultOffsetInFileOfOldestMessage)
 
         let headerHandle2 = try createHeaderHandle(version: 3)
-        XCTAssertThrowsError(try headerHandle2.synchronizeHeaderData()) {
-            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileCorrupted)
-        }
+        XCTAssertNoThrow(try headerHandle2.synchronizeHeaderData())
+        XCTAssertEqual(try Data(contentsOf: testFileLocation), fileData, "Opening handle with different version caused file to be changed")
     }
 
     func test_synchronizeHeaderData_doesNotThrowWhenMaximumBytesIsInconsistent() throws {
@@ -73,12 +73,15 @@ final class CacheHeaderHandleTests: XCTestCase {
         let defaultOffsetInFileOfOldestMessage = headerHandle1.offsetInFileOfOldestMessage
         try headerHandle1.updateOffsetInFileAtEndOfNewestMessage(to: 1000)
         try headerHandle1.updateOffsetInFileOfOldestMessage(to: 2000)
+        let fileData = try Data(contentsOf: testFileLocation)
 
         XCTAssertNotEqual(headerHandle1.offsetInFileAtEndOfNewestMessage, defaultOffsetInFileAtEndOfNewestMessage)
         XCTAssertNotEqual(headerHandle1.offsetInFileOfOldestMessage, defaultOffsetInFileOfOldestMessage)
 
         let headerHandle2 = try createHeaderHandle(maximumBytes: 10000)
         XCTAssertNoThrow(try headerHandle2.synchronizeHeaderData())
+
+        XCTAssertEqual(try Data(contentsOf: testFileLocation), fileData, "Opening handle with different maximumBytes caused file to be changed")
     }
 
     func test_synchronizeHeaderData_writesHeaderWhenFileIsEmpty() throws {

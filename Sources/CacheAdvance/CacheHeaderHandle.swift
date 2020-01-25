@@ -61,7 +61,7 @@ final class CacheHeaderHandle {
         try handle.seek(to: CacheHeaderHandle.beginningOfHeaderField_offsetInFileOfOldestMessage)
 
         // Write this updated value to disk.
-        try handle.write(data: currentHeader.data(for: .offsetInFileOfOldestMessage))
+        try handle.write(data: expectedHeader.data(for: .offsetInFileOfOldestMessage))
     }
 
     func updateOffsetInFileAtEndOfNewestMessage(to offset: UInt64) throws {
@@ -71,7 +71,7 @@ final class CacheHeaderHandle {
         try handle.seek(to: CacheHeaderHandle.beginningOfHeaderField_offsetInFileAtEndOfNewestMessage)
 
         // Write this updated value to disk.
-        try handle.write(data: currentHeader.data(for: .offsetInFileAtEndOfNewestMessage))
+        try handle.write(data: expectedHeader.data(for: .offsetInFileAtEndOfNewestMessage))
     }
 
     /// Checks if the expected header version matches the persisted header version.
@@ -95,8 +95,8 @@ final class CacheHeaderHandle {
 
         guard !headerData.isEmpty else {
             // The file is empty. Write a header to disk.
-            try writeHeaderData()
-            persistedMetadata = Metadata(fileHeader: currentHeader)
+            let writtenHeader = try writeHeaderData()
+            persistedMetadata = Metadata(fileHeader: writtenHeader)
             return
         }
 
@@ -107,8 +107,7 @@ final class CacheHeaderHandle {
 
         let persistedMetadata = Metadata(fileHeader: fileHeader)
         guard canOpenFile(with: persistedMetadata) else {
-            // The header can't be understood.
-            throw CacheAdvanceError.fileCorrupted
+            return
         }
 
         self.persistedMetadata = persistedMetadata
@@ -123,7 +122,7 @@ final class CacheHeaderHandle {
 
     private var persistedMetadata: Metadata?
 
-    private var currentHeader: FileHeader {
+    private var expectedHeader: FileHeader {
         FileHeader(
             version: version,
             maximumBytes: maximumBytes,
@@ -169,12 +168,16 @@ final class CacheHeaderHandle {
     }
 
     /// Writes header data to the file.
-    private func writeHeaderData() throws {
+    private func writeHeaderData() throws -> FileHeader {
+        let header = expectedHeader
+
         // Seek to the beginning of the file before writing the header.
         try handle.seek(to: 0)
 
         // Write the header to disk.
-        try handle.write(data: currentHeader.asData)
+        try handle.write(data: header.asData)
+
+        return header
     }
 
     private func memoizedMetadata() throws -> Metadata {
