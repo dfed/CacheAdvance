@@ -101,7 +101,7 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertTrue(try sut.isWritable())
     }
 
-    func test_isWritable_throwsFileCorruptedWhenHeaderVersionDoesNotMatch() throws {
+    func test_isWritable_returnsFalseWhenHeaderVersionDoesNotMatch() throws {
         let originalHeader = try createHeaderHandle(
             overwritesOldMessages: false,
             version: 0)
