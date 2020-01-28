@@ -39,4 +39,4 @@ let package = Package(
     ],
     swiftLanguageVersions: [.v5]
 )
-let version = Version(0, 2, 0)
+let version = Version(0, 3, 0)

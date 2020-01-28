@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name     = 'CacheAdvance'
-  s.version  = '0.2.0'
+  s.version  = '0.3.0'
   s.license  = 'Apache License, Version 2.0'
   s.summary  = 'A cache that enables the performant persistence of individual messages to disk'
   s.homepage = 'https://github.com/dfed/CacheAdvance'

@@ -78,7 +78,7 @@ To install CacheAdvance in your iOS project with [Swift Package Manager](https:/
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/dfed/CacheAdvance", from: "0.2.0"),
+    .package(url: "https://github.com/dfed/CacheAdvance", from: "0.3.0"),
 ]
 ```
 
