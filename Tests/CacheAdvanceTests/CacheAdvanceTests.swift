@@ -65,6 +65,20 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertFalse(try cache.isEmpty())
     }
 
+    func test_isEmpty_throwsIncompatibleHeaderWhenHeaderVersionDoesNotMatch() throws {
+        let originalHeader = try createHeaderHandle(
+            overwritesOldMessages: false,
+            version: 0)
+        try originalHeader.synchronizeHeaderData()
+
+        let sut = try createCache(
+            overwritesOldMessages: false,
+            zeroOutExistingFile: false)
+        XCTAssertThrowsError(try sut.isEmpty()) {
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.incompatibleHeader)
+        }
+    }
+
     func test_messages_canReadEmptyCacheThatDoesNotOverwriteOldestMessages() throws {
         let cache = try createCache(overwritesOldMessages: false)
 
@@ -77,6 +91,43 @@ final class CacheAdvanceTests: XCTestCase {
 
         let messages = try cache.messages()
         XCTAssertEqual(messages, [])
+    }
+
+    func test_isWritable_returnsTrueWhenStaticHeaderMetadataMatches() throws {
+        let originalCache = try createCache(overwritesOldMessages: false)
+        XCTAssertTrue(try originalCache.isWritable())
+
+        let sut = try createCache(overwritesOldMessages: false, zeroOutExistingFile: false)
+        XCTAssertTrue(try sut.isWritable())
+    }
+
+    func test_isWritable_returnsFalseWhenHeaderVersionDoesNotMatch() throws {
+        let originalHeader = try createHeaderHandle(
+            overwritesOldMessages: false,
+            version: 0)
+        try originalHeader.synchronizeHeaderData()
+
+        let sut = try createCache(overwritesOldMessages: false, zeroOutExistingFile: false)
+        XCTAssertFalse(try sut.isWritable())
+    }
+
+    func test_isWritable_returnsFalseWhenMaximumBytesDoesNotMatch() throws {
+        let originalCache = try createCache(overwritesOldMessages: false)
+        XCTAssertTrue(try originalCache.isWritable())
+
+        let sut = try createCache(
+            sizedToFit: Self.lorumIpsumMessages.dropLast(),
+            overwritesOldMessages: false,
+            zeroOutExistingFile: false)
+        XCTAssertFalse(try sut.isWritable())
+    }
+
+    func test_isWritable_returnsFalseWhenOverwritesOldMessagesDoesNotMatch() throws {
+        let originalCache = try createCache(overwritesOldMessages: false)
+        XCTAssertTrue(try originalCache.isWritable())
+
+        let sut = try createCache(overwritesOldMessages: true, zeroOutExistingFile: false)
+        XCTAssertFalse(try sut.isWritable())
     }
 
     func test_append_singleMessageThatFits_canBeRetrieved() throws {
@@ -238,6 +289,44 @@ final class CacheAdvanceTests: XCTestCase {
         }
     }
 
+    func test_append_throwsIncompatibleHeaderWhenHeaderVersionDoesNotMatch() throws {
+        let originalHeader = try createHeaderHandle(
+            overwritesOldMessages: false,
+            version: 0)
+        try originalHeader.synchronizeHeaderData()
+
+        let sut = try createCache(
+            sizedToFit: Self.lorumIpsumMessages.dropLast(),
+            overwritesOldMessages: false,
+            zeroOutExistingFile: false)
+        XCTAssertThrowsError(try sut.append(message: Self.lorumIpsumMessages.last!)) {
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.incompatibleHeader)
+        }
+    }
+
+    func test_append_throwsFileNotWritableWhenMaximumBytesDoesNotMatch() throws {
+        let originalCache = try createCache(overwritesOldMessages: false)
+        XCTAssertTrue(try originalCache.isWritable())
+
+        let sut = try createCache(
+            sizedToFit: Self.lorumIpsumMessages.dropLast(),
+            overwritesOldMessages: false,
+            zeroOutExistingFile: false)
+        XCTAssertThrowsError(try sut.append(message: Self.lorumIpsumMessages.last!)) {
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileNotWritable)
+        }
+    }
+
+    func test_append_throwsFileNotWritableWhenOverwritesOldMessagesDoesNotMatch() throws {
+        let originalCache = try createCache(overwritesOldMessages: false)
+        XCTAssertTrue(try originalCache.isWritable())
+
+        let sut = try createCache(overwritesOldMessages: true, zeroOutExistingFile: false)
+        XCTAssertThrowsError(try sut.append(message: Self.lorumIpsumMessages.last!)) {
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileNotWritable)
+        }
+    }
+
     func test_messages_canReadMessagesWrittenByADifferentCache() throws {
         let cache = try createCache(overwritesOldMessages: false)
         for message in Self.lorumIpsumMessages {
@@ -268,6 +357,66 @@ final class CacheAdvanceTests: XCTestCase {
 
             let secondCache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor, zeroOutExistingFile: false)
             XCTAssertEqual(try cache.messages(), try secondCache.messages())
+        }
+    }
+
+    func test_messages_cacheThatDoesNotOverwrite_canReadMessagesWrittenByAnOverwritingCache() throws {
+        let cache = try createCache(overwritesOldMessages: false)
+        for message in Self.lorumIpsumMessages {
+            try cache.append(message: message)
+        }
+
+        let secondCache = try createCache(overwritesOldMessages: true, zeroOutExistingFile: false)
+        XCTAssertEqual(try cache.messages(), try secondCache.messages())
+    }
+
+    func test_messages_cacheThatOverwrites_canReadMessagesWrittenByAnOverwritingCacheWithDifferentMaximumBytes() throws {
+        for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
+            let cache = try createCache(overwritesOldMessages: true)
+            for message in Self.lorumIpsumMessages {
+                try cache.append(message: message)
+            }
+
+            let secondCache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor, zeroOutExistingFile: false)
+            XCTAssertEqual(try cache.messages(), try secondCache.messages())
+        }
+    }
+
+    func test_messages_cacheThatOverwrites_canReadMessagesWrittenByANonOverwritingCache() throws {
+        for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
+            let cache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
+            for message in Self.lorumIpsumMessages {
+                try cache.append(message: message)
+            }
+
+            let secondCache = try createCache(overwritesOldMessages: false, zeroOutExistingFile: false)
+            XCTAssertEqual(try cache.messages(), try secondCache.messages())
+        }
+    }
+
+    func test_messages_cacheThatDoesNotOverwrite_canReadMessagesWrittenByAnOverwritingCacheWithDifferentMaximumBytes() throws {
+        for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
+            let cache = try createCache(overwritesOldMessages: false)
+            for message in Self.lorumIpsumMessages {
+                try cache.append(message: message)
+            }
+
+            let secondCache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor, zeroOutExistingFile: false)
+            XCTAssertEqual(try cache.messages(), try secondCache.messages())
+        }
+    }
+
+    func test_messages_throwsIncompatibleHeaderWhenHeaderVersionDoesNotMatch() throws {
+        let originalHeader = try createHeaderHandle(
+            overwritesOldMessages: false,
+            version: 0)
+        try originalHeader.synchronizeHeaderData()
+
+        let sut = try createCache(
+            overwritesOldMessages: false,
+            zeroOutExistingFile: false)
+        XCTAssertThrowsError(try sut.messages()) {
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.incompatibleHeader)
         }
     }
 
@@ -487,8 +636,27 @@ final class CacheAdvanceTests: XCTestCase {
         }
     }
 
+    private func createHeaderHandle(
+        sizedToFit messages: [TestableMessage] = CacheAdvanceTests.lorumIpsumMessages,
+        overwritesOldMessages: Bool,
+        maximumByteDivisor: Double = 1,
+        maximumByteSubtractor: Bytes = 0,
+        version: UInt8 = FileHeader.version,
+        zeroOutExistingFile: Bool = true)
+        throws
+        -> CacheHeaderHandle
+    {
+        if zeroOutExistingFile {
+            FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
+        }
+        return try CacheHeaderHandle(
+            forReadingFrom: testFileLocation,
+            maximumBytes: Bytes(Double(try requiredByteCount(for: messages)) / maximumByteDivisor) - maximumByteSubtractor,
+            overwritesOldMessages: overwritesOldMessages,
+            version: version)
+    }
+
     private func createCache(
-        file: URL = FileManager.default.temporaryDirectory.appendingPathComponent("CacheAdvanceTests"),
         sizedToFit messages: [TestableMessage] = CacheAdvanceTests.lorumIpsumMessages,
         overwritesOldMessages: Bool,
         maximumByteDivisor: Double = 1,
@@ -498,10 +666,10 @@ final class CacheAdvanceTests: XCTestCase {
         -> CacheAdvance<TestableMessage>
     {
         if zeroOutExistingFile {
-            FileManager.default.createFile(atPath: file.path, contents: nil, attributes: nil)
+            FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
         }
         return try CacheAdvance<TestableMessage>(
-            fileURL: file,
+            fileURL: testFileLocation,
             maximumBytes: Bytes(Double(try requiredByteCount(for: messages)) / maximumByteDivisor) - maximumByteSubtractor,
             shouldOverwriteOldMessages: overwritesOldMessages)
     }
@@ -514,4 +682,5 @@ final class CacheAdvanceTests: XCTestCase {
         Array(messages.dropFirst(messages.count - newMessageCount))
     }
 
+    private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("CacheAdvanceTests")
 }

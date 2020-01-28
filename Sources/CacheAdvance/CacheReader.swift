@@ -23,12 +23,9 @@ final class CacheReader {
 
     /// Creates a new instance of the receiver.
     ///
-    /// - Parameters:
-    ///   - file: The file URL indicating the desired location of the on-disk store. This file should already exist.
-    ///   - overwriteOldMessages: When `true`,  the cache encodes a pointer to the oldest message after the newest message marker.
-    init(forReadingFrom file: URL, overwriteOldMessages: Bool) throws {
+    /// - Parameter file: The file URL indicating the desired location of the on-disk store. This file should already exist.
+    init(forReadingFrom file: URL) throws {
         reader = try FileHandle(forReadingFrom: file)
-        self.overwriteOldMessages = overwriteOldMessages
     }
 
     deinit {
@@ -115,7 +112,6 @@ final class CacheReader {
     }
 
     private let reader: FileHandle
-    private let overwriteOldMessages: Bool
 
 }
 
