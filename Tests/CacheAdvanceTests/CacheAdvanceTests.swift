@@ -58,7 +58,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_isEmpty_returnsFalseWhenCacheThatOverwritesIsFull() throws {
         let cache = try createCache(overwritesOldMessages: true)
-        for message in Self.lorumIpsumMessages {
+        for message in LorumIpsum.messages {
             try cache.append(message: message)
         }
 
@@ -116,7 +116,7 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertTrue(try originalCache.isWritable())
 
         let sut = try createCache(
-            sizedToFit: Self.lorumIpsumMessages.dropLast(),
+            sizedToFit: LorumIpsum.messages.dropLast(),
             overwritesOldMessages: false,
             zeroOutExistingFile: false)
         XCTAssertFalse(try sut.isWritable())
@@ -165,17 +165,17 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_append_multipleMessagesCanBeRetrieved() throws {
         let cache = try createCache(overwritesOldMessages: false)
-        for message in Self.lorumIpsumMessages {
+        for message in LorumIpsum.messages {
             try cache.append(message: message)
         }
 
         let messages = try cache.messages()
-        XCTAssertEqual(messages, Self.lorumIpsumMessages)
+        XCTAssertEqual(messages, LorumIpsum.messages)
     }
 
     func test_append_multipleMessagesCanBeRetrievedTwiceFromNonOverwritingCache() throws {
         let cache = try createCache(overwritesOldMessages: false)
-        for message in Self.lorumIpsumMessages {
+        for message in LorumIpsum.messages {
             try cache.append(message: message)
         }
 
@@ -184,7 +184,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_append_multipleMessagesCanBeRetrievedTwiceFromOverwritingCache() throws {
         let cache = try createCache(overwritesOldMessages: true, maximumByteDivisor: 3)
-        for message in Self.lorumIpsumMessages {
+        for message in LorumIpsum.messages {
             try cache.append(message: message)
         }
 
@@ -193,7 +193,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_append_dropsLastMessageIfCacheDoesNotRollAndLastMessageDoesNotFit() throws {
         let cache = try createCache(overwritesOldMessages: false)
-        for message in Self.lorumIpsumMessages {
+        for message in LorumIpsum.messages {
             try cache.append(message: message)
         }
 
@@ -202,90 +202,90 @@ final class CacheAdvanceTests: XCTestCase {
         }
 
         let messages = try cache.messages()
-        XCTAssertEqual(messages, Self.lorumIpsumMessages)
+        XCTAssertEqual(messages, LorumIpsum.messages)
     }
 
     func test_append_dropsOldestMessageIfCacheRollsAndLastMessageDoesNotFitAndIsShorterThanOldestMessage() throws {
         let cache = try createCache(overwritesOldMessages: true)
-        for message in Self.lorumIpsumMessages {
+        for message in LorumIpsum.messages {
             try cache.append(message: message)
         }
 
-        // Append a message that is shorter than the first message in Self.lorumIpsumMessages.
+        // Append a message that is shorter than the first message in LorumIpsum.messages.
         let shortMessage: TestableMessage = "Short message"
         try cache.append(message: shortMessage)
 
         let messages = try cache.messages()
-        XCTAssertEqual(messages, Array(Self.lorumIpsumMessages.dropFirst()) + [shortMessage])
+        XCTAssertEqual(messages, Array(LorumIpsum.messages.dropFirst()) + [shortMessage])
     }
 
     func test_append_dropsFirstTwoMessagesIfCacheRollsAndLastMessageDoesNotFitAndIsLargerThanOldestMessage() throws {
         let cache = try createCache(overwritesOldMessages: true)
-        for message in Self.lorumIpsumMessages {
+        for message in LorumIpsum.messages {
             try cache.append(message: message)
         }
 
-        // Append a message that is slightly longer than the first message in Self.lorumIpsumMessages.
-        let barelyLongerMessage = TestableMessage(stringLiteral: Self.lorumIpsumMessages[0].value + "hi")
+        // Append a message that is slightly longer than the first message in LorumIpsum.messages.
+        let barelyLongerMessage = TestableMessage(stringLiteral: LorumIpsum.messages[0].value + "hi")
         try cache.append(message: barelyLongerMessage)
 
         let messages = try cache.messages()
-        XCTAssertEqual(messages, Array(Self.lorumIpsumMessages.dropFirst(2)) + [barelyLongerMessage])
+        XCTAssertEqual(messages, Array(LorumIpsum.messages.dropFirst(2)) + [barelyLongerMessage])
     }
 
     func test_append_dropsOldMessagesAsNecessary() throws {
         for maximumByteDivisor in stride(from: 1, to: 20, by: 0.1) {
             let cache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
-            for message in Self.lorumIpsumMessages {
+            for message in LorumIpsum.messages {
                 try cache.append(message: message)
             }
 
             let messages = try cache.messages()
-            XCTAssertEqual(expectedMessagesInOverwritingCache(givenOriginal: Self.lorumIpsumMessages, newMessageCount: messages.count), messages)
+            XCTAssertEqual(expectedMessagesInOverwritingCache(givenOriginal: LorumIpsum.messages, newMessageCount: messages.count), messages)
         }
     }
 
     func test_append_canWriteMessagesToCacheCreatedByADifferentCache() throws {
         let cache = try createCache(overwritesOldMessages: false)
-        for message in Self.lorumIpsumMessages.dropLast() {
+        for message in LorumIpsum.messages.dropLast() {
             try cache.append(message: message)
         }
 
         let cachedMessages = try cache.messages()
         let secondCache = try createCache(overwritesOldMessages: false, zeroOutExistingFile: false)
-        try secondCache.append(message: Self.lorumIpsumMessages.last!)
-        XCTAssertEqual(cachedMessages + [Self.lorumIpsumMessages.last!], try secondCache.messages())
+        try secondCache.append(message: LorumIpsum.messages.last!)
+        XCTAssertEqual(cachedMessages + [LorumIpsum.messages.last!], try secondCache.messages())
     }
 
     func test_append_canWriteMessagesToCacheCreatedByADifferentOverridingCache() throws {
         for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
             let cache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
-            for message in Self.lorumIpsumMessages.dropLast() {
+            for message in LorumIpsum.messages.dropLast() {
                 try cache.append(message: message)
             }
 
             let cachedMessages = try cache.messages()
 
             let secondCache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
-            try secondCache.append(message: Self.lorumIpsumMessages.last!)
+            try secondCache.append(message: LorumIpsum.messages.last!)
             let secondCacheMessages = try secondCache.messages()
 
-            XCTAssertEqual(expectedMessagesInOverwritingCache(givenOriginal: cachedMessages + [Self.lorumIpsumMessages.last!], newMessageCount: secondCacheMessages.count), secondCacheMessages)
+            XCTAssertEqual(expectedMessagesInOverwritingCache(givenOriginal: cachedMessages + [LorumIpsum.messages.last!], newMessageCount: secondCacheMessages.count), secondCacheMessages)
         }
     }
 
     func test_append_canWriteMessagesAfterRetrievingMessages() throws {
         for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
             let cache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
-            for message in Self.lorumIpsumMessages.dropLast() {
+            for message in LorumIpsum.messages.dropLast() {
                 try cache.append(message: message)
             }
 
             let cachedMessages = try cache.messages()
-            try cache.append(message: Self.lorumIpsumMessages.last!)
+            try cache.append(message: LorumIpsum.messages.last!)
 
             let cachedMessagesAfterAppend = try cache.messages()
-            XCTAssertEqual(expectedMessagesInOverwritingCache(givenOriginal: cachedMessages + [Self.lorumIpsumMessages.last!], newMessageCount: cachedMessagesAfterAppend.count), cachedMessagesAfterAppend)
+            XCTAssertEqual(expectedMessagesInOverwritingCache(givenOriginal: cachedMessages + [LorumIpsum.messages.last!], newMessageCount: cachedMessagesAfterAppend.count), cachedMessagesAfterAppend)
         }
     }
 
@@ -296,10 +296,10 @@ final class CacheAdvanceTests: XCTestCase {
         try originalHeader.synchronizeHeaderData()
 
         let sut = try createCache(
-            sizedToFit: Self.lorumIpsumMessages.dropLast(),
+            sizedToFit: LorumIpsum.messages.dropLast(),
             overwritesOldMessages: false,
             zeroOutExistingFile: false)
-        XCTAssertThrowsError(try sut.append(message: Self.lorumIpsumMessages.last!)) {
+        XCTAssertThrowsError(try sut.append(message: LorumIpsum.messages.last!)) {
             XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.incompatibleHeader)
         }
     }
@@ -309,10 +309,10 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertTrue(try originalCache.isWritable())
 
         let sut = try createCache(
-            sizedToFit: Self.lorumIpsumMessages.dropLast(),
+            sizedToFit: LorumIpsum.messages.dropLast(),
             overwritesOldMessages: false,
             zeroOutExistingFile: false)
-        XCTAssertThrowsError(try sut.append(message: Self.lorumIpsumMessages.last!)) {
+        XCTAssertThrowsError(try sut.append(message: LorumIpsum.messages.last!)) {
             XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileNotWritable)
         }
     }
@@ -322,14 +322,14 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertTrue(try originalCache.isWritable())
 
         let sut = try createCache(overwritesOldMessages: true, zeroOutExistingFile: false)
-        XCTAssertThrowsError(try sut.append(message: Self.lorumIpsumMessages.last!)) {
+        XCTAssertThrowsError(try sut.append(message: LorumIpsum.messages.last!)) {
             XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileNotWritable)
         }
     }
 
     func test_messages_canReadMessagesWrittenByADifferentCache() throws {
         let cache = try createCache(overwritesOldMessages: false)
-        for message in Self.lorumIpsumMessages {
+        for message in LorumIpsum.messages {
             try cache.append(message: message)
         }
 
@@ -339,10 +339,10 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_messages_canReadMessagesWrittenByADifferentFullCache() throws {
         let cache = try createCache(overwritesOldMessages: false, maximumByteSubtractor: 1)
-        for message in Self.lorumIpsumMessages.dropLast() {
+        for message in LorumIpsum.messages.dropLast() {
             try cache.append(message: message)
         }
-        XCTAssertThrowsError(try cache.append(message: Self.lorumIpsumMessages.last!))
+        XCTAssertThrowsError(try cache.append(message: LorumIpsum.messages.last!))
 
         let secondCache = try createCache(overwritesOldMessages: false, maximumByteSubtractor: 1, zeroOutExistingFile: false)
         XCTAssertEqual(try cache.messages(), try secondCache.messages())
@@ -351,7 +351,7 @@ final class CacheAdvanceTests: XCTestCase {
     func test_messages_canReadMessagesWrittenByADifferentOverwritingCache() throws {
         for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
             let cache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
-            for message in Self.lorumIpsumMessages {
+            for message in LorumIpsum.messages {
                 try cache.append(message: message)
             }
 
@@ -362,7 +362,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_messages_cacheThatDoesNotOverwrite_canReadMessagesWrittenByAnOverwritingCache() throws {
         let cache = try createCache(overwritesOldMessages: false)
-        for message in Self.lorumIpsumMessages {
+        for message in LorumIpsum.messages {
             try cache.append(message: message)
         }
 
@@ -373,7 +373,7 @@ final class CacheAdvanceTests: XCTestCase {
     func test_messages_cacheThatOverwrites_canReadMessagesWrittenByAnOverwritingCacheWithDifferentMaximumBytes() throws {
         for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
             let cache = try createCache(overwritesOldMessages: true)
-            for message in Self.lorumIpsumMessages {
+            for message in LorumIpsum.messages {
                 try cache.append(message: message)
             }
 
@@ -385,7 +385,7 @@ final class CacheAdvanceTests: XCTestCase {
     func test_messages_cacheThatOverwrites_canReadMessagesWrittenByANonOverwritingCache() throws {
         for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
             let cache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
-            for message in Self.lorumIpsumMessages {
+            for message in LorumIpsum.messages {
                 try cache.append(message: message)
             }
 
@@ -397,7 +397,7 @@ final class CacheAdvanceTests: XCTestCase {
     func test_messages_cacheThatDoesNotOverwrite_canReadMessagesWrittenByAnOverwritingCacheWithDifferentMaximumBytes() throws {
         for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
             let cache = try createCache(overwritesOldMessages: false)
-            for message in Self.lorumIpsumMessages {
+            for message in LorumIpsum.messages {
                 try cache.append(message: message)
             }
 
@@ -420,211 +420,7 @@ final class CacheAdvanceTests: XCTestCase {
         }
     }
 
-    private static let lorumIpsumMessages: [TestableMessage] = [
-        "Lorem ipsum dolor sit amet,",
-        "consectetur adipiscing elit.",
-        "Etiam sagittis neque massa,",
-        "id auctor urna elementum at.",
-        "Phasellus sit amet mauris posuere,",
-        "aliquet eros nec,",
-        "posuere odio.",
-        "Ut in neque egestas,",
-        "vehicula massa non,",
-        "consequat augue.",
-        "Pellentesque mattis blandit velit,",
-        "ut accumsan velit mollis sed.",
-        "Praesent ac vehicula metus.",
-        "Praesent eu purus justo.",
-        "Maecenas arcu risus,",
-        "egestas vitae commodo eu,",
-        "gravida non ipsum.",
-        "Mauris nec ipsum et lacus rhoncus dictum.",
-        "Fusce sagittis magna quis iaculis venenatis.",
-        "Nullam placerat odio id nulla porttitor,",
-        "ultrices varius nulla varius.",
-        "Duis in tellus mauris.",
-        "Praesent tristique sem vel nisi gravida hendrerit.",
-        "Nullam sit amet vulputate risus,",
-        "id tempus tortor.",
-        "Vivamus lacus tortor,",
-        "varius malesuada metus ut,",
-        "sagittis dapibus neque.",
-        "Duis fermentum est id justo tempus ornare.",
-        "Praesent vulputate ut ligula sit amet gravida.",
-        "Integer convallis ipsum vitae purus vulputate lobortis.",
-        "Curabitur condimentum ligula eu pharetra suscipit.",
-        "Vestibulum imperdiet sem ac eros gravida accumsan.",
-        "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
-        "Orci varius natoque penatibus et magnis dis parturient montes,",
-        "nascetur ridiculus mus.",
-        "Nunc at odio dolor.",
-        "Curabitur vel risus cursus,",
-        "aliquet quam consequat,",
-        "egestas metus.",
-        "In ut lacus lacus.",
-        "Fusce quis mollis velit.",
-        "Nullam lobortis urna luctus convallis luctus.",
-        "Etiam in tristique lorem.",
-        "Donec vulputate odio felis.",
-        "Sed tortor enim,",
-        "facilisis eget consequat ac,",
-        "vehicula a arcu.",
-        "Curabitur vehicula magna eu posuere finibus.",
-        "Nulla felis ipsum,",
-        "dictum id nisi quis,",
-        "suscipit laoreet metus.",
-        "Nam malesuada nunc ut turpis ullamcorper,",
-        "sit amet interdum elit dignissim.",
-        "Etiam nec lectus sed dolor pretium accumsan ut at urna.",
-        "Nullam diam enim,",
-        "hendrerit in sagittis sit amet,",
-        "dignissim sit amet erat.",
-        "Nam a ex a lectus bibendum convallis id nec urna.",
-        "Donec venenatis leo quam,",
-        "quis iaculis neque convallis a.",
-        "Praesent et venenatis enim,",
-        "nec finibus sem.",
-        "Sed id lorem non nulla dapibus aliquet vel sed risus.",
-        "Aliquam pellentesque elit id dui ullamcorper pellentesque.",
-        "In iaculis sollicitudin leo eu bibendum.",
-        "Nam condimentum neque sed ultricies sollicitudin.",
-        "Sed auctor consequat mollis.",
-        "Maecenas hendrerit dignissim leo eget semper.",
-        "Aenean et felis sed erat consectetur porttitor.",
-        "Vivamus velit tellus,",
-        "dictum et leo suscipit,",
-        "venenatis sollicitudin neque.",
-        "Sed gravida varius viverra.",
-        "In rutrum tellus at faucibus volutpat.",
-        "Duis bibendum purus eu scelerisque lacinia.",
-        "Orci varius natoque penatibus et magnis dis parturient montes,",
-        "nascetur ridiculus mus.",
-        "Morbi a viverra elit.",
-        "Donec egestas felis nunc,",
-        "nec tempor magna consequat vulputate.",
-        "Vestibulum vel quam magna.",
-        "Quisque sed magna ante.",
-        "Sed vel lacus vel tellus blandit malesuada nec faucibus sem.",
-        "Praesent bibendum bibendum arcu eget ultricies.",
-        "Cras elit risus,",
-        "semper in varius ut,",
-        "aliquam ornare massa.",
-        "Pellentesque aliquet nisi in dignissim faucibus.",
-        "Curabitur libero lectus,",
-        "euismod a eros in,",
-        "tincidunt venenatis lectus.",
-        "Nunc volutpat pulvinar posuere.",
-        "Etiam placerat urna dolor,",
-        "accumsan sodales dui maximus vel.",
-        "Aenean in velit commodo,",
-        "dapibus dui efficitur,",
-        "tristique erat.",
-        "Quisque pharetra vehicula imperdiet.",
-        "In massa orci,",
-        "porttitor at maximus vel,",
-        "ullamcorper eget purus.",
-        "Curabitur pulvinar vestibulum euismod.",
-        "Nulla posuere orci ut dapibus commodo.",
-        "Etiam pharetra arcu eu ante consectetur,",
-        "sed euismod nulla venenatis.",
-        "Cras elementum nisl et turpis ultricies,",
-        "nec tempor urna iaculis.",
-        "Suspendisse a lectus non dolor venenatis bibendum.",
-        "Cras mauris tellus,",
-        "ultrices a convallis sit amet,",
-        "faucibus ut dolor.",
-        "Etiam congue tincidunt nunc,",
-        "vel ornare ante convallis id.",
-        "Fusce egestas lacus id arcu vulputate,",
-        "sed fringilla sapien interdum.",
-        "Cras ac ipsum vitae neque rhoncus consectetur.",
-        "Nunc consequat erat id nulla vulputate,",
-        "id malesuada lacus sodales.",
-        "Donec aliquam lorem vitae ipsum ullamcorper,",
-        "ut hendrerit eros dignissim.",
-        "Duis vehicula,",
-        "mi ac congue molestie,",
-        "est nisl facilisis lectus,",
-        "eget finibus ante neque ac tortor.",
-        "Mauris eget ante in felis maximus molestie.",
-        "Sed ullamcorper aliquam felis,",
-        "id molestie eros commodo at.",
-        "Etiam a molestie arcu.",
-        "Donec mollis viverra neque eget blandit.",
-        "Phasellus at felis et tellus aliquam semper ut ut nisl.",
-        "Nulla volutpat ultricies lacus,",
-        "quis accumsan quam commodo id.",
-        "Curabitur sagittis dui nisi,",
-        "vitae ullamcorper nulla sagittis id.",
-        "Morbi pellentesque fringilla mattis.",
-        "Quisque sollicitudin et purus a tempus.",
-        "Nunc volutpat sapien sed vulputate dapibus.",
-        "Vestibulum fermentum nisi vitae elit fringilla imperdiet.",
-        "Phasellus convallis velit quis viverra pellentesque.",
-        "Duis sit amet laoreet nunc.",
-        "Vestibulum magna odio,",
-        "aliquam feugiat urna quis,",
-        "interdum condimentum sapien.",
-        "Donec varius ipsum non mattis hendrerit.",
-        "Fusce a laoreet ligula.",
-        "Cras efficitur posuere ante quis ullamcorper.",
-        "Donec ut varius quam,",
-        "sit amet bibendum ipsum.",
-        "Proin molestie,",
-        "nulla blandit hendrerit laoreet,",
-        "erat sapien mattis odio,",
-        "eu egestas erat est id nulla.",
-        "Integer pulvinar feugiat justo a mollis.",
-        "Maecenas nisi nisl,",
-        "lacinia eget convallis eu,",
-        "hendrerit sit amet quam.",
-        "Vestibulum mattis velit eu sapien maximus pellentesque.",
-        "Vivamus venenatis,",
-        "ex at condimentum mollis,",
-        "odio turpis elementum dui,",
-        "sed accumsan odio sem a nibh.",
-        "Suspendisse sed tincidunt urna,",
-        "quis aliquam risus.",
-        "Maecenas vitae lacinia ante.",
-        "Nulla quis est mi.",
-        "Nunc non maximus nulla.",
-        "Phasellus placerat elit ac pretium pharetra.",
-        "Nunc nibh dolor,",
-        "convallis non ultrices in,",
-        "pharetra a massa.",
-        "In hac habitasse platea dictumst.",
-        "Integer mattis luctus metus,",
-        "eget pretium elit semper a.",
-        "In interdum congue nibh vel porttitor.",
-        "Phasellus eu viverra turpis,",
-        "ut molestie metus.",
-        "Suspendisse quis eros mollis,",
-        "cursus enim in,",
-        "malesuada diam.",
-        "Nullam in metus vulputate,",
-        "finibus nisi ut,",
-        "pellentesque tortor.",
-        "Mauris rutrum,",
-        "lectus ullamcorper elementum dignissim,",
-        "orci neque condimentum dolor,",
-        "quis tempus ante urna ac dui.",
-        "Vestibulum dui elit,",
-        "pulvinar at velit non,",
-        "maximus semper tortor.",
-        "Ut eu neque sit amet nulla aliquet commodo nec fermentum purus.",
-        "Mauris ut urna a est sollicitudin condimentum id in enim.",
-        "Aliquam porttitor libero id laoreet placerat.",
-        "Etiam euismod libero eget risus placerat,",
-        "quis egestas sapien lacinia.",
-        "Donec eget augue dignissim,",
-        "ultrices elit eget,",
-        "dictum nibh.",
-        "In ultricies risus vel nisi convallis fermentum.",
-        "Etiam tempor nisi nulla,",
-        "eu pulvinar nisl pretium ut.",
-        "Cras ullamcorper enim nisl,",
-        "at tempus arcu sagittis quis.",
-    ]
+    // MARK: Private
 
     private func requiredByteCount<T: Codable>(for messages: [T]) throws -> UInt64 {
         let encoder = JSONEncoder()
@@ -637,7 +433,7 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     private func createHeaderHandle(
-        sizedToFit messages: [TestableMessage] = CacheAdvanceTests.lorumIpsumMessages,
+        sizedToFit messages: [TestableMessage] = LorumIpsum.messages,
         overwritesOldMessages: Bool,
         maximumByteDivisor: Double = 1,
         maximumByteSubtractor: Bytes = 0,
@@ -657,7 +453,7 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     private func createCache(
-        sizedToFit messages: [TestableMessage] = CacheAdvanceTests.lorumIpsumMessages,
+        sizedToFit messages: [TestableMessage] = LorumIpsum.messages,
         overwritesOldMessages: Bool,
         maximumByteDivisor: Double = 1,
         maximumByteSubtractor: Bytes = 0,
