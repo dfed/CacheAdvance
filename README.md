@@ -19,6 +19,14 @@ let myCache = try CacheAdvance<MyMessageType>(
     maximumBytes: 5000,
     shouldOverwriteOldMessages: false)
 ```
+
+```objc
+CADCacheAdvance *const cache = [[CADCacheAdvance alloc]
+                                    initWithFileURL:[NSFileManager.defaultManager.temporaryDirectory URLByAppendingPathComponent:@"MyCache"]
+                                    maximumBytes:5000
+                                    shouldOverwriteOldMessages:YES
+                                    error:nil];
+```
 To begin caching messages, you need to create a CacheAdvance instance with:
 
 * A file URL – this URL must represent a file that has already been created. You can create a file by using `FileManager`'s [createFile(atPath:contents:attributes:)](https://developer.apple.com/documentation/foundation/filemanager/1410695-createfile) API.
@@ -28,7 +36,11 @@ To begin caching messages, you need to create a CacheAdvance instance with:
 ### Appending messages to disk
 
 ```swift
-try myCache.append(message: aMessageInstance)
+try myCache.append(message: someMessage)
+```
+
+```objc
+[cache appendMessage:someData error:nil];
 ```
 
 By the time the above method exits, the message will have been persisted to disk. A CacheAdvance keeps no in-memory buffer. Appending a new message is cheap, as a CacheAdvance needs to encode and persist only the new message and associated metadata.
@@ -41,6 +53,10 @@ To ensure that caches can be read from 32bit devices, messages should not be lar
 
 ```swift
 let cachedMessages = try myCache.messages()
+```
+
+```objc
+NSArray<NSData> *const cachedMessages = [cache messagesAndReturnError:nil];
 ```
 
 This method reads all cached messages from disk into memory.
