@@ -116,6 +116,7 @@ private struct Storage: Codable {
 
     // MARK: Fileprivate
 
+    /// The underlying stored data. This property name is short to reduce the required on-disk storage space required per message.
     fileprivate let d: Data
 
     fileprivate var asString: String {
