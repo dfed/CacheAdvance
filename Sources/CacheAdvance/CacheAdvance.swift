@@ -189,7 +189,7 @@ public final class CacheAdvance<T: Codable> {
     /// - Parameter messageLength: the length of the next message that will be written.
     private func prepareReaderForWriting(dataOfLength messageLength: Bytes) throws {
         while writer.offsetInFile < reader.offsetInFile
-            && reader.offsetInFile < writer.offsetInFile + messageLength
+            && reader.offsetInFile <= writer.offsetInFile + messageLength
         {
             // The current position of the writer is before the oldest message, which means that writing this message would write into the current message.
             // Advance to the next message.
