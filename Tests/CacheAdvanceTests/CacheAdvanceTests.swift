@@ -234,7 +234,7 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_append_dropsOldMessagesAsNecessary() throws {
-        for maximumByteDivisor in stride(from: 1, to: 20, by: 0.1) {
+        for maximumByteDivisor in stride(from: 1, to: 50, by: 0.1) {
             let cache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
             for message in LorumIpsum.messages {
                 try cache.append(message: message)
@@ -258,7 +258,7 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_append_canWriteMessagesToCacheCreatedByADifferentOverridingCache() throws {
-        for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
+        for maximumByteDivisor in stride(from: 1, to: 50, by: 0.5) {
             let cache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
             for message in LorumIpsum.messages.dropLast() {
                 try cache.append(message: message)
@@ -275,7 +275,7 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_append_canWriteMessagesAfterRetrievingMessages() throws {
-        for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
+        for maximumByteDivisor in stride(from: 1, to: 50, by: 0.5) {
             let cache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
             for message in LorumIpsum.messages.dropLast() {
                 try cache.append(message: message)
@@ -349,7 +349,7 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_messages_canReadMessagesWrittenByADifferentOverwritingCache() throws {
-        for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
+        for maximumByteDivisor in stride(from: 1, to: 50, by: 0.5) {
             let cache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
             for message in LorumIpsum.messages {
                 try cache.append(message: message)
@@ -371,7 +371,7 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_messages_cacheThatOverwrites_canReadMessagesWrittenByAnOverwritingCacheWithDifferentMaximumBytes() throws {
-        for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
+        for maximumByteDivisor in stride(from: 1, to: 50, by: 0.5) {
             let cache = try createCache(overwritesOldMessages: true)
             for message in LorumIpsum.messages {
                 try cache.append(message: message)
@@ -383,7 +383,7 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_messages_cacheThatOverwrites_canReadMessagesWrittenByANonOverwritingCache() throws {
-        for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
+        for maximumByteDivisor in stride(from: 1, to: 50, by: 0.5) {
             let cache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
             for message in LorumIpsum.messages {
                 try cache.append(message: message)
@@ -395,7 +395,7 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_messages_cacheThatDoesNotOverwrite_canReadMessagesWrittenByAnOverwritingCacheWithDifferentMaximumBytes() throws {
-        for maximumByteDivisor in stride(from: 1, to: 10, by: 0.5) {
+        for maximumByteDivisor in stride(from: 1, to: 50, by: 0.5) {
             let cache = try createCache(overwritesOldMessages: false)
             for message in LorumIpsum.messages {
                 try cache.append(message: message)
