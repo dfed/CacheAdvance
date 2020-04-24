@@ -117,6 +117,7 @@ for rawPlatform in rawPlatforms {
         "-configuration", "Release",
         "-derivedDataPath", platform.derivedDataPath,
         "-PBXBuildsContinueAfterErrors=0",
+        "OTHER_CFLAGS='-DGENERATED_XCODE_PROJECT'",
     ]
     if !platform.destination.isEmpty {
         xcodeBuildArguments.append("-destination")

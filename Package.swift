@@ -15,6 +15,9 @@ let package = Package(
         .library(
             name: "CacheAdvance",
             targets: ["CacheAdvance"]),
+        .library(
+            name: "CADCacheAdvance",
+            targets: ["CADCacheAdvance"])
     ],
     targets: [
         .target(
@@ -25,6 +28,12 @@ let package = Package(
         .testTarget(
             name: "CacheAdvanceTests",
             dependencies: ["CacheAdvance"]),
+        .target(
+            name: "CADCacheAdvance",
+            dependencies: ["CacheAdvance"]),
+        .testTarget(
+            name: "CADCacheAdvanceTests",
+            dependencies: ["CADCacheAdvance"]),
         .target(
             name: "SwiftTryCatch",
             dependencies: [],
