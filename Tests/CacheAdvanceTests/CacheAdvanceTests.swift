@@ -420,6 +420,62 @@ final class CacheAdvanceTests: XCTestCase {
         }
     }
 
+    func test_performance_append_fillableCache() throws {
+        measure {
+            guard let sut = try? createCache(overwritesOldMessages: false, zeroOutExistingFile: true) else {
+                XCTFail("Could not create cache")
+                return
+            }
+            for message in LorumIpsum.messages {
+                try? sut.append(message: message)
+            }
+        }
+    }
+
+    func test_performance_messages_fillableCache() throws {
+        guard let sut = try? createCache(overwritesOldMessages: false, zeroOutExistingFile: true) else {
+            XCTFail("Could not create cache")
+            return
+        }
+        for message in LorumIpsum.messages {
+            try? sut.append(message: message)
+        }
+        measure {
+            guard (try? sut.messages()) != nil else {
+                XCTFail("Could not read messages")
+                return
+            }
+        }
+    }
+
+    func test_performance_append_overwritingCache() throws {
+        measure {
+            guard let sut = try? createCache(overwritesOldMessages: true, zeroOutExistingFile: false) else {
+                XCTFail("Could not create cache")
+                return
+            }
+            for message in LorumIpsum.messages {
+                try? sut.append(message: message)
+            }
+        }
+    }
+
+    func test_performance_messages_overwritingCache() throws {
+        guard let sut = try? createCache(overwritesOldMessages: true, zeroOutExistingFile: false) else {
+            XCTFail("Could not create cache")
+            return
+        }
+        for message in LorumIpsum.messages {
+            try? sut.append(message: message)
+        }
+        measure {
+            guard (try? sut.messages()) != nil else {
+                XCTFail("Could not read messages")
+                return
+            }
+        }
+    }
+
     // MARK: Private
 
     private func requiredByteCount<T: Codable>(for messages: [T]) throws -> UInt64 {
