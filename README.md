@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/cocoapods/l/CacheAdvance.svg)](https://cocoapods.org/pods/CacheAdvance)
 [![Platform](https://img.shields.io/cocoapods/p/CacheAdvance.svg)](https://cocoapods.org/pods/CacheAdvance)
 
-A cache that enables the performant persistence of individual messages to disk.
+A cache that enables the performant persistence of individual messages to disk. CacheAdvance message writes are more than 15x faster than raw SQLite writes.
 
 ## Usage
 
