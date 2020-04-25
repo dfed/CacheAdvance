@@ -30,25 +30,63 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
         super.tearDown()
     }
 
-    // MARK: Behavior Tests
+    // MARK: Performance Tests
 
-    func test_performance_append_sqlite() throws {
+    func test_performance_append_sqlite() {
+        createDatabase()
         measure {
-            createDatabase()
             for message in LorumIpsum.messages {
-                insertMessage(message.value)
+                insertMessage(message)
             }
         }
     }
 
-    func test_performance_messages_sqlite() throws {
+    func test_memory_append_sqlite() {
+        guard #available(iOS 13.0, tvOS 13.0, macOS 10.15, *) else {
+            return
+        }
+
+        createDatabase()
+        measure(metrics: [XCTMemoryMetric()]) {
+            for message in LorumIpsum.messages {
+                insertMessage(message)
+            }
+        }
+    }
+
+    func test_performance_messages_sqlite() {
         createDatabase()
         for message in LorumIpsum.messages {
-            insertMessage(message.value)
+            insertMessage(message)
         }
         measure {
             let _ = readMessages()
         }
+    }
+
+    func test_memory_messages_sqlite() {
+        guard #available(iOS 13.0, tvOS 13.0, macOS 10.15, *) else {
+            return
+        }
+
+        createDatabase()
+        for message in LorumIpsum.messages {
+            insertMessage(message)
+        }
+        measure(metrics: [XCTMemoryMetric()]) {
+            let _ = readMessages()
+        }
+    }
+
+    // MARK: Behavior Tests
+
+    func test_readMessages_canReadInsertedMessages() {
+        createDatabase()
+        for message in LorumIpsum.messages {
+            insertMessage(message)
+        }
+
+        XCTAssertEqual(readMessages(), LorumIpsum.messages)
     }
 
     // MARK: Private
