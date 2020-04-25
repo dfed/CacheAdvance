@@ -14,10 +14,12 @@ let package = Package(
     products: [
         .library(
             name: "CacheAdvance",
-            targets: ["CacheAdvance"]),
+            targets: ["CacheAdvance"]
+        ),
         .library(
             name: "CADCacheAdvance",
-            targets: ["CADCacheAdvance"])
+            targets: ["CADCacheAdvance"]
+        )
     ],
     targets: [
         .target(
@@ -27,13 +29,17 @@ let package = Package(
         ),
         .testTarget(
             name: "CacheAdvanceTests",
-            dependencies: ["CacheAdvance"]),
+            dependencies: ["CacheAdvance"]
+        ),
         .target(
             name: "CADCacheAdvance",
-            dependencies: ["CacheAdvance"]),
+            dependencies: ["CacheAdvance"],
+            swiftSettings: [.define("SWIFT_PACKAGE_MANAGER")]
+        ),
         .testTarget(
             name: "CADCacheAdvanceTests",
-            dependencies: ["CADCacheAdvance"]),
+            dependencies: ["CADCacheAdvance"]
+        ),
         .target(
             name: "SwiftTryCatch",
             dependencies: [],
@@ -44,7 +50,8 @@ let package = Package(
         ),
         .testTarget(
             name: "SwiftTryCatchTests",
-            dependencies: ["SwiftTryCatch"])
+            dependencies: ["SwiftTryCatch"]
+        )
     ],
     swiftLanguageVersions: [.v5]
 )

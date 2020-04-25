@@ -15,7 +15,9 @@
 //  limitations under the License.
 //
 
+#if SWIFT_PACKAGE_MANAGER
 import CacheAdvance
+#endif
 import Foundation
 
 /// A cache that enables the performant persistence of individual messages to disk.
