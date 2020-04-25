@@ -18,6 +18,8 @@
 import SQLite3
 import XCTest
 
+@testable import CacheAdvance
+
 final class SQLitePerformanceComparisonTests: XCTestCase {
 
     // MARK: XCTestCase
@@ -61,7 +63,7 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
             return
         }
         var createTableStatement: OpaquePointer?
-        guard sqlite3_prepare_v2(db, "CREATE TABLE Messages(Message TEXT);", -1, &createTableStatement, nil) == SQLITE_OK else {
+        guard sqlite3_prepare_v2(db, "CREATE TABLE Messages(Message BLOB);", -1, &createTableStatement, nil) == SQLITE_OK else {
             XCTFail("Failed to prepare database")
             return
         }
@@ -72,15 +74,21 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
         sqlite3_finalize(createTableStatement)
     }
 
-    func insertMessage(_ message: String) {
-        let insertStatementString = "INSERT INTO Messages(Message) VALUES ('\(message)');"
+    func insertMessage(_ message: TestableMessage) {
+        guard let messageData = try? encoder.encode(message),
+            let messageDataPointer = messageData.withUnsafeBytes({ $0.baseAddress }) else {
+            XCTFail("Could not encode message")
+            return
+        }
+
+        let insertStatementString = "INSERT INTO Messages(Message) VALUES (?);"
         var insertStatement: OpaquePointer?
 
         guard sqlite3_prepare_v2(db, insertStatementString, -1, &insertStatement, nil) == SQLITE_OK else {
             XCTFail("Failed to prepare message")
             return
         }
-        sqlite3_bind_text(insertStatement, 2, NSString(string: message).utf8String, -1, nil)
+        sqlite3_bind_blob(insertStatement, 1, messageDataPointer, Int32(messageData.count), nil)
         guard sqlite3_step(insertStatement) == SQLITE_DONE else {
             XCTFail("Failed to insert message")
             return
@@ -88,7 +96,7 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
         sqlite3_finalize(insertStatement)
     }
 
-    func readMessages() -> [String] {
+    func readMessages() -> [TestableMessage] {
         let rawQuery = "SELECT * FROM Messages;"
         var query: OpaquePointer?
         guard sqlite3_prepare_v2(db, rawQuery, -1, &query, nil) == SQLITE_OK else {
@@ -98,15 +106,28 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
         defer {
             sqlite3_finalize(query)
         }
-        var logs = [String]()
+        var logs = [TestableMessage]()
         while sqlite3_step(query) == SQLITE_ROW {
-            let log = String(cString: sqlite3_column_text(query, 0))
-            logs.append(log)
+            guard let messageDataPointer = sqlite3_column_blob(query, 0) else {
+                XCTFail("Failed to retrieve message blob")
+                return []
+            }
+            let messageLength = sqlite3_column_bytes(query, 0)
+            let messageData = Data(bytes: messageDataPointer, count: Int(messageLength))
+            guard let message = try? decoder.decode(TestableMessage.self, from: messageData) else {
+                XCTFail("Failed to decode message")
+                return []
+            }
+            logs.append(message)
         }
 
         return logs
     }
 
     private var db: OpaquePointer?
+
     private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("SQLiteTests")
+    private let encoder = JSONEncoder()
+    private let decoder = JSONDecoder()
+
 }
