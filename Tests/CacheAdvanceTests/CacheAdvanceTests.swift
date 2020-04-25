@@ -247,7 +247,7 @@ final class CacheAdvanceTests: XCTestCase {
 
         // The byte layout in the cache should now be as follows:
         // [header][length|test-message][length|test-message][length|test-message]
-        //         ^ reading handle                                              ^ writing handle
+        //         ^ reading handle                                               ^ writing handle
 
         // When we read messages, we read from the current position of the reading handle – which is at the start of the oldest persisted message –
         // up until the current position of the writing handle – which is at the end of the newest persisted message. This algorithm implies that if
