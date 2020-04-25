@@ -420,12 +420,35 @@ final class CacheAdvanceTests: XCTestCase {
         }
     }
 
+    // MARK: Performance Tests
+
     func test_performance_append_fillableCache() throws {
+        let maximumBytes = Bytes(Double(try requiredByteCount(for: LorumIpsum.messages)))
+        // Create a cache that won't run out of room over multiple test runs
+        guard let sut = try? createCache(maximumByes: maximumBytes * 10, overwritesOldMessages: false, zeroOutExistingFile: true) else {
+            XCTFail("Could not create cache")
+            return
+        }
         measure {
-            guard let sut = try? createCache(overwritesOldMessages: false, zeroOutExistingFile: true) else {
-                XCTFail("Could not create cache")
-                return
+            // Append all messages, filling up the cahce.
+            for message in LorumIpsum.messages {
+                try? sut.append(message: message)
             }
+        }
+    }
+
+    func test_memory_append_fillableCache() throws {
+        guard #available(iOS 13.0, tvOS 13.0, macOS 10.15, *) else {
+            return
+        }
+        let maximumBytes = Bytes(Double(try requiredByteCount(for: LorumIpsum.messages)))
+        // Create a cache that won't run out of room over multiple test runs
+        guard let sut = try? createCache(maximumByes: maximumBytes * 10, overwritesOldMessages: false, zeroOutExistingFile: true) else {
+            XCTFail("Could not create cache")
+            return
+        }
+        measure(metrics: [XCTMemoryMetric()]) {
+            // Append all messages, filling up the cahce.
             for message in LorumIpsum.messages {
                 try? sut.append(message: message)
             }
@@ -448,12 +471,57 @@ final class CacheAdvanceTests: XCTestCase {
         }
     }
 
-    func test_performance_append_overwritingCache() throws {
-        measure {
-            guard let sut = try? createCache(overwritesOldMessages: true, zeroOutExistingFile: false) else {
-                XCTFail("Could not create cache")
+    func test_memory_messages_fillableCache() throws {
+        guard #available(iOS 13.0, tvOS 13.0, macOS 10.15, *) else {
+            return
+        }
+
+        guard let sut = try? createCache(overwritesOldMessages: false, zeroOutExistingFile: true) else {
+            XCTFail("Could not create cache")
+            return
+        }
+        for message in LorumIpsum.messages {
+            try? sut.append(message: message)
+        }
+        measure(metrics: [XCTMemoryMetric()]) {
+            guard (try? sut.messages()) != nil else {
+                XCTFail("Could not read messages")
                 return
             }
+        }
+    }
+
+    func test_performance_append_overwritingCache() throws {
+        let maximumBytes = Bytes(Double(try requiredByteCount(for: LorumIpsum.messages)))
+        guard let sut = try? createCache(maximumByes: maximumBytes, overwritesOldMessages: true, zeroOutExistingFile: true) else {
+            XCTFail("Could not create cache")
+            return
+        }
+        // Fill the cache before the test starts.
+        for message in LorumIpsum.messages {
+            try? sut.append(message: message)
+        }
+        measure {
+            for message in LorumIpsum.messages {
+                try? sut.append(message: message)
+            }
+        }
+    }
+
+    func test_memory_append_overwritingCache() throws {
+        guard #available(iOS 13.0, tvOS 13.0, macOS 10.15, *) else {
+            return
+        }
+        let maximumBytes = Bytes(Double(try requiredByteCount(for: LorumIpsum.messages)))
+        guard let sut = try? createCache(maximumByes: maximumBytes, overwritesOldMessages: true, zeroOutExistingFile: true) else {
+            XCTFail("Could not create cache")
+            return
+        }
+        // Fill the cache before the test starts.
+        for message in LorumIpsum.messages {
+            try? sut.append(message: message)
+        }
+        measure(metrics: [XCTMemoryMetric()]) {
             for message in LorumIpsum.messages {
                 try? sut.append(message: message)
             }
@@ -469,6 +537,25 @@ final class CacheAdvanceTests: XCTestCase {
             try? sut.append(message: message)
         }
         measure {
+            guard (try? sut.messages()) != nil else {
+                XCTFail("Could not read messages")
+                return
+            }
+        }
+    }
+
+    func test_memory_messages_overwritingCache() {
+        guard #available(iOS 13.0, tvOS 13.0, macOS 10.15, *) else {
+            return
+        }
+        guard let sut = try? createCache(overwritesOldMessages: true, zeroOutExistingFile: false) else {
+            XCTFail("Could not create cache")
+            return
+        }
+        for message in LorumIpsum.messages {
+            try? sut.append(message: message)
+        }
+        measure(metrics: [XCTMemoryMetric()]) {
             guard (try? sut.messages()) != nil else {
                 XCTFail("Could not read messages")
                 return
@@ -508,6 +595,7 @@ final class CacheAdvanceTests: XCTestCase {
             version: version)
     }
 
+
     private func createCache(
         sizedToFit messages: [TestableMessage] = LorumIpsum.messages,
         overwritesOldMessages: Bool,
@@ -517,12 +605,25 @@ final class CacheAdvanceTests: XCTestCase {
         throws
         -> CacheAdvance<TestableMessage>
     {
+        try createCache(
+            maximumByes: Bytes(Double(try requiredByteCount(for: messages)) / maximumByteDivisor) - maximumByteSubtractor,
+            overwritesOldMessages: overwritesOldMessages,
+            zeroOutExistingFile: zeroOutExistingFile)
+    }
+
+    private func createCache(
+        maximumByes: Bytes,
+        overwritesOldMessages: Bool,
+        zeroOutExistingFile: Bool = true)
+        throws
+        -> CacheAdvance<TestableMessage>
+    {
         if zeroOutExistingFile {
             FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
         }
         return try CacheAdvance<TestableMessage>(
             fileURL: testFileLocation,
-            maximumBytes: Bytes(Double(try requiredByteCount(for: messages)) / maximumByteDivisor) - maximumByteSubtractor,
+            maximumBytes: maximumByes,
             shouldOverwriteOldMessages: overwritesOldMessages)
     }
 
@@ -535,4 +636,6 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("CacheAdvanceTests")
+
+
 }
