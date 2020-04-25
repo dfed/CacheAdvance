@@ -233,6 +233,47 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertEqual(messages, Array(LorumIpsum.messages.dropFirst(2)) + [barelyLongerMessage])
     }
 
+    func test_append_inAnOverwritingCacheEvictsMinimumPossibleNumberOfMessages() throws {
+        let message: TestableMessage = "test-message"
+        let maxMessagesBeforeOverwriting = [message, message, message]
+        let cache = try createCache(
+            sizedToFit: maxMessagesBeforeOverwriting,
+            overwritesOldMessages: true)
+        for message in maxMessagesBeforeOverwriting {
+            try cache.append(message: message)
+        }
+
+        // All of our messages have been stored and our cache is full.
+
+        // The byte layout in the cache should now be as follows:
+        // [header][length|test-message][length|test-message][length|test-message]
+        //         ^ reading handle                                              ^ writing handle
+
+        // When we read messages, we read from the current position of the reading handle – which is at the start of the oldest persisted message –
+        // up until the current position of the writing handle – which is at the end of the newest persisted message. This algorithm implies that if
+        // the reading handle and the writing handle are at the same position in the file, then the file is empty. Therefore, when writing a message
+        // and overwriting, we must ensure that we do not accidently write a message such that the reading handle and the writing handle end up in
+        // the same position.
+
+        // Prove to ourselves we've stored all of the messages.
+        XCTAssertEqual(
+            try cache.messages(),
+            maxMessagesBeforeOverwriting)
+
+        // Append one more message of the same size.
+        try cache.append(message: message)
+
+        // Because we can not have the writing handle in the same position as the writing handle, the byte layout in the cache should now be as follows:
+        // [header][length|test-message]                     [length|test-message]
+        //                              ^ writing handle     ^ reading handle
+
+        // In other words, we had to evict a single message in order to ensure that our writing and reading handles did not point at the same byte.
+        // If more messages have been dropped, that indicates that our `prepareReaderForWriting` method has a bug.
+        XCTAssertEqual(
+            try cache.messages(),
+            maxMessagesBeforeOverwriting.dropLast())
+    }
+
     func test_append_dropsOldMessagesAsNecessary() throws {
         for maximumByteDivisor in stride(from: 1, to: 50, by: 0.1) {
             let cache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
