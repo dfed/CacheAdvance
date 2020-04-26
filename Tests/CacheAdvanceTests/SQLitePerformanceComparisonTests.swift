@@ -138,7 +138,7 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
             cache.appendMessage(message)
         }
         measure {
-            let _ = cache.messages()
+            _ = cache.messages()
         }
     }
 
@@ -151,7 +151,7 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
             cache.appendMessage(message)
         }
         measure {
-            let _ = cache.messages()
+            _ = cache.messages()
         }
     }
 
@@ -165,9 +165,10 @@ class SQLiteCache<T: Codable> {
 
     // MARK: Initialization
 
-    init(location: URL,
-         maxMessageCount: Int32,
-         shouldOverwriteMessages: Bool)
+    init(
+        location: URL,
+        maxMessageCount: Int32,
+        shouldOverwriteMessages: Bool)
     {
         self.location = location
         self.maxMessageCount = maxMessageCount

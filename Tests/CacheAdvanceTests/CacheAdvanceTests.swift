@@ -474,6 +474,9 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_performance_createCacheAndAppendSingleMessage() throws {
         measure {
+            // Delete any existing cache.
+            FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
+
             guard let sut = try? createCache(maximumByes: 100, overwritesOldMessages: true, zeroOutExistingFile: false) else {
                 XCTFail("Could not create cache")
                 return
