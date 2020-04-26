@@ -16,6 +16,8 @@
 //
 
 #if SWIFT_PACKAGE_MANAGER
+// Swift Package Manager defines multiple modules, while other distribution mechanisms do not.
+// We only need to import CacheAdvance if this project is being built with Swift Package Manager.
 import CacheAdvance
 #endif
 import Foundation
