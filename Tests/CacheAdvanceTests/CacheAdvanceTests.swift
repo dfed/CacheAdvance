@@ -489,8 +489,9 @@ final class CacheAdvanceTests: XCTestCase {
             XCTFail("Could not create cache")
             return
         }
+        // Force the cache to set up before we start writing messages.
+        _ = try sut.isWritable()
         measure {
-            // Append all messages, filling up the cache.
             for message in LorumIpsum.messages {
                 try? sut.append(message: message)
             }
@@ -498,12 +499,9 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_performance_messages_fillableCache() throws {
-        guard let sut = try? createCache(overwritesOldMessages: false, zeroOutExistingFile: true) else {
-            XCTFail("Could not create cache")
-            return
-        }
+        let sut = try createCache(overwritesOldMessages: false, zeroOutExistingFile: true)
         for message in LorumIpsum.messages {
-            try? sut.append(message: message)
+            try sut.append(message: message)
         }
         measure {
             guard (try? sut.messages()) != nil else {
@@ -515,13 +513,10 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_performance_append_overwritingCache() throws {
         let maximumBytes = Bytes(Double(try requiredByteCount(for: LorumIpsum.messages)))
-        guard let sut = try? createCache(maximumByes: maximumBytes, overwritesOldMessages: true, zeroOutExistingFile: true) else {
-            XCTFail("Could not create cache")
-            return
-        }
+        let sut = try createCache(maximumByes: maximumBytes, overwritesOldMessages: true, zeroOutExistingFile: true)
         // Fill the cache before the test starts.
         for message in LorumIpsum.messages {
-            try? sut.append(message: message)
+            try sut.append(message: message)
         }
         measure {
             for message in LorumIpsum.messages {
@@ -531,12 +526,9 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_performance_messages_overwritingCache() throws {
-        guard let sut = try? createCache(overwritesOldMessages: true, zeroOutExistingFile: false) else {
-            XCTFail("Could not create cache")
-            return
-        }
+        let sut = try createCache(overwritesOldMessages: true, zeroOutExistingFile: false)
         for message in LorumIpsum.messages {
-            try? sut.append(message: message)
+            try sut.append(message: message)
         }
         measure {
             guard (try? sut.messages()) != nil else {
