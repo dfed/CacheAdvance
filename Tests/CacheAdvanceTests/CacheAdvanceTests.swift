@@ -471,7 +471,7 @@ final class CacheAdvanceTests: XCTestCase {
             return
         }
         measure {
-            // Append all messages, filling up the cahce.
+            // Append all messages, filling up the cache.
             for message in LorumIpsum.messages {
                 try? sut.append(message: message)
             }
@@ -489,7 +489,7 @@ final class CacheAdvanceTests: XCTestCase {
             return
         }
         measure(metrics: [XCTMemoryMetric()]) {
-            // Append all messages, filling up the cahce.
+            // Append all messages, filling up the cache.
             for message in LorumIpsum.messages {
                 try? sut.append(message: message)
             }
