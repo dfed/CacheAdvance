@@ -271,7 +271,7 @@ final class CacheAdvanceTests: XCTestCase {
         // If more messages have been dropped, that indicates that our `prepareReaderForWriting` method has a bug.
         XCTAssertEqual(
             try cache.messages(),
-            [message, message]
+            [message, message])
     }
 
     func test_append_dropsOldMessagesAsNecessary() throws {
