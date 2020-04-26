@@ -32,7 +32,14 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
 
     // MARK: Performance Tests
 
-    func test_performance_append_sqlite() {
+    func test_performance_createDatabaseAndAppendSingleMessage() {
+        measure {
+            createDatabase()
+            insertMessage("test message")
+        }
+    }
+
+    func test_performance_sqlite_append() {
         createDatabase()
         measure {
             for message in LorumIpsum.messages {
@@ -41,46 +48,19 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
         }
     }
 
-    func test_memory_append_sqlite() {
-        guard #available(iOS 13.0, tvOS 13.0, macOS 10.15, *) else {
-            return
-        }
-
-        createDatabase()
-        measure(metrics: [XCTMemoryMetric()]) {
-            for message in LorumIpsum.messages {
-                insertMessage(message)
-            }
-        }
-    }
-
-    func test_performance_messages_sqlite() {
+    func test_performance_sqlite_messages() {
         createDatabase()
         for message in LorumIpsum.messages {
             insertMessage(message)
         }
         measure {
-            let _ = readMessages()
-        }
-    }
-
-    func test_memory_messages_sqlite() {
-        guard #available(iOS 13.0, tvOS 13.0, macOS 10.15, *) else {
-            return
-        }
-
-        createDatabase()
-        for message in LorumIpsum.messages {
-            insertMessage(message)
-        }
-        measure(metrics: [XCTMemoryMetric()]) {
             let _ = readMessages()
         }
     }
 
     // MARK: Behavior Tests
 
-    func test_readMessages_canReadInsertedMessages() {
+    func test_readMessages_sqlite_canReadInsertedMessages() {
         createDatabase()
         for message in LorumIpsum.messages {
             insertMessage(message)
