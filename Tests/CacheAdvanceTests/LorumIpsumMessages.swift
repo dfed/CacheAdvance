@@ -15,9 +15,7 @@
 //  limitations under the License.
 //
 
-import Foundation
-
-struct LorumIpsum {
+enum LorumIpsum {
     static let messages: [TestableMessage] = [
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
         "Arcu cursus euismod quis viverra nibh cras pulvinar.",

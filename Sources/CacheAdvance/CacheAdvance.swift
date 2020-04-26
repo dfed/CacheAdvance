@@ -188,11 +188,13 @@ public final class CacheAdvance<T: Codable> {
     /// This method should only be called on a cache that overwrites old messages.
     /// - Parameter messageLength: the length of the next message that will be written.
     private func prepareReaderForWriting(dataOfLength messageLength: Bytes) throws {
+        // If our writer is behind our reader,
         while writer.offsetInFile < reader.offsetInFile
-            && reader.offsetInFile <= writer.offsetInFile + messageLength
+            // And our writer doesn't have enough room to write a message such that it stays behind the current reader position.
+            && writer.offsetInFile + messageLength >= reader.offsetInFile
         {
-            // The current position of the writer is before the oldest message, which means that writing this message would write into the current message.
-            // Advance to the next message.
+            // Then writing this message would write into the oldest-known message.
+            // We must advance our reader to the next-oldest message to help make room for the next message we want to write.
             try reader.seekToNextMessage()
         }
     }
