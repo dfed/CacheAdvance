@@ -16,14 +16,13 @@
 //
 
 #if GENERATED_XCODE_PROJECT
-// These imports work when working within the generated CacheAdvance.xcodeproj used in CI.
+// This import works when working within the generated CacheAdvance.xcodeproj used in CI.
 #import <CADCacheAdvance/CADCacheAdvance-Swift.h>
-#import <XCTest/XCTest.h>
 #else
-// These imports work when working within Package.swift.
+// This import works when working within Package.swift.
 @import CADCacheAdvance;
-@import XCTest;
 #endif
+@import XCTest;
 
 /// Tests that exercise the API of CADCacheAdvance.
 /// - Note: Since CADCacheAdvance is a thin wrapper on CacheAdvance<Data>, these tests are intended to do nothing more than exercise the API.
