@@ -54,27 +54,16 @@
 {
     CADCacheAdvance *const cache = [self createCache];
     NSError *error = nil;
-    [cache appendMessage:@"Test"
+    [cache appendMessage:[@"Test" dataUsingEncoding:NSUTF8StringEncoding]
                 error:&error];
     XCTAssertNil(error);
     XCTAssertFalse(cache.isEmpty);
 }
 
-- (void)test_messageDataAndReturnError_returnsAppendedMessage;
-{
-    CADCacheAdvance *const cache = [self createCache];
-    NSData *const data = [@"Test" dataUsingEncoding:NSUTF8StringEncoding];
-    NSError *error = nil;
-    [cache appendData:data
-                error:&error];
-    XCTAssertNil(error);
-    XCTAssertEqualObjects([cache messageDataAndReturnError:nil], @[data]);
-}
-
 - (void)test_messagesAndReturnError_returnsAppendedMessage;
 {
     CADCacheAdvance *const cache = [self createCache];
-    NSString *const message = @"Test";
+    NSData *const message = [@"Test" dataUsingEncoding:NSUTF8StringEncoding];
     NSError *error = nil;
     [cache appendMessage:message
                    error:&error];

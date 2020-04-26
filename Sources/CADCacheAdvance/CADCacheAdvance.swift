@@ -68,15 +68,8 @@ public final class __ObjectiveCCompatibleCacheAdvanceWithGenericStorage: NSObjec
     /// Appends a message to the cache.
     /// - Parameter message: A message to write to disk. Must be smaller than both `maximumBytes - FileHeader.expectedEndOfHeaderInFile` and `MessageSpan.max`.
     @objc
-    public func appendMessage(_ message: String) throws {
+    public func appendMessage(_ message: Data) throws {
         try cache.append(message: Storage(message))
-    }
-
-    /// Appends a data message to the cache.
-    /// - Parameter message: A message to write to disk. Must be smaller than both `maximumBytes - FileHeader.expectedEndOfHeaderInFile` and `MessageSpan.max`.
-    @objc
-    public func appendData(_ data: Data) throws {
-        try cache.append(message: Storage(data))
     }
 
     /// - Returns: `true` when there are no messages written to the file, or when the file can not be read.
@@ -87,14 +80,8 @@ public final class __ObjectiveCCompatibleCacheAdvanceWithGenericStorage: NSObjec
 
     /// Fetches all messages from the cache.
     @objc
-    public func messageData() throws -> [Data] {
+    public func messages() throws -> [Data] {
         try cache.messages().map { $0.d }
-    }
-
-    /// Fetches all messages from the cache.
-    @objc
-    public func messages() throws -> [String] {
-        try cache.messages().map { $0.asString }
     }
 
     // MARK: Private
@@ -108,20 +95,12 @@ private struct Storage: Codable {
 
     // MARK: Initialization
 
-    fileprivate init(_ string: String) {
-        d = Data(string.utf8)
-    }
-
     fileprivate init(_ data: Data) {
         d = data
     }
 
     // MARK: Fileprivate
 
-    /// The underlying stored data. This property name is short to reduce the required on-disk storage space required per message.
+    /// The underlying stored data. This property name is short to reduce the required on-disk storage space per message.
     fileprivate let d: Data
-
-    fileprivate var asString: String {
-        String(decoding: d, as: UTF8.self)
-    }
 }
