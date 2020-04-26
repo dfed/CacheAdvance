@@ -498,19 +498,6 @@ final class CacheAdvanceTests: XCTestCase {
         }
     }
 
-    func test_performance_messages_fillableCache() throws {
-        let sut = try createCache(overwritesOldMessages: false, zeroOutExistingFile: true)
-        for message in LorumIpsum.messages {
-            try sut.append(message: message)
-        }
-        measure {
-            guard (try? sut.messages()) != nil else {
-                XCTFail("Could not read messages")
-                return
-            }
-        }
-    }
-
     func test_performance_append_overwritingCache() throws {
         let maximumBytes = Bytes(Double(try requiredByteCount(for: LorumIpsum.messages)))
         let sut = try createCache(maximumByes: maximumBytes, overwritesOldMessages: true, zeroOutExistingFile: true)
@@ -525,9 +512,22 @@ final class CacheAdvanceTests: XCTestCase {
         }
     }
 
-    func test_performance_messages_overwritingCache() throws {
-        let sut = try createCache(overwritesOldMessages: true, zeroOutExistingFile: false)
+    func test_performance_messages_fillableCache() throws {
+        let sut = try createCache(overwritesOldMessages: false, zeroOutExistingFile: true)
         for message in LorumIpsum.messages {
+            try sut.append(message: message)
+        }
+        measure {
+            guard (try? sut.messages()) != nil else {
+                XCTFail("Could not read messages")
+                return
+            }
+        }
+    }
+
+    func test_performance_messages_overwritingCache() throws {
+        let sut = try createCache(overwritesOldMessages: true, zeroOutExistingFile: true)
+        for message in LorumIpsum.messages + LorumIpsum.messages {
             try sut.append(message: message)
         }
         measure {

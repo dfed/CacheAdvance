@@ -129,12 +129,25 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
         }
     }
 
-    func test_performance_sqlite_messages() {
+    func test_performance_sqlite_messages_fillableCache() {
         let cache = SQLiteCache<TestableMessage>(
             location: testFileLocation,
             maxMessageCount: Int32(LorumIpsum.messages.count),
             shouldOverwriteMessages: false)
         for message in LorumIpsum.messages {
+            cache.appendMessage(message)
+        }
+        measure {
+            let _ = cache.messages()
+        }
+    }
+
+    func test_performance_sqlite_messages_overwritingCache() {
+        let cache = SQLiteCache<TestableMessage>(
+            location: testFileLocation,
+            maxMessageCount: Int32(LorumIpsum.messages.count),
+            shouldOverwriteMessages: true)
+        for message in LorumIpsum.messages + LorumIpsum.messages {
             cache.appendMessage(message)
         }
         measure {
