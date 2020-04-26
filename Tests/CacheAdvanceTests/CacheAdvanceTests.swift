@@ -573,7 +573,6 @@ final class CacheAdvanceTests: XCTestCase {
             version: version)
     }
 
-
     private func createCache(
         sizedToFit messages: [TestableMessage] = LorumIpsum.messages,
         overwritesOldMessages: Bool,
@@ -614,6 +613,4 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("CacheAdvanceTests")
-
-
 }

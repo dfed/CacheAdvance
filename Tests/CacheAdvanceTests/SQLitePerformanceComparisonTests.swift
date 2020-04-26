@@ -158,7 +158,6 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
     // MARK: Private
 
     private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("SQLiteTests")
-
 }
 
 class SQLiteCache<T: Codable> {

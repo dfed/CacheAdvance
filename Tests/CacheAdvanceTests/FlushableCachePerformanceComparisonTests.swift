@@ -211,7 +211,6 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
     // MARK: Private
 
     private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("SQLiteTests")
-
 }
 
 /// A simple in-memory cache that can be flushed to disk.
