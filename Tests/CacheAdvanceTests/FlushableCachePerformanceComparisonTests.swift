@@ -28,6 +28,17 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
         try? Data().write(to: testFileLocation)
     }
 
+    // MARK: Behavior Tests
+
+    func test_readMessages_canReadInsertedMessages() throws {
+        let cache = FlushableCache<TestableMessage>(location: testFileLocation)
+        for message in LorumIpsum.messages {
+            try cache.appendMessage(message)
+        }
+
+        XCTAssertEqual(try cache.messages(), LorumIpsum.messages)
+    }
+
     // MARK: Performance Tests
 
     func test_performance_json_createDatabaseAndAppendSingleMessage() throws {
@@ -75,17 +86,6 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
             let freshCache = FlushableCache<TestableMessage>(location: testFileLocation)
             _ = try? freshCache.messages()
         }
-    }
-
-    // MARK: Behavior Tests
-
-    func test_readMessages_canReadInsertedMessages() throws {
-        let cache = FlushableCache<TestableMessage>(location: testFileLocation)
-        for message in LorumIpsum.messages {
-            try cache.appendMessage(message)
-        }
-
-        XCTAssertEqual(try cache.messages(), LorumIpsum.messages)
     }
 
     // MARK: Private
