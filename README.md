@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/cocoapods/l/CacheAdvance.svg)](https://cocoapods.org/pods/CacheAdvance)
 [![Platform](https://img.shields.io/cocoapods/p/CacheAdvance.svg)](https://cocoapods.org/pods/CacheAdvance)
 
-A performant cache for logging systems. CacheAdvance persists log events 15x faster while utilizing 40% less memory than SQLite.
+A performant cache for logging systems. CacheAdvance persists log events 30x faster than SQLite.
 
 ## Usage
 
