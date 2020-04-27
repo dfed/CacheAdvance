@@ -493,8 +493,7 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     func test_performance_append_overwritingCache() throws {
-        let maximumBytes = Bytes(Double(try requiredByteCount(for: LorumIpsum.messages)))
-        let sut = try createCache(maximumByes: maximumBytes, overwritesOldMessages: true, zeroOutExistingFile: true)
+        let sut = try createCache(overwritesOldMessages: true, zeroOutExistingFile: true)
         // Fill the cache before the test starts.
         for message in LorumIpsum.messages {
             try sut.append(message: message)
