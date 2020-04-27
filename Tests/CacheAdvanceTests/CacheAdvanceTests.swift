@@ -461,6 +461,77 @@ final class CacheAdvanceTests: XCTestCase {
         }
     }
 
+    // MARK: Performance Tests
+
+    func test_performance_createCacheAndAppendSingleMessage() throws {
+        measure {
+            // Delete any existing cache.
+            FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
+
+            guard let sut = try? createCache(maximumByes: 100, overwritesOldMessages: true, zeroOutExistingFile: false) else {
+                XCTFail("Could not create cache")
+                return
+            }
+            try? sut.append(message: "test message")
+        }
+    }
+
+    func test_performance_append_fillableCache() throws {
+        let maximumBytes = Bytes(Double(try requiredByteCount(for: LorumIpsum.messages)))
+        // Create a cache that won't run out of room over multiple test runs
+        guard let sut = try? createCache(maximumByes: maximumBytes * 10, overwritesOldMessages: false, zeroOutExistingFile: true) else {
+            XCTFail("Could not create cache")
+            return
+        }
+        // Force the cache to set up before we start writing messages.
+        _ = try sut.isWritable()
+        measure {
+            for message in LorumIpsum.messages {
+                try? sut.append(message: message)
+            }
+        }
+    }
+
+    func test_performance_append_overwritingCache() throws {
+        let maximumBytes = Bytes(Double(try requiredByteCount(for: LorumIpsum.messages)))
+        let sut = try createCache(maximumByes: maximumBytes, overwritesOldMessages: true, zeroOutExistingFile: true)
+        // Fill the cache before the test starts.
+        for message in LorumIpsum.messages {
+            try sut.append(message: message)
+        }
+        measure {
+            for message in LorumIpsum.messages {
+                try? sut.append(message: message)
+            }
+        }
+    }
+
+    func test_performance_messages_fillableCache() throws {
+        let sut = try createCache(overwritesOldMessages: false, zeroOutExistingFile: true)
+        for message in LorumIpsum.messages {
+            try sut.append(message: message)
+        }
+        measure {
+            guard (try? sut.messages()) != nil else {
+                XCTFail("Could not read messages")
+                return
+            }
+        }
+    }
+
+    func test_performance_messages_overwritingCache() throws {
+        let sut = try createCache(overwritesOldMessages: true, zeroOutExistingFile: true)
+        for message in LorumIpsum.messages + LorumIpsum.messages {
+            try sut.append(message: message)
+        }
+        measure {
+            guard (try? sut.messages()) != nil else {
+                XCTFail("Could not read messages")
+                return
+            }
+        }
+    }
+
     // MARK: Private
 
     private func requiredByteCount<T: Codable>(for messages: [T]) throws -> UInt64 {
@@ -502,12 +573,25 @@ final class CacheAdvanceTests: XCTestCase {
         throws
         -> CacheAdvance<TestableMessage>
     {
+        try createCache(
+            maximumByes: Bytes(Double(try requiredByteCount(for: messages)) / maximumByteDivisor) - maximumByteSubtractor,
+            overwritesOldMessages: overwritesOldMessages,
+            zeroOutExistingFile: zeroOutExistingFile)
+    }
+
+    private func createCache(
+        maximumByes: Bytes,
+        overwritesOldMessages: Bool,
+        zeroOutExistingFile: Bool = true)
+        throws
+        -> CacheAdvance<TestableMessage>
+    {
         if zeroOutExistingFile {
             FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
         }
         return try CacheAdvance<TestableMessage>(
             fileURL: testFileLocation,
-            maximumBytes: Bytes(Double(try requiredByteCount(for: messages)) / maximumByteDivisor) - maximumByteSubtractor,
+            maximumBytes: maximumByes,
             shouldOverwriteOldMessages: overwritesOldMessages)
     }
 
