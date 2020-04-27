@@ -29,29 +29,6 @@ public final class CacheAdvance<T: Codable> {
     ///   - fileURL: The file URL indicating the desired location of the on-disk store. This file should already exist.
     ///   - maximumBytes: The maximum size of the cache, in bytes. Logs larger than this size will fail to append to the store.
     ///   - shouldOverwriteOldMessages: When `true`, once the on-disk store exceeds maximumBytes, new entries will replace the oldest entry.
-    ///
-    /// - Warning: `maximumBytes` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache will prevent appending new messages to this cache.
-    /// - Warning: `shouldOverwriteOldMessages` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache will prevent appending new messages to this cache.
-    public convenience init(
-        fileURL: URL,
-        maximumBytes: Bytes,
-        shouldOverwriteOldMessages: Bool)
-        throws
-    {
-        try self.init(
-            fileURL: fileURL,
-            maximumBytes: maximumBytes,
-            shouldOverwriteOldMessages: shouldOverwriteOldMessages,
-            decoder: JSONDecoder(),
-            encoder: JSONEncoder())
-    }
-
-    /// Creates a new instance of the receiver.
-    ///
-    /// - Parameters:
-    ///   - fileURL: The file URL indicating the desired location of the on-disk store. This file should already exist.
-    ///   - maximumBytes: The maximum size of the cache, in bytes. Logs larger than this size will fail to append to the store.
-    ///   - shouldOverwriteOldMessages: When `true`, once the on-disk store exceeds maximumBytes, new entries will replace the oldest entry.
     ///   - decoder: The decoder that will be used to decode already-persisted messages.
     ///   - encoder: The encoder that will be used to encode messages prior to persistence.
     ///
@@ -63,8 +40,8 @@ public final class CacheAdvance<T: Codable> {
         fileURL: URL,
         maximumBytes: Bytes,
         shouldOverwriteOldMessages: Bool,
-        decoder: MessageDecoder,
-        encoder: MessageEncoder)
+        decoder: MessageDecoder = JSONDecoder(),
+        encoder: MessageEncoder = JSONEncoder())
         throws
     {
         self.fileURL = fileURL
