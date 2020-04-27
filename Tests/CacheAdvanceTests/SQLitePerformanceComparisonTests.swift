@@ -69,6 +69,19 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
         XCTAssertEqual(cache.messages().count, LorumIpsum.messages.count)
     }
 
+    func test_append_sqlite_overwritingCache_storesOnlyMostRecentMessages() {
+        let cache = SQLiteCache<TestableMessage>(
+            location: testFileLocation,
+            maxMessageCount: Int32(LorumIpsum.messages.count),
+            shouldOverwriteMessages: true)
+        for message in LorumIpsum.messages {
+            cache.appendMessage(message)
+        }
+        cache.appendMessage(#function)
+
+        XCTAssertEqual(cache.messages(), Array(LorumIpsum.messages.dropFirst()) + [#function])
+    }
+
     func test_messages_sqlite_overwritingCache_canReadInsertedMessages() {
         let cache = SQLiteCache<TestableMessage>(
             location: testFileLocation,
@@ -83,7 +96,7 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
 
     // MARK: Performance Tests
 
-    func test_performance_createDatabaseAndAppendSingleMessage() {
+    func test_performance_sqlite_createDatabaseAndAppendSingleMessage() {
         measure {
             // Delete any existing database.
             try? FileManager.default.removeItem(at: testFileLocation)
@@ -227,7 +240,7 @@ class SQLiteCache<T: Codable> {
             }
 
             guard sqlite3_step(deleteQuery) == SQLITE_DONE else {
-                XCTFail("Failed to delete top messages")
+                XCTFail("Failed to delete oldest message")
                 return
             }
         }

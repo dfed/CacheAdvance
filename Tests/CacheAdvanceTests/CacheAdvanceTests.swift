@@ -22,15 +22,6 @@ import XCTest
 
 final class CacheAdvanceTests: XCTestCase {
 
-    // MARK: XCTestCase
-
-    override func setUp() {
-        super.setUp()
-
-        // Clear out any existing cache.
-        FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
-    }
-
     // MARK: Behavior Tests
 
     func test_isEmpty_returnsTrueWhenCacheIsEmpty() throws {

@@ -66,6 +66,19 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
         XCTAssertEqual(try cache.messages().count, LorumIpsum.messages.count)
     }
 
+    func test_append_flushableCache_overwritingCache_storesOnlyMostRecentMessages() throws {
+        let cache = FlushableCache<TestableMessage>(
+            location: testFileLocation,
+            maxMessageCount: LorumIpsum.messages.count,
+            shouldOverwriteMessages: true)
+        for message in LorumIpsum.messages {
+            try cache.appendMessage(message)
+        }
+        try cache.appendMessage(#function)
+
+        XCTAssertEqual(try cache.messages(), Array(LorumIpsum.messages.dropFirst()) + [#function])
+    }
+
     func test_messages_flushableCache_overwritingCache_canReadInsertedMessages() throws {
         let cache = FlushableCache<TestableMessage>(
             location: testFileLocation,
@@ -80,37 +93,33 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
 
     // MARK: Performance Tests
 
-    func test_performance_createDatabaseAndAppendSingleMessageAndFlush() {
-        // We delete the database between runs because this cache type becomes less performant as the cache grows.
+    func test_performance_flushableCache_createCacheAndAppendSingleMessageAndFlush() {
+        let cache = FlushableCache<TestableMessage>(
+            location: testFileLocation,
+            maxMessageCount: LorumIpsum.messages.count,
+            shouldOverwriteMessages: false)
         measure {
-            // Delete any existing database.
-            FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
-
-            let cache = FlushableCache<TestableMessage>(
-                location: testFileLocation,
-                maxMessageCount: LorumIpsum.messages.count,
-                shouldOverwriteMessages: false)
-
             try? cache.appendMessage("test message")
             try? cache.flushMessages()
+
+            // Prepare ourselves for the next run.
+            cache.dropMessages()
         }
     }
 
     func test_performance_flushableCache_appendAndFlush_fillableCache() {
-         // We delete the database between runs because this cache type becomes less performant as the cache grows.
+         let cache = FlushableCache<TestableMessage>(
+             location: testFileLocation,
+             maxMessageCount: LorumIpsum.messages.count,
+             shouldOverwriteMessages: false)
         measure {
-            // Delete the existing cache.
-            FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
-
-            let cache = FlushableCache<TestableMessage>(
-                location: testFileLocation,
-                maxMessageCount: LorumIpsum.messages.count,
-                shouldOverwriteMessages: false)
-
             for message in LorumIpsum.messages {
                 try? cache.appendMessage(message)
                 try? cache.flushMessages()
             }
+
+            // Prepare ourselves for the next run.
+            cache.dropMessages()
         }
     }
 
@@ -133,21 +142,20 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
     }
 
     func test_performance_flushableCache_appendAndFlushEvery50Messages_fillableCache() {
-          // We delete the database between runs because this cache type becomes less performant as the cache grows.
+          let cache = FlushableCache<TestableMessage>(
+              location: testFileLocation,
+              maxMessageCount: LorumIpsum.messages.count,
+              shouldOverwriteMessages: false)
          measure {
-             // Delete the existing cache.
-             FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
-
-             let cache = FlushableCache<TestableMessage>(
-                 location: testFileLocation,
-                 maxMessageCount: LorumIpsum.messages.count,
-                 shouldOverwriteMessages: false)
             for (index, message) in LorumIpsum.messages.enumerated() {
                 try? cache.appendMessage(message)
                 if index % 50 == 0 {
                     try? cache.flushMessages()
                 }
             }
+
+            // Prepare ourselves for the next run.
+            cache.dropMessages()
         }
     }
 
@@ -170,7 +178,6 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
             }
         }
     }
-
 
     func test_performance_flushableCache_messages_fillableCache() throws {
         let cache = FlushableCache<TestableMessage>(
@@ -260,6 +267,10 @@ class FlushableCache<T: Codable> {
 
     func flushMessages() throws {
         try encoder.encode(try messages()).write(to: location)
+    }
+
+    func dropMessages() {
+        _messages = []
     }
 
     // MARK: Private
