@@ -98,8 +98,14 @@ public final class __ObjectiveCCompatibleCacheAdvanceWithGenericData: NSObject {
 /// A decoder that treats all messages as if they are `Data`.
 final class PassthroughDataDecoder: MessageDecoder {
     func decode<T>(_ type: T.Type, from data: Data) throws -> T where T : Decodable {
-        // `T` must always be `Data`.
-        data as! T
+        if let data = data as? T {
+            return data
+        } else {
+            throw DecodingError.dataCorrupted(
+                DecodingError.Context(
+                    codingPath: [],
+                    debugDescription: "Type was not Data"))
+        }
     }
 }
 
@@ -108,7 +114,14 @@ final class PassthroughDataDecoder: MessageDecoder {
 /// A encoder that treats all messages as if they are `Data`.
 final class PassthroughDataEncoder: MessageEncoder {
     func encode<T>(_ value: T) throws -> Data where T : Encodable {
-        // `T` must always be `Data`.
-        value as! Data
+        if let value = value as? Data {
+            return value
+        } else {
+            throw EncodingError.invalidValue(
+                value,
+                EncodingError.Context(
+                    codingPath: [],
+                    debugDescription: "Value was not Data"))
+        }
     }
 }
