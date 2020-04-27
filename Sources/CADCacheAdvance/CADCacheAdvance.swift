@@ -27,7 +27,7 @@ import Foundation
 /// - Attention: This type is meant to be used by Objective-C code, and is not exposed to Swift. Swift code should use CacheAdvance<T>.
 @objc(CADCacheAdvance)
 @available(swift, obsoleted: 1.0)
-public final class __ObjectiveCCompatibleCacheAdvanceWithGenericStorage: NSObject {
+public final class __ObjectiveCCompatibleCacheAdvanceWithGenericData: NSObject {
 
     // MARK: Initialization
 
@@ -47,10 +47,12 @@ public final class __ObjectiveCCompatibleCacheAdvanceWithGenericStorage: NSObjec
         shouldOverwriteOldMessages: Bool)
         throws
     {
-        cache = try CacheAdvance<Storage>(
+        cache = try CacheAdvance<Data>(
             fileURL: fileURL,
             maximumBytes: maximumBytes,
-            shouldOverwriteOldMessages: shouldOverwriteOldMessages)
+            shouldOverwriteOldMessages: shouldOverwriteOldMessages,
+            decoder: PassthroughDataDecoder(),
+            encoder: PassthroughDataEncoder())
     }
 
     // MARK: Public
@@ -71,7 +73,7 @@ public final class __ObjectiveCCompatibleCacheAdvanceWithGenericStorage: NSObjec
     /// - Parameter message: A message to write to disk. Must be smaller than both `maximumBytes - FileHeader.expectedEndOfHeaderInFile` and `MessageSpan.max`.
     @objc
     public func appendMessage(_ message: Data) throws {
-        try cache.append(message: Storage(message))
+        try cache.append(message: message)
     }
 
     /// - Returns: `true` when there are no messages written to the file, or when the file can not be read.
@@ -83,26 +85,30 @@ public final class __ObjectiveCCompatibleCacheAdvanceWithGenericStorage: NSObjec
     /// Fetches all messages from the cache.
     @objc
     public func messages() throws -> [Data] {
-        try cache.messages().map { $0.d }
+        try cache.messages()
     }
 
     // MARK: Private
 
-    private let cache: CacheAdvance<Storage>
+    private let cache: CacheAdvance<Data>
 }
 
-// MARK: - Storage
+// MARK: - PassthroughDataDecoder
 
-private struct Storage: Codable {
-
-    // MARK: Initialization
-
-    fileprivate init(_ data: Data) {
-        d = data
+/// A decoder that treats all messages as if they are `Data`.
+final class PassthroughDataDecoder: MessageDecoder {
+    func decode<T>(_ type: T.Type, from data: Data) throws -> T where T : Decodable {
+        // `T` must always be `Data`.
+        data as! T
     }
+}
 
-    // MARK: Fileprivate
+// MARK: - PassthroughDataDecoder
 
-    /// The underlying stored data. This property name is short to reduce the required on-disk storage space per message.
-    fileprivate let d: Data
+/// A encoder that treats all messages as if they are `Data`.
+final class PassthroughDataEncoder: MessageEncoder {
+    func encode<T>(_ value: T) throws -> Data where T : Encodable {
+        // `T` must always be `Data`.
+        value as! Data
+    }
 }

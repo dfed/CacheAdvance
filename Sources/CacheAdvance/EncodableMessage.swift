@@ -30,7 +30,7 @@ struct EncodableMessage<T: Codable> {
     /// - Parameters:
     ///   - message: The messages to encode.
     ///   - encoder: The encoder to use.
-    init(message: T, encoder: JSONEncoder) {
+    init(message: T, encoder: MessageEncoder) {
         self.message = message
         self.encoder = encoder
     }
@@ -51,6 +51,6 @@ struct EncodableMessage<T: Codable> {
     // MARK: Private
 
     private let message: T
-    private let encoder: JSONEncoder
+    private let encoder: MessageEncoder
 
 }
