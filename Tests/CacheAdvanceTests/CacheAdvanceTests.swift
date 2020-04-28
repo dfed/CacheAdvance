@@ -286,7 +286,7 @@ final class CacheAdvanceTests: XCTestCase {
             let messages = try cache.messages()
             XCTAssertEqual(expectedMessagesInOverwritingCache(givenOriginal: LorumIpsum.messages, newMessageCount: messages.count), messages)
 
-            // Prepare for the next test.
+            // Prepare ourselves for the next run.
             clearCacheFile()
         }
     }
@@ -318,7 +318,7 @@ final class CacheAdvanceTests: XCTestCase {
 
             XCTAssertEqual(expectedMessagesInOverwritingCache(givenOriginal: cachedMessages + [LorumIpsum.messages.last!], newMessageCount: secondCacheMessages.count), secondCacheMessages)
 
-            // Prepare for the next test.
+            // Prepare ourselves for the next run.
             clearCacheFile()
         }
     }
@@ -336,7 +336,7 @@ final class CacheAdvanceTests: XCTestCase {
             let cachedMessagesAfterAppend = try cache.messages()
             XCTAssertEqual(expectedMessagesInOverwritingCache(givenOriginal: cachedMessages + [LorumIpsum.messages.last!], newMessageCount: cachedMessagesAfterAppend.count), cachedMessagesAfterAppend)
 
-            // Prepare for the next test.
+            // Prepare ourselves for the next run.
             clearCacheFile()
         }
     }
@@ -408,7 +408,7 @@ final class CacheAdvanceTests: XCTestCase {
             let secondCache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
             XCTAssertEqual(try cache.messages(), try secondCache.messages())
 
-            // Prepare for the next test.
+            // Prepare ourselves for the next run.
             clearCacheFile()
         }
     }
@@ -433,7 +433,7 @@ final class CacheAdvanceTests: XCTestCase {
             let secondCache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
             XCTAssertEqual(try cache.messages(), try secondCache.messages())
 
-            // Prepare for the next test.
+            // Prepare ourselves for the next run.
             clearCacheFile()
         }
     }
@@ -448,7 +448,7 @@ final class CacheAdvanceTests: XCTestCase {
             let secondCache = try createCache(overwritesOldMessages: false)
             XCTAssertEqual(try cache.messages(), try secondCache.messages())
 
-            // Prepare for the next test.
+            // Prepare ourselves for the next run.
             clearCacheFile()
         }
     }
@@ -463,7 +463,7 @@ final class CacheAdvanceTests: XCTestCase {
             let secondCache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
             XCTAssertEqual(try cache.messages(), try secondCache.messages())
 
-            // Prepare for the next test.
+            // Prepare ourselves for the next run.
             clearCacheFile()
         }
     }
