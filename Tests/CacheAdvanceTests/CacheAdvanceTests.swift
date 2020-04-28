@@ -22,6 +22,11 @@ import XCTest
 
 final class CacheAdvanceTests: XCTestCase {
 
+    override func setUp() {
+        super.setUp()
+        clearCacheFile()
+    }
+
     // MARK: Behavior Tests
 
     func test_isEmpty_returnsTrueWhenCacheIsEmpty() throws {
