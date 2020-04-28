@@ -465,8 +465,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_performance_createCacheAndAppendSingleMessage() throws {
         measure {
-            // Delete any existing cache.
-            FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
+            clearCacheFile()
 
             guard let sut = try? createCache(maximumByes: 100, overwritesOldMessages: true, zeroOutExistingFile: false) else {
                 XCTFail("Could not create cache")
@@ -554,9 +553,7 @@ final class CacheAdvanceTests: XCTestCase {
         throws
         -> CacheHeaderHandle
     {
-        if zeroOutExistingFile {
-            FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
-        }
+        if zeroOutExistingFile { clearCacheFile() }
         return try CacheHeaderHandle(
             forReadingFrom: testFileLocation,
             maximumBytes: Bytes(Double(try requiredByteCount(for: messages)) / maximumByteDivisor) - maximumByteSubtractor,
@@ -586,9 +583,7 @@ final class CacheAdvanceTests: XCTestCase {
         throws
         -> CacheAdvance<TestableMessage>
     {
-        if zeroOutExistingFile {
-            FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
-        }
+        if zeroOutExistingFile { clearCacheFile() }
         return try CacheAdvance<TestableMessage>(
             fileURL: testFileLocation,
             maximumBytes: maximumByes,
@@ -601,6 +596,13 @@ final class CacheAdvanceTests: XCTestCase {
         -> [TestableMessage]
     {
         Array(messages.dropFirst(messages.count - newMessageCount))
+    }
+
+    private func clearCacheFile() {
+        FileManager.default.createFile(
+            atPath: testFileLocation.path,
+            contents: nil,
+            attributes: nil)
     }
 
     private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("CacheAdvanceTests")
