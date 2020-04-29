@@ -595,8 +595,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     private func createCache(
         maximumByes: Bytes,
-        overwritesOldMessages: Bool,
-        zeroOutExistingFile: Bool = true)
+        overwritesOldMessages: Bool)
         throws
         -> CacheAdvance<TestableMessage>
     {
