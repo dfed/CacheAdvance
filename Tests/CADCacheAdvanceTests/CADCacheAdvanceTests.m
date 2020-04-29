@@ -56,7 +56,7 @@
     CADCacheAdvance *const cache = [self createCacheThatOverwitesOldMessages:YES];
     NSError *error = nil;
     [cache appendMessage:[@"Test" dataUsingEncoding:NSUTF8StringEncoding]
-                error:&error];
+                   error:&error];
     XCTAssertNil(error);
     XCTAssertFalse(cache.isEmpty);
 }

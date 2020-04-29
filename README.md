@@ -22,10 +22,10 @@ let myCache = try CacheAdvance<MyMessageType>(
 
 ```objc
 CADCacheAdvance *const cache = [[CADCacheAdvance alloc]
-                                    initWithFileURL:[NSFileManager.defaultManager.temporaryDirectory URLByAppendingPathComponent:@"MyCache"]
-                                    maximumBytes:5000
-                                    shouldOverwriteOldMessages:YES
-                                    error:nil];
+                                initWithFileURL:[NSFileManager.defaultManager.temporaryDirectory URLByAppendingPathComponent:@"MyCache"]
+                                maximumBytes:5000
+                                shouldOverwriteOldMessages:YES
+                                error:nil];
 ```
 To begin caching messages, you need to create a CacheAdvance instance with:
 
