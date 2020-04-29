@@ -18,13 +18,10 @@
 #if GENERATED_XCODE_PROJECT
 // This import works when working within the generated CacheAdvance.xcodeproj used in CI.
 #import <CADCacheAdvance/CADCacheAdvance-Swift.h>
+#import <LorumIpsum/LorumIpsum-Swift.h>
 #else
 // This import works when working within Package.swift.
 @import CADCacheAdvance;
-#endif
-#if SWIFT_PACKAGE_MANAGER
-// Swift Package Manager defines multiple modules, while other distribution mechanisms do not.
-// We only need to import SwiftTryCatch if this project is being built with Swift Package Manager.
 @import LorumIpsum;
 #endif
 @import XCTest;

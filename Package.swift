@@ -29,8 +29,7 @@ let package = Package(
         ),
         .testTarget(
             name: "CacheAdvanceTests",
-            dependencies: ["CacheAdvance", "LorumIpsum"],
-            swiftSettings: [.define("SWIFT_PACKAGE_MANAGER")]
+            dependencies: ["CacheAdvance", "LorumIpsum"]
         ),
         .target(
             name: "CADCacheAdvance",
@@ -43,8 +42,7 @@ let package = Package(
         ),
         .testTarget(
             name: "CADCacheAdvanceTests",
-            dependencies: ["CADCacheAdvance", "LorumIpsum"],
-            cSettings: [.define("SWIFT_PACKAGE_MANAGER")]
+            dependencies: ["CADCacheAdvance", "LorumIpsum"]
         ),
         .target(
             name: "SwiftTryCatch",
