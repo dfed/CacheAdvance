@@ -29,16 +29,22 @@ let package = Package(
         ),
         .testTarget(
             name: "CacheAdvanceTests",
-            dependencies: ["CacheAdvance"]
+            dependencies: ["CacheAdvance", "LorumIpsum"],
+            swiftSettings: [.define("SWIFT_PACKAGE_MANAGER")]
         ),
         .target(
             name: "CADCacheAdvance",
             dependencies: ["CacheAdvance"],
             swiftSettings: [.define("SWIFT_PACKAGE_MANAGER")]
         ),
+        .target(
+            name: "LorumIpsum",
+            dependencies: []
+        ),
         .testTarget(
             name: "CADCacheAdvanceTests",
-            dependencies: ["CADCacheAdvance"]
+            dependencies: ["CADCacheAdvance", "LorumIpsum"],
+            cSettings: [.define("SWIFT_PACKAGE_MANAGER")]
         ),
         .target(
             name: "SwiftTryCatch",

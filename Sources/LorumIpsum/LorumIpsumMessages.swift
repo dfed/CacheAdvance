@@ -15,8 +15,12 @@
 //  limitations under the License.
 //
 
-enum LorumIpsum {
-    static let messages: [TestableMessage] = [
+import Foundation
+
+@objc(CADLorumIpsum)
+public final class LorumIpsum: NSObject {
+    @objc
+    public static let messages: [String] = [
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
         "Arcu cursus euismod quis viverra nibh cras pulvinar.",
         "Et malesuada fames ac turpis.",

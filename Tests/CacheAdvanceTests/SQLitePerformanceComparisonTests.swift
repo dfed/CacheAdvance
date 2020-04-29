@@ -36,62 +36,62 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
     func test_append_sqlite_fillableCache_canMaintainMaxCount() {
         let cache = SQLiteCache<TestableMessage>(
             location: testFileLocation,
-            maxMessageCount: Int32(LorumIpsum.messages.count),
+            maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
             shouldOverwriteMessages: false)
-        for message in LorumIpsum.messages + LorumIpsum.messages {
+        for message in TestableMessage.lorumIpsum + TestableMessage.lorumIpsum {
             cache.appendMessage(message)
         }
 
-        XCTAssertEqual(cache.messages().count, LorumIpsum.messages.count)
+        XCTAssertEqual(cache.messages().count, TestableMessage.lorumIpsum.count)
     }
 
     func test_messages_sqlite_fillableCache_canReadInsertedMessages() {
         let cache = SQLiteCache<TestableMessage>(
             location: testFileLocation,
-            maxMessageCount: Int32(LorumIpsum.messages.count),
+            maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
             shouldOverwriteMessages: true)
-        for message in LorumIpsum.messages {
+        for message in TestableMessage.lorumIpsum {
             cache.appendMessage(message)
         }
 
-        XCTAssertEqual(cache.messages(), LorumIpsum.messages)
+        XCTAssertEqual(cache.messages(), TestableMessage.lorumIpsum)
     }
 
     func test_append_sqlite_overwritingCache_canMaintainMaxCount() {
         let cache = SQLiteCache<TestableMessage>(
             location: testFileLocation,
-            maxMessageCount: Int32(LorumIpsum.messages.count),
+            maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
             shouldOverwriteMessages: true)
-        for message in LorumIpsum.messages + LorumIpsum.messages {
+        for message in TestableMessage.lorumIpsum + TestableMessage.lorumIpsum {
             cache.appendMessage(message)
         }
 
-        XCTAssertEqual(cache.messages().count, LorumIpsum.messages.count)
+        XCTAssertEqual(cache.messages().count, TestableMessage.lorumIpsum.count)
     }
 
     func test_append_sqlite_overwritingCache_storesOnlyMostRecentMessages() {
         let cache = SQLiteCache<TestableMessage>(
             location: testFileLocation,
-            maxMessageCount: Int32(LorumIpsum.messages.count),
+            maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
             shouldOverwriteMessages: true)
-        for message in LorumIpsum.messages {
+        for message in TestableMessage.lorumIpsum {
             cache.appendMessage(message)
         }
         cache.appendMessage(#function)
 
-        XCTAssertEqual(cache.messages(), Array(LorumIpsum.messages.dropFirst()) + [#function])
+        XCTAssertEqual(cache.messages(), Array(TestableMessage.lorumIpsum.dropFirst()) + [#function])
     }
 
     func test_messages_sqlite_overwritingCache_canReadInsertedMessages() {
         let cache = SQLiteCache<TestableMessage>(
             location: testFileLocation,
-            maxMessageCount: Int32(LorumIpsum.messages.count),
+            maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
             shouldOverwriteMessages: true)
-        for message in LorumIpsum.messages {
+        for message in TestableMessage.lorumIpsum {
             cache.appendMessage(message)
         }
 
-        XCTAssertEqual(cache.messages(), LorumIpsum.messages)
+        XCTAssertEqual(cache.messages(), TestableMessage.lorumIpsum)
     }
 
     // MARK: Performance Tests
@@ -103,7 +103,7 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
 
             let cache = SQLiteCache<TestableMessage>(
                 location: testFileLocation,
-                maxMessageCount: Int32(LorumIpsum.messages.count),
+                maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
                 shouldOverwriteMessages: false)
 
             cache.appendMessage("test message")
@@ -114,12 +114,12 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
          // Create a cache that won't run out of room over multiple test runs.
         let cache = SQLiteCache<TestableMessage>(
             location: testFileLocation,
-            maxMessageCount: Int32(LorumIpsum.messages.count * 10),
+            maxMessageCount: Int32(TestableMessage.lorumIpsum.count * 10),
             shouldOverwriteMessages: false)
         cache.createDatabaseIfNecessay()
 
         measure {
-            for message in LorumIpsum.messages {
+            for message in TestableMessage.lorumIpsum {
                 cache.appendMessage(message)
             }
         }
@@ -128,15 +128,15 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
     func test_performance_sqlite_append_overwritingCache() {
         let cache = SQLiteCache<TestableMessage>(
             location: testFileLocation,
-            maxMessageCount: Int32(LorumIpsum.messages.count),
+            maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
             shouldOverwriteMessages: true)
 
         // Fill the cache before the test starts.
-        for message in LorumIpsum.messages {
+        for message in TestableMessage.lorumIpsum {
             cache.appendMessage(message)
         }
         measure {
-            for message in LorumIpsum.messages {
+            for message in TestableMessage.lorumIpsum {
                 cache.appendMessage(message)
             }
         }
@@ -145,9 +145,9 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
     func test_performance_sqlite_messages_fillableCache() {
         let cache = SQLiteCache<TestableMessage>(
             location: testFileLocation,
-            maxMessageCount: Int32(LorumIpsum.messages.count),
+            maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
             shouldOverwriteMessages: false)
-        for message in LorumIpsum.messages {
+        for message in TestableMessage.lorumIpsum {
             cache.appendMessage(message)
         }
         measure {
@@ -158,9 +158,9 @@ final class SQLitePerformanceComparisonTests: XCTestCase {
     func test_performance_sqlite_messages_overwritingCache() {
         let cache = SQLiteCache<TestableMessage>(
             location: testFileLocation,
-            maxMessageCount: Int32(LorumIpsum.messages.count),
+            maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
             shouldOverwriteMessages: true)
-        for message in LorumIpsum.messages + LorumIpsum.messages {
+        for message in TestableMessage.lorumIpsum + TestableMessage.lorumIpsum {
             cache.appendMessage(message)
         }
         measure {
