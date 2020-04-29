@@ -313,6 +313,10 @@ final class CacheAdvanceTests: XCTestCase {
             let cachedMessages = try cache.messages()
 
             let secondCache = try createCache(overwritesOldMessages: true, maximumByteDivisor: maximumByteDivisor)
+
+            // Check that we can retrieve the messages from the first cache.
+            XCTAssertGreaterThan(try secondCache.messages().count, 0)
+
             try secondCache.append(message: LorumIpsum.messages.last!)
             let secondCacheMessages = try secondCache.messages()
 
