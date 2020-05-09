@@ -17,6 +17,8 @@
 
 import Foundation
 #if SWIFT_PACKAGE_MANAGER
+// Swift Package Manager defines multiple modules, while other distribution mechanisms do not.
+// We only need to import SwiftTryCatch if this project is being built with Swift Package Manager.
 import SwiftTryCatch
 #endif
 

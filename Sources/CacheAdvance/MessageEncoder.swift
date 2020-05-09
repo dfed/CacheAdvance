@@ -1,6 +1,6 @@
 //
-//  Created by Dan Federman on 12/20/19.
-//  Copyright © 2019 Dan Federman.
+//  Created by Dan Federman on 4/26/20.
+//  Copyright © 2020 Dan Federman.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -16,17 +16,10 @@
 //
 
 import Foundation
-import LorumIpsum
 
-struct TestableMessage: Codable, ExpressibleByStringLiteral, Equatable {
-
-    typealias StringLiteralType = String
-
-    init(stringLiteral value: Self.StringLiteralType) {
-        self.value = value
-    }
-
-    let value: String
-
-    static let lorumIpsum = LorumIpsum.messages.map { TestableMessage(stringLiteral: $0) }
+/// An object capable of encoding a message of type `T` to `Data`.
+public protocol MessageEncoder {
+    func encode<T>(_ value: T) throws -> Data where T : Encodable
 }
+
+extension JSONEncoder: MessageEncoder {}
