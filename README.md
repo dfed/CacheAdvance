@@ -1,6 +1,6 @@
 # CacheAdvance
 
-[![CI Status](https://travis-ci.com/dfed/CacheAdvance.svg?branch=master)](https://travis-ci.com/dfed/CacheAdvance)
+[![CI Status](https://travis-ci.com/dfed/CacheAdvance.svg?branch=main)](https://travis-ci.com/dfed/CacheAdvance)
 [![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible-4BC51D.svg?style=flat)](https://github.com/apple/swift-package-manager)
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![Version](https://img.shields.io/cocoapods/v/CacheAdvance.svg)](https://cocoapods.org/pods/CacheAdvance)
@@ -130,6 +130,10 @@ Thanks, and happy caching!
 ## Developing
 
 Double-click on `Package.swift` in the root of the repository to open the project in Xcode.
+
+## Default branch
+
+The default branch of this repository is `main`. Between the initial commit and [`151ab3f`](https://github.com/dfed/CacheAdvance/commit/151ab3f1d57531b9ae7a9219d0d8a33300704595), the default branch of this repository was `master`. See #46 for more details on why this change was made.
 
 ## Attribution
 
