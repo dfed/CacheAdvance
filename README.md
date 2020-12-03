@@ -2,7 +2,6 @@
 
 [![CI Status](https://travis-ci.com/dfed/CacheAdvance.svg?branch=main)](https://travis-ci.com/dfed/CacheAdvance)
 [![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible-4BC51D.svg?style=flat)](https://github.com/apple/swift-package-manager)
-[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![Version](https://img.shields.io/cocoapods/v/CacheAdvance.svg)](https://cocoapods.org/pods/CacheAdvance)
 [![License](https://img.shields.io/cocoapods/l/CacheAdvance.svg)](https://cocoapods.org/pods/CacheAdvance)
 [![Platform](https://img.shields.io/cocoapods/p/CacheAdvance.svg)](https://cocoapods.org/pods/CacheAdvance)
