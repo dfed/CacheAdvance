@@ -78,7 +78,7 @@ final class CacheAdvanceTests: XCTestCase {
 
         let sut = try createCache(overwritesOldMessages: false)
         XCTAssertThrowsError(try sut.isEmpty()) {
-            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.incompatibleHeader)
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.incompatibleHeader(persistedVersion: 0))
         }
     }
 
@@ -355,7 +355,7 @@ final class CacheAdvanceTests: XCTestCase {
             sizedToFit: TestableMessage.lorumIpsum.dropLast(),
             overwritesOldMessages: false)
         XCTAssertThrowsError(try sut.append(message: TestableMessage.lorumIpsum.last!)) {
-            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.incompatibleHeader)
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.incompatibleHeader(persistedVersion: 0))
         }
     }
 
@@ -480,7 +480,7 @@ final class CacheAdvanceTests: XCTestCase {
 
         let sut = try createCache(overwritesOldMessages: false)
         XCTAssertThrowsError(try sut.messages()) {
-            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.incompatibleHeader)
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.incompatibleHeader(persistedVersion: 0))
         }
     }
 

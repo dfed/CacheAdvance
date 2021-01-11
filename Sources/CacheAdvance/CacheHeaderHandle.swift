@@ -74,11 +74,11 @@ final class CacheHeaderHandle {
         try handle.write(data: expectedHeader.data(for: .offsetInFileAtEndOfNewestMessage))
     }
 
-    /// Checks if the expected header version matches the persisted header version.
+    /// Throws if the expected header version does not match the persisted header version.
     ///
-    /// - Returns: `true` if this object's header version matches that of `fileHeader`; otherwise `false`.
-    func canOpenFile() throws -> Bool {
-        canOpenFile(with: try memoizedMetadata())
+    /// - Throws: `CacheAdvanceError.incompatibleHeader` if this object's header version does not match that of `fileHeader`. May also throw a file reading error if the file can not be read.
+    func openFile() throws {
+        try openFile(with: try memoizedMetadata())
     }
 
     /// Checks if the all the header metadata provided at initialization matches the persisted header.
@@ -106,7 +106,9 @@ final class CacheHeaderHandle {
         }
 
         let persistedMetadata = Metadata(fileHeader: fileHeader)
-        guard canOpenFile(with: persistedMetadata) else {
+        do {
+            try openFile(with: persistedMetadata)
+        } catch {
             return
         }
 
@@ -142,15 +144,17 @@ final class CacheHeaderHandle {
         return try handle.readDataUp(toLength: Int(FileHeader.expectedEndOfHeaderInFile))
     }
 
-    /// Checks if the expected header version matches the persisted header version.
+    /// Throws if the expected header version does not match the persisted header version.
     ///
     /// - Parameter persistedMetadata: The persisted header metadata.
-    /// - Returns: `true` if this object's header version matches that of `fileHeader`; otherwise `false`.
-    private func canOpenFile(with persistedMetadata: Metadata) -> Bool {
+    /// - Throws: `CacheAdvanceError.incompatibleHeader` if this object's header version does not match that of `fileHeader`. May also throw a file reading error if the file can not be read.
+    private func openFile(with persistedMetadata: Metadata) throws {
         // Our current file header version is 1.
         // That means there is only one header version we can understand.
         // Our header version must be our expected version for us to open the file successfully.
-        persistedMetadata.version == version
+        if persistedMetadata.version != version {
+            throw CacheAdvanceError.incompatibleHeader(persistedVersion: persistedMetadata.version)
+        }
     }
 
     /// Checks if the all the header metadata provided at initialization matches the persisted header.
@@ -158,7 +162,9 @@ final class CacheHeaderHandle {
     /// - Parameter persistedMetadata: The persisted header metadata.
     /// - Returns: `true` if this object's static metadata matches that of the persisted `fileHeader`; otherwise `false`.
     private func canWriteToFile(with persistedMetadata: Metadata) -> Bool {
-        guard canOpenFile(with: persistedMetadata) else {
+        do {
+            try openFile(with: persistedMetadata)
+        } catch {
             // If we can't open the file, we can't write to it.
             return false
         }
