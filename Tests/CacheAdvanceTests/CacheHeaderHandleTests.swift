@@ -113,7 +113,7 @@ final class CacheHeaderHandleTests: XCTestCase {
         try handle.closeHandle()
     }
 
-    func test_openFile_versionMismatch_throwsIncompatibleHeader() throws {
+    func test_checkFile_versionMismatch_throwsIncompatibleHeader() throws {
         let originalHeader = try createHeaderHandle(
             maximumBytes: 1000,
             overwritesOldMessages: true,
@@ -125,18 +125,18 @@ final class CacheHeaderHandleTests: XCTestCase {
             overwritesOldMessages: true,
             version: 2)
 
-        XCTAssertThrowsError(try sut.openFile()) {
+        XCTAssertThrowsError(try sut.checkFile()) {
             XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.incompatibleHeader(persistedVersion: 1))
         }
     }
 
-    func test_openFile_emptyFile_throwsFileCorrupted() throws {
+    func test_checkFile_emptyFile_throwsFileCorrupted() throws {
         let sut = try createHeaderHandle(
             maximumBytes: 1000,
             overwritesOldMessages: true,
             version: 2)
 
-        XCTAssertThrowsError(try sut.openFile()) {
+        XCTAssertThrowsError(try sut.checkFile()) {
             XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileCorrupted)
         }
     }
@@ -197,7 +197,7 @@ final class CacheHeaderHandleTests: XCTestCase {
         }
     }
 
-    func test_openFile_noMismatches_doesNotThrow() throws {
+    func test_checkFile_noMismatches_doesNotThrow() throws {
         let originalHeader = try createHeaderHandle(
             maximumBytes: 1000,
             overwritesOldMessages: true,
@@ -209,7 +209,7 @@ final class CacheHeaderHandleTests: XCTestCase {
             overwritesOldMessages: true,
             version: 1)
 
-        XCTAssertNoThrow(try sut.openFile())
+        XCTAssertNoThrow(try sut.checkFile())
     }
 
     // MARK: Private

@@ -77,8 +77,8 @@ final class CacheHeaderHandle {
     /// Throws if the expected header version does not match the persisted header version.
     ///
     /// - Throws: `CacheAdvanceError.incompatibleHeader` if this object's header version does not match that of `fileHeader`. May also throw a file reading error if the file can not be read.
-    func openFile() throws {
-        try openFile(with: try memoizedMetadata())
+    func checkFile() throws {
+        try checkFile(with: try memoizedMetadata())
     }
 
     /// Checks if the all the header metadata provided at initialization matches the persisted header.
@@ -107,7 +107,7 @@ final class CacheHeaderHandle {
 
         let persistedMetadata = Metadata(fileHeader: fileHeader)
         do {
-            try openFile(with: persistedMetadata)
+            try checkFile(with: persistedMetadata)
         } catch {
             return
         }
@@ -148,7 +148,7 @@ final class CacheHeaderHandle {
     ///
     /// - Parameter persistedMetadata: The persisted header metadata.
     /// - Throws: `CacheAdvanceError.incompatibleHeader` if this object's header version does not match that of `fileHeader`. May also throw a file reading error if the file can not be read.
-    private func openFile(with persistedMetadata: Metadata) throws {
+    private func checkFile(with persistedMetadata: Metadata) throws {
         // Our current file header version is 1.
         // That means there is only one header version we can understand.
         // Our header version must be our expected version for us to open the file successfully.
@@ -163,7 +163,7 @@ final class CacheHeaderHandle {
     /// - Returns: `true` if this object's static metadata matches that of the persisted `fileHeader`; otherwise `false`.
     private func canWriteToFile(with persistedMetadata: Metadata) -> Bool {
         do {
-            try openFile(with: persistedMetadata)
+            try checkFile(with: persistedMetadata)
         } catch {
             // If we can't open the file, we can't write to it.
             return false
