@@ -73,9 +73,7 @@ public final class CacheAdvance<T: Codable> {
     /// - Parameter message: A message to write to disk. Must be smaller than both `maximumBytes - FileHeader.expectedEndOfHeaderInFile` and `MessageSpan.max`.
     public func append(message: T) throws {
         try setUpFileHandlesIfNecessary()
-        guard try header.canOpenFile() else {
-            throw CacheAdvanceError.incompatibleHeader
-        }
+        try header.checkFile()
         guard try header.canWriteToFile() else {
             throw CacheAdvanceError.fileNotWritable
         }
@@ -142,9 +140,7 @@ public final class CacheAdvance<T: Codable> {
     /// - Returns: `true` when there are no messages written to the file.
     public func isEmpty() throws -> Bool {
         try setUpFileHandlesIfNecessary()
-        guard try header.canOpenFile() else {
-            throw CacheAdvanceError.incompatibleHeader
-        }
+        try header.checkFile()
 
         return header.offsetInFileAtEndOfNewestMessage == FileHeader.expectedEndOfHeaderInFile
     }
@@ -152,9 +148,7 @@ public final class CacheAdvance<T: Codable> {
     /// Fetches all messages from the cache.
     public func messages() throws -> [T] {
         try setUpFileHandlesIfNecessary()
-        guard try header.canOpenFile() else {
-            throw CacheAdvanceError.incompatibleHeader
-        }
+        try header.checkFile()
 
         var messages = [T]()
         while let encodedMessage = try reader.nextEncodedMessage() {
