@@ -147,7 +147,7 @@ final class CacheHeaderHandle {
     /// Checks that the file's persisted metadata has the expected values.
     ///
     /// - Parameter persistedMetadata: The persisted header metadata.
-    /// - Throws: `CacheAdvanceError.incompatibleHeader` if this object's header version does not match that of `fileHeader`. May also throw a file reading error if the file can not be read.
+    /// - Throws: `CacheAdvanceError.incompatibleHeader` if this object's header version does not match that of `fileHeader`.
     private func checkFile(with persistedMetadata: Metadata) throws {
         // Our current file header version is 1.
         // That means there is only one header version we can understand.
