@@ -21,6 +21,7 @@ public enum CacheAdvanceError: Error, Equatable {
     /// Thrown when a message being appended to a cache that does not overwrite old messages is too large to store in the remaining space.
     case messageLargerThanRemainingCacheSize
     /// Thrown when a cache's persisted header is incompatible with the current implementation.
+    /// - Parameter persistedVersion: The header version of the file being read.
     case incompatibleHeader(persistedVersion: UInt8)
     /// Thrown when the cache file's persisted static header data is inconsistent with the metadata with which the cache was initialized.
     case fileNotWritable
