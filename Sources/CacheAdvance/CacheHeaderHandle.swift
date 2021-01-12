@@ -74,7 +74,7 @@ final class CacheHeaderHandle {
         try handle.write(data: expectedHeader.data(for: .offsetInFileAtEndOfNewestMessage))
     }
 
-    /// Throws if the expected header version does not match the persisted header version.
+    /// Checks that the file is formatted as expected.
     ///
     /// - Throws: `CacheAdvanceError.incompatibleHeader` if this object's header version does not match that of `fileHeader`. May also throw a file reading error if the file can not be read.
     func checkFile() throws {
@@ -144,7 +144,7 @@ final class CacheHeaderHandle {
         return try handle.readDataUp(toLength: Int(FileHeader.expectedEndOfHeaderInFile))
     }
 
-    /// Throws if the expected header version does not match the persisted header version.
+    /// Checks that the file's persisted metadata has the expected values.
     ///
     /// - Parameter persistedMetadata: The persisted header metadata.
     /// - Throws: `CacheAdvanceError.incompatibleHeader` if this object's header version does not match that of `fileHeader`. May also throw a file reading error if the file can not be read.
