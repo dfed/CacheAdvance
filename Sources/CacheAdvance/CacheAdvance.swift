@@ -112,12 +112,16 @@ public final class CacheAdvance<T: Codable> {
 
         let cacheHasSpaceForNewMessageBeforeEndOfFile = writer.offsetInFile + bytesNeededToStoreMessage <= header.maximumBytes
         if header.overwritesOldMessages {
-            if !cacheHasSpaceForNewMessageBeforeEndOfFile {
+            let truncateAtOffset: UInt64?
+            if cacheHasSpaceForNewMessageBeforeEndOfFile {
+                // We have room for this message. No need to truncate.
+                truncateAtOffset = nil
+            } else {
                 // This message can't be written without exceeding our maximum file length.
                 // We'll need to start writing the file from the beginning of the file.
 
-                // Trim the file to the current position to remove soon-to-be-abandoned data from the file.
-                try writer.truncate(at: writer.offsetInFile)
+                // Trim the file to the current writer position to remove soon-to-be-abandoned data from the file.
+                truncateAtOffset = writer.offsetInFile
 
                 // Set the offset back to the beginning of the file.
                 try writer.seek(to: FileHeader.expectedEndOfHeaderInFile)
@@ -139,6 +143,12 @@ public final class CacheAdvance<T: Codable> {
             // Update the offsetInFileOfOldestMessage in our header before we write the message.
             // If the application crashes between writing the header and writing the message data, we'll have lost the messages between the previous offsetInFileOfOldestMessage and the new offsetInFileOfOldestMessage.
             try header.updateOffsetInFileOfOldestMessage(to: offsetInFileOfOldestMessage)
+
+            // Truncate the file if it needs truncation before we write the next message, and after we update our header.
+            // If the application crashes between truncating this message data and writing the next message, our file will still be consistent.
+            if let truncateAtOffset = truncateAtOffset {
+                try writer.truncate(at: truncateAtOffset)
+            }
 
             // Let the reader know where the oldest message begins.
             reader.offsetInFileOfOldestMessage = offsetInFileOfOldestMessage
