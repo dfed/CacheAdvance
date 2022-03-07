@@ -23,49 +23,61 @@ enum TaskError: Error {
 enum Platform: String, CaseIterable, CustomStringConvertible {
     case iOS_12
     case iOS_13
+    case iOS_14
     case tvOS_12
     case tvOS_13
+    case tvOS_14
     case macOS_10_15
     case watchOS_5
     case watchOS_6
+    case watchOS_7
 
     var destination: String {
         switch self {
         case .iOS_12:
-            return "platform=iOS Simulator,OS=12.2,name=iPad Pro (12.9-inch) (3rd generation)"
+            return "platform=iOS Simulator,OS=12.4,name=iPad Pro (12.9-inch) (3rd generation)"
         case .iOS_13:
-            return "platform=iOS Simulator,OS=13.2.2,name=iPad Pro (12.9-inch) (3rd generation)"
+            return "platform=iOS Simulator,OS=13.7,name=iPad Pro (12.9-inch) (4th generation)"
+        case .iOS_14:
+            return "platform=iOS Simulator,OS=14.4,name=iPad Pro (12.9-inch) (4th generation)"
 
         case .tvOS_12:
-            return "platform=tvOS Simulator,OS=12.2,name=Apple TV"
+            return "platform=tvOS Simulator,OS=12.4,name=Apple TV"
         case .tvOS_13:
-            return "platform=tvOS Simulator,OS=13.2,name=Apple TV"
+            return "platform=tvOS Simulator,OS=13.4,name=Apple TV"
+        case .tvOS_14:
+            return "platform=tvOS Simulator,OS=14.3,name=Apple TV"
 
         case .macOS_10_15:
             return "platform=OS X"
 
         case .watchOS_5:
-             return "OS=5.2,name=Apple Watch Series 4 - 44mm"
+            return "OS=5.3,name=Apple Watch Series 4 - 44mm"
         case .watchOS_6:
-            return "OS=6.1,name=Apple Watch Series 4 - 44mm"
+            return "OS=6.2.1,name=Apple Watch Series 4 - 44mm"
+        case .watchOS_7:
+            return "OS=7.2,name=Apple Watch Series 6 - 44mm"
         }
     }
 
     var sdk: String {
         switch self {
         case .iOS_12,
-             .iOS_13:
+             .iOS_13,
+             .iOS_14:
             return "iphonesimulator"
 
         case .tvOS_12,
-             .tvOS_13:
+             .tvOS_13,
+             .tvOS_14:
             return "appletvsimulator"
 
         case .macOS_10_15:
             return "macosx10.15"
 
         case .watchOS_5,
-             .watchOS_6:
+             .watchOS_6,
+             .watchOS_7:
             return "watchsimulator"
         }
     }
@@ -74,13 +86,16 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
         switch self {
         case .iOS_12,
              .iOS_13,
+             .iOS_14,
              .tvOS_12,
              .tvOS_13,
+             .tvOS_14,
              .macOS_10_15:
             return true
 
         case .watchOS_5,
-             .watchOS_6:
+             .watchOS_6,
+             .watchOS_7:
             // watchOS does not support unit testing (yet?).
             return false
         }
@@ -101,6 +116,12 @@ guard CommandLine.arguments.count > 1 else {
 }
 
 try execute(commandPath: "/usr/bin/swift", arguments: ["package", "generate-xcodeproj", "--output=generated/"])
+
+// The generate-xcodeproj command has a bug where the test deployment target is above the minimum deployment target for the project. Fix it with sed.
+try execute(commandPath: "/usr/bin/sed", arguments: ["-i", "-e", "s/IPHONEOS_DEPLOYMENT_TARGET = \"14.0\"/IPHONEOS_DEPLOYMENT_TARGET = \"12.0\"/g", "generated/CacheAdvance.xcodeproj/project.pbxproj"])
+try execute(commandPath: "/usr/bin/sed", arguments: ["-i", "-e", "s/TVOS_DEPLOYMENT_TARGET = \"14.0\"/TVOS_DEPLOYMENT_TARGET = \"12.0\"/g", "generated/CacheAdvance.xcodeproj/project.pbxproj"])
+try execute(commandPath: "/usr/bin/sed", arguments: ["-i", "-e", "s/WATCHOS_DEPLOYMENT_TARGET = \"7.0\"/MACOSX_DEPLOYMENT_TARGET = \"5.0\"/g", "generated/CacheAdvance.xcodeproj/project.pbxproj"])
+try execute(commandPath: "/usr/bin/sed", arguments: ["-i", "-e", "s/MACOSX_DEPLOYMENT_TARGET = \"11.0\"/MACOSX_DEPLOYMENT_TARGET = \"10.15\"/g", "generated/CacheAdvance.xcodeproj/project.pbxproj"])
 
 let rawPlatforms = CommandLine.arguments[1].components(separatedBy: ",")
 
