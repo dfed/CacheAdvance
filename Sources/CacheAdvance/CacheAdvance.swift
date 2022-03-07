@@ -36,7 +36,7 @@ public final class CacheAdvance<T: Codable> {
     /// - Warning: `shouldOverwriteOldMessages` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache will prevent appending new messages to this cache.
     /// - Warning: `decoder` must have a consistent implementation for the life of a cache. Changing this value after logs have been persisted to a cache may prevent reading messages from this cache.
     /// - Warning: `encoder` must have a consistent implementation for the life of a cache. Changing this value after logs have been persisted to a cache may prevent reading messages from this cache.
-    public init(
+    public convenience init(
         fileURL: URL,
         maximumBytes: Bytes,
         shouldOverwriteOldMessages: Bool,
@@ -44,12 +44,31 @@ public final class CacheAdvance<T: Codable> {
         encoder: MessageEncoder = JSONEncoder())
         throws
     {
+        self.init(
+            fileURL: fileURL,
+            writer: try FileHandle(forWritingTo: fileURL),
+            reader: try CacheReader(forReadingFrom: fileURL),
+            header: try CacheHeaderHandle(
+                forReadingFrom: fileURL,
+                maximumBytes: maximumBytes,
+                overwritesOldMessages: shouldOverwriteOldMessages),
+            decoder: decoder,
+            encoder: encoder)
+    }
+
+    /// An internal initializer with no logic. Can be used to create pathological test cases.
+    required init(
+        fileURL: URL,
+        writer: FileHandle,
+        reader: CacheReader,
+        header: CacheHeaderHandle,
+        decoder: MessageDecoder,
+        encoder: MessageEncoder)
+    {
         self.fileURL = fileURL
-
-        writer = try FileHandle(forWritingTo: fileURL)
-        reader = try CacheReader(forReadingFrom: fileURL)
-        header = try CacheHeaderHandle(forReadingFrom: fileURL, maximumBytes: maximumBytes, overwritesOldMessages: shouldOverwriteOldMessages)
-
+        self.writer = writer
+        self.reader = reader
+        self.header = header
         self.decoder = decoder
         self.encoder = encoder
     }
