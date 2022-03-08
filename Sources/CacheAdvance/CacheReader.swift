@@ -63,7 +63,7 @@ final class CacheReader {
             guard !previousReadWasEmpty else {
                 // If the previous read was also empty, then the file has been corrupted.
                 // Two empty reads in a row means that offsetInFileAtEndOfNewestMessage is incorrect.
-                // This inconsistency likely occurred because a crash occurred during a message write.
+                // This inconsistency likely is likely due to a crash occurring during a message write.
                 throw CacheAdvanceError.fileCorrupted
             }
             // We know the next message is at the end of the file header. Let's seek to it.
