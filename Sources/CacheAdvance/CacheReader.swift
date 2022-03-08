@@ -42,7 +42,7 @@ final class CacheReader {
     }
 
     /// Returns the next encodable message, seeking to the beginning of the next message.
-    func nextEncodedMessage() throws -> Data? {
+    func nextEncodedMessage(previousReadWasEmpty: Bool = false) throws -> Data? {
         let startingOffset = offsetInFile
 
         guard startingOffset != offsetInFileAtEndOfNewestMessage else {
@@ -60,11 +60,17 @@ final class CacheReader {
             return message
 
         case .emptyRead:
+            guard !previousReadWasEmpty else {
+                // If the previous read was also empty, then the file has been corrupted.
+                // Two empty reads in a row means that offsetInFileAtEndOfNewestMessage is incorrect.
+                // This inconsistency likely is likely due to a crash occurring during a message write.
+                throw CacheAdvanceError.fileCorrupted
+            }
             // We know the next message is at the end of the file header. Let's seek to it.
             try reader.seek(to: FileHeader.expectedEndOfHeaderInFile)
 
             // We know there's a message to read now that we're at the start of the file.
-            return try nextEncodedMessage()
+            return try nextEncodedMessage(previousReadWasEmpty: true)
 
         case .invalidFormat:
             throw CacheAdvanceError.fileCorrupted
