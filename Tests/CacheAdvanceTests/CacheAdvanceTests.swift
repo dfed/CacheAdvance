@@ -97,9 +97,10 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
   func test_messages_throwsFileCorruptedWhenOffsetInFileAtEndOfNewsetMessageOutOfSync() throws {
+      let randomHighValue: UInt64 = 10_1000
       let header = try CacheHeaderHandle(
         forReadingFrom: testFileLocation,
-        maximumBytes: 10_000,
+        maximumBytes: randomHighValue,
         overwritesOldMessages: true)
       let cache = CacheAdvance<TestableMessage>(
         fileURL: testFileLocation,
