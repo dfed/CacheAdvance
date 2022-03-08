@@ -602,7 +602,7 @@ final class CacheAdvanceTests: XCTestCase {
         throws
         -> CacheAdvance<TestableMessage>
     {
-        return try CacheAdvance<TestableMessage>(
+        try CacheAdvance<TestableMessage>(
             fileURL: testFileLocation,
             maximumBytes: maximumByes,
             shouldOverwriteOldMessages: overwritesOldMessages)
