@@ -126,7 +126,7 @@ public final class CacheAdvance<T: Codable> {
                 // Set the offset back to the beginning of the file.
                 try writer.seek(to: FileHeader.expectedEndOfHeaderInFile)
 
-                // We know the oldest message is at the beginning of the file, since we just tossed out the rest of the file.
+                // We know the oldest message is at the beginning of the file, since we are about to toss out the rest of the file.
                 reader.offsetInFileOfOldestMessage = FileHeader.expectedEndOfHeaderInFile
                 try reader.seekToBeginningOfOldestMessage()
 
