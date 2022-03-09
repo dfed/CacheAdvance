@@ -118,7 +118,7 @@ final class CacheAdvanceTests: XCTestCase {
       // Our file is empty. Make the file corrupted by setting the offset at end of newest message to be further in the file.
       // This should never happen, but past versions of this repo could lead to a file having this kind of inconsistency if a crash occurred at the wrong time.
       try header.updateOffsetInFileAtEndOfNewestMessage(
-        to: FileHeader.expectedEndOfHeaderInFile + UInt64(MessageSpan.storageLength) + 1)
+        to: FileHeader.expectedEndOfHeaderInFile + 1)
 
       XCTAssertThrowsError(try cache.messages()) {
           XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileCorrupted)
