@@ -21,6 +21,7 @@ jobs:
     name: Pod Lint
     needs: common-setup
     runs-on: macOS-10.15
+    steps:
       - name: Lint Podspec
         run: bundle exec pod lib lint --verbose --fail-fast --swift-version=5.1
   carthage:
