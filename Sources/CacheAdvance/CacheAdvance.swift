@@ -119,12 +119,6 @@ public final class CacheAdvance<T: Codable> {
                 // Trim the file to the current writer position to remove soon-to-be-abandoned data from the file.
                 try writer.truncate(at: writer.offsetInFile)
 
-                // Update the offsetInFileAtEndOfNewestMessage in our header and reader such that we will ignore the now-deleted data in the file.
-                // If the application crashes between writing this header and writing the next message data, we'll have only lost the messages we were about to delete.
-                // If `writer.offsetInFile == FileHeader.expectedEndOfHeaderInFile`, then crashing before we update the header would lead to this now-empty file being viewed as corrupted.
-                try header.updateOffsetInFileAtEndOfNewestMessage(to: writer.offsetInFile)
-                reader.offsetInFileAtEndOfNewestMessage = writer.offsetInFile
-
                 // Set the offset back to the beginning of the file.
                 try writer.seek(to: FileHeader.expectedEndOfHeaderInFile)
 
