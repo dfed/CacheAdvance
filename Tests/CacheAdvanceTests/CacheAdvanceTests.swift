@@ -96,34 +96,34 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertEqual(messages, [])
     }
 
-  func test_messages_throwsFileCorruptedWhenOffsetInFileAtEndOfNewsetMessageOutOfSync() throws {
-      let randomHighValue: UInt64 = 10_1000
-      let header = try CacheHeaderHandle(
-        forReadingFrom: testFileLocation,
-        maximumBytes: randomHighValue,
-        overwritesOldMessages: true)
-      let cache = CacheAdvance<TestableMessage>(
-        fileURL: testFileLocation,
-        writer: try FileHandle(forWritingTo: testFileLocation),
-        reader: try CacheReader(forReadingFrom: testFileLocation),
-        header: try CacheHeaderHandle(
+    func test_messages_throwsFileCorruptedWhenOffsetInFileAtEndOfNewsetMessageOutOfSync() throws {
+        let randomHighValue: UInt64 = 10_1000
+        let header = try CacheHeaderHandle(
             forReadingFrom: testFileLocation,
-            maximumBytes: header.maximumBytes,
-            overwritesOldMessages: header.overwritesOldMessages),
-        decoder: JSONDecoder(),
-        encoder: JSONEncoder())
+            maximumBytes: randomHighValue,
+            overwritesOldMessages: true)
+        let cache = CacheAdvance<TestableMessage>(
+            fileURL: testFileLocation,
+            writer: try FileHandle(forWritingTo: testFileLocation),
+            reader: try CacheReader(forReadingFrom: testFileLocation),
+            header: try CacheHeaderHandle(
+                forReadingFrom: testFileLocation,
+                maximumBytes: header.maximumBytes,
+                overwritesOldMessages: header.overwritesOldMessages),
+            decoder: JSONDecoder(),
+            encoder: JSONEncoder())
 
-      // Make sure the header data is persisted before we read it as part of the `messages()` call below.
-      try header.synchronizeHeaderData()
-      // Our file is empty. Make the file corrupted by setting the offset at end of newest message to be further in the file.
-      // This should never happen, but past versions of this repo could lead to a file having this kind of inconsistency if a crash occurred at the wrong time.
-      try header.updateOffsetInFileAtEndOfNewestMessage(
-        to: FileHeader.expectedEndOfHeaderInFile + 1)
+        // Make sure the header data is persisted before we read it as part of the `messages()` call below.
+        try header.synchronizeHeaderData()
+        // Our file is empty. Make the file corrupted by setting the offset at end of newest message to be further in the file.
+        // This should never happen, but past versions of this repo could lead to a file having this kind of inconsistency if a crash occurred at the wrong time.
+        try header.updateOffsetInFileAtEndOfNewestMessage(
+            to: FileHeader.expectedEndOfHeaderInFile + 1)
 
-      XCTAssertThrowsError(try cache.messages()) {
-          XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileCorrupted)
-      }
-  }
+        XCTAssertThrowsError(try cache.messages()) {
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileCorrupted)
+        }
+    }
 
     func test_isWritable_returnsTrueWhenStaticHeaderMetadataMatches() throws {
         let originalCache = try createCache(overwritesOldMessages: false)
