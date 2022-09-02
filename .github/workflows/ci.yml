@@ -34,14 +34,14 @@ jobs:
       - name: Build Framework
         run: swift package generate-xcodeproj --output generated/ && carthage build --project-directory generated/ --verbose --no-skip-current
   spm-11:
-    name: SPM Build Xcode 11
+    name: Build Xcode 11
     runs-on: macOS-11
     strategy:
       matrix:
         platforms: [
           'iOS_12,tvOS_12',
           'iOS_13,tvOS_13,watchOS_6',
-          'macOS_11'
+          'macOS_10_15',
         ]
       fail-fast: false
     steps:
@@ -59,12 +59,13 @@ jobs:
         if: success()
         run: Scripts/upload-coverage-reports.sh ${{ matrix.platforms }}
   spm-12:
-    name: SPM Build Xcode 12
+    name: Build Xcode 12
     runs-on: macOS-11
     strategy:
       matrix:
         platforms: [
           'iOS_14,tvOS_14,watchOS_7',
+          'macOS_11',
         ]
       fail-fast: false
     steps:
@@ -81,3 +82,39 @@ jobs:
       - name: Upload Coverage Reports
         if: success()
         run: Scripts/upload-coverage-reports.sh ${{ matrix.platforms }}
+  spm-13:
+    name: Build Xcode 13
+    runs-on: macOS-12
+    strategy:
+      matrix:
+        platforms: [
+          'iOS_15,tvOS_15,watchOS_8',
+          'macOS_12',
+        ]
+      fail-fast: false
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Bundle Install
+        run: bundle install
+      - name: Select Xcode Version
+        run: sudo xcode-select --switch /Applications/Xcode_13.4.1.app/Contents/Developer
+      - name: Prepare Simulator Runtimes
+        run: Scripts/github/prepare-simulators.sh ${{ matrix.platforms }}
+      - name: Build and Test Framework
+        run: Scripts/build.swift ${{ matrix.platforms }}
+      - name: Upload Coverage Reports
+        if: success()
+        run: Scripts/upload-coverage-reports.sh ${{ matrix.platforms }}
+  spm-13-swift:
+    name: Swift Build Xcode 13
+    runs-on: macOS-12
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Bundle Install
+        run: bundle install
+      - name: Select Xcode Version
+        run: sudo xcode-select --switch /Applications/Xcode_13.4.1.app/Contents/Developer
+      - name: Build and Test Framework
+        run: swift test -c release -Xswiftc -enable-testing
