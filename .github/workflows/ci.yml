@@ -116,4 +116,4 @@ jobs:
       - name: Select Xcode Version
         run: sudo xcode-select --switch /Applications/Xcode_13.4.1.app/Contents/Developer
       - name: Build and Test Framework
-        run: swift test -c release -Xswiftc -enable-testing
+        run: xcrun swift test -c release -Xswiftc -enable-testing
