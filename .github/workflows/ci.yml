@@ -39,7 +39,6 @@ jobs:
     strategy:
       matrix:
         platforms: [
-          'iOS_12,tvOS_12',
           'iOS_13,tvOS_13,watchOS_6',
           'macOS_10_15',
         ]

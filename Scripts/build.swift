@@ -21,11 +21,9 @@ enum TaskError: Error {
 }
 
 enum Platform: String, CaseIterable, CustomStringConvertible {
-    case iOS_12
     case iOS_13
     case iOS_14
     case iOS_15
-    case tvOS_12
     case tvOS_13
     case tvOS_14
     case tvOS_15
@@ -39,8 +37,6 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
 
     var destination: String {
         switch self {
-        case .iOS_12:
-            return "platform=iOS Simulator,OS=12.4,name=iPad Pro (12.9-inch) (3rd generation)"
         case .iOS_13:
             return "platform=iOS Simulator,OS=13.7,name=iPad Pro (12.9-inch) (4th generation)"
         case .iOS_14:
@@ -48,8 +44,6 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
         case .iOS_15:
             return "platform=iOS Simulator,OS=15.5,name=iPad Pro (12.9-inch) (5th generation)"
 
-        case .tvOS_12:
-            return "platform=tvOS Simulator,OS=12.4,name=Apple TV"
         case .tvOS_13:
             return "platform=tvOS Simulator,OS=13.4,name=Apple TV"
         case .tvOS_14:
@@ -75,14 +69,12 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
 
     var sdk: String {
         switch self {
-        case .iOS_12,
-             .iOS_13,
+        case .iOS_13,
              .iOS_14,
              .iOS_15:
             return "iphonesimulator"
 
-        case .tvOS_12,
-             .tvOS_13,
+        case .tvOS_13,
              .tvOS_14,
              .tvOS_15:
             return "appletvsimulator"
@@ -104,11 +96,9 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
 
     var shouldTest: Bool {
         switch self {
-        case .iOS_12,
-             .iOS_13,
+        case .iOS_13,
              .iOS_14,
              .iOS_15,
-             .tvOS_12,
              .tvOS_13,
              .tvOS_14,
              .tvOS_15,
@@ -128,10 +118,8 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
 
     var shouldGenerateXcodeproj: Bool {
         switch self {
-        case .iOS_12,
-             .iOS_13,
+        case .iOS_13,
              .iOS_14,
-             .tvOS_12,
              .tvOS_13,
              .tvOS_14,
              .macOS_10_15,
