@@ -30,7 +30,6 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
     case macOS_10_15
     case macOS_11
     case macOS_12
-    case watchOS_5
     case watchOS_6
     case watchOS_7
     case watchOS_8
@@ -56,8 +55,6 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
              .macOS_12:
             return "platform=OS X"
 
-        case .watchOS_5:
-            return "OS=5.3,name=Apple Watch Series 4 - 44mm"
         case .watchOS_6:
             return "OS=6.2.1,name=Apple Watch Series 4 - 44mm"
         case .watchOS_7:
@@ -86,8 +83,7 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
         case .macOS_12:
             return "macosx12.3"
 
-        case .watchOS_5,
-             .watchOS_6,
+        case .watchOS_6,
              .watchOS_7,
              .watchOS_8:
             return "watchsimulator"
@@ -107,8 +103,7 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
              .macOS_12:
             return true
 
-        case .watchOS_5,
-             .watchOS_6,
+        case .watchOS_6,
              .watchOS_7,
              .watchOS_8:
             // watchOS does not support unit testing (yet?).
@@ -124,7 +119,6 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
              .tvOS_14,
              .macOS_10_15,
              .macOS_11,
-             .watchOS_5,
              .watchOS_6,
              .watchOS_7:
             return true
