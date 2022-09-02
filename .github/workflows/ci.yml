@@ -9,7 +9,7 @@ on:
 jobs:
   pod-lint:
     name: Pod Lint
-    runs-on: macOS-10.15
+    runs-on: macOS-11
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
@@ -21,7 +21,7 @@ jobs:
         run: bundle exec pod lib lint --verbose --fail-fast --swift-version=5.1
   carthage:
     name: Carthage
-    runs-on: macOS-10.15
+    runs-on: macOS-11
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
@@ -35,13 +35,13 @@ jobs:
         run: swift package generate-xcodeproj --output generated/ && carthage build --project-directory generated/ --verbose --no-skip-current
   spm-11:
     name: SPM Build Xcode 11
-    runs-on: macOS-10.15
+    runs-on: macOS-11
     strategy:
       matrix:
         platforms: [
           'iOS_12,tvOS_12',
           'iOS_13,tvOS_13,watchOS_6',
-          'macOS_10_15'
+          'macOS_11'
         ]
       fail-fast: false
     steps:
@@ -60,7 +60,7 @@ jobs:
         run: Scripts/upload-coverage-reports.sh ${{ matrix.platforms }}
   spm-12:
     name: SPM Build Xcode 12
-    runs-on: macOS-10.15
+    runs-on: macOS-11
     strategy:
       matrix:
         platforms: [
