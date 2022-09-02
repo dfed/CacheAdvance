@@ -163,7 +163,7 @@ for rawPlatform in rawPlatforms {
         // The generate-xcodeproj command has a bug where the test deployment target is above the minimum deployment target for the project. Fix it with sed.
         try execute(commandPath: "/usr/bin/sed", arguments: ["-i", "-e", "s/IPHONEOS_DEPLOYMENT_TARGET = \"14.0\"/IPHONEOS_DEPLOYMENT_TARGET = \"12.0\"/g", "generated/CacheAdvance.xcodeproj/project.pbxproj"])
         try execute(commandPath: "/usr/bin/sed", arguments: ["-i", "-e", "s/TVOS_DEPLOYMENT_TARGET = \"14.0\"/TVOS_DEPLOYMENT_TARGET = \"12.0\"/g", "generated/CacheAdvance.xcodeproj/project.pbxproj"])
-        try execute(commandPath: "/usr/bin/sed", arguments: ["-i", "-e", "s/WATCHOS_DEPLOYMENT_TARGET = \"7.0\"/MACOSX_DEPLOYMENT_TARGET = \"5.0\"/g", "generated/CacheAdvance.xcodeproj/project.pbxproj"])
+        try execute(commandPath: "/usr/bin/sed", arguments: ["-i", "-e", "s/WATCHOS_DEPLOYMENT_TARGET = \"7.0\"/WATCHOS_DEPLOYMENT_TARGET = \"5.0\"/g", "generated/CacheAdvance.xcodeproj/project.pbxproj"])
         try execute(commandPath: "/usr/bin/sed", arguments: ["-i", "-e", "s/MACOSX_DEPLOYMENT_TARGET = \"11.0\"/MACOSX_DEPLOYMENT_TARGET = \"11.0\"/g", "generated/CacheAdvance.xcodeproj/project.pbxproj"])
     }
 
