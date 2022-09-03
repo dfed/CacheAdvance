@@ -31,10 +31,10 @@ extension BigEndianHostSwappable {
     ///
     /// - Parameter data: A data blob representing encodable data. Must be of length `Self.storageLength`.
     init(_ data: Data) {
-        let decodedSize = withUnsafePointer(to: data) {
-            return UnsafeRawBufferPointer(start: $0, count: Self.storageLength)
+        let decodedSize = data.withUnsafeBytes {
+            return $0.load(as: Self.self)
         }
-        self = Self.swapToHost(decodedSize.load(as: Self.self))
+        self = Self.swapToHost(decodedSize)
     }
 
     /// The length of a contiguous data blob required to store this type.
