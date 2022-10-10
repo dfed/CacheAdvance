@@ -24,8 +24,9 @@ final class CacheReader {
     /// Creates a new instance of the receiver.
     ///
     /// - Parameter file: The file URL indicating the desired location of the on-disk store. This file should already exist.
-    init(forReadingFrom file: URL) throws {
+    init(forReadingFrom file: URL, seekForwardOnly: Bool = false) throws {
         reader = try FileHandle(forReadingFrom: file)
+        self.seekForwardOnly = seekForwardOnly
     }
 
     deinit {
@@ -63,6 +64,11 @@ final class CacheReader {
             guard !previousReadWasEmpty else {
                 // If the previous read was also empty, then the file has been corrupted.
                 throw CacheAdvanceError.fileCorrupted
+            }
+            if seekForwardOnly && startingOffset > FileHeader.expectedEndOfHeaderInFile {
+                // If seekForwardOnly is true, then return nil when startingOffset is ahead
+                // Otherwise, there will be an infinite loop in reading messages.
+                return nil
             }
             // We know the next message is at the end of the file header. Let's seek to it.
             try reader.seek(to: FileHeader.expectedEndOfHeaderInFile)
@@ -116,6 +122,7 @@ final class CacheReader {
     }
 
     private let reader: FileHandle
+    private let seekForwardOnly: Bool
 
 }
 

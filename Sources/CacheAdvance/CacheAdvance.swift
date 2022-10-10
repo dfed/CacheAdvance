@@ -29,6 +29,7 @@ public final class CacheAdvance<T: Codable> {
     ///   - fileURL: The file URL indicating the desired location of the on-disk store. This file should already exist.
     ///   - maximumBytes: The maximum size of the cache, in bytes. Logs larger than this size will fail to append to the store.
     ///   - shouldOverwriteOldMessages: When `true`, once the on-disk store exceeds maximumBytes, new entries will replace the oldest entry.
+    ///   - readerForwardOnly: When `true`, the file handle cursor won't move backward to the current offset to avoid possible infinite loop when reading messages()
     ///   - decoder: The decoder that will be used to decode already-persisted messages.
     ///   - encoder: The encoder that will be used to encode messages prior to persistence.
     ///
@@ -40,6 +41,7 @@ public final class CacheAdvance<T: Codable> {
         fileURL: URL,
         maximumBytes: Bytes,
         shouldOverwriteOldMessages: Bool,
+        readerForwardOnly: Bool = false,
         decoder: MessageDecoder = JSONDecoder(),
         encoder: MessageEncoder = JSONEncoder())
         throws
@@ -47,7 +49,7 @@ public final class CacheAdvance<T: Codable> {
         self.init(
             fileURL: fileURL,
             writer: try FileHandle(forWritingTo: fileURL),
-            reader: try CacheReader(forReadingFrom: fileURL),
+            reader: try CacheReader(forReadingFrom: fileURL, seekForwardOnly: readerForwardOnly),
             header: try CacheHeaderHandle(
                 forReadingFrom: fileURL,
                 maximumBytes: maximumBytes,

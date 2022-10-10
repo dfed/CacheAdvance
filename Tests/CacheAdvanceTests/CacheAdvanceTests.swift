@@ -125,6 +125,80 @@ final class CacheAdvanceTests: XCTestCase {
         }
     }
 
+    private func prepareCacheWithIncorrectOffsetInHeader() throws -> CacheHeaderHandle {
+        let randomHighValue: UInt64 = 10_1000
+        let header = try CacheHeaderHandle(
+            forReadingFrom: testFileLocation,
+            maximumBytes: randomHighValue,
+            overwritesOldMessages: true)
+        let cacheToWrite = CacheAdvance<TestableMessage>(
+            fileURL: testFileLocation,
+            writer: try FileHandle(forWritingTo: testFileLocation),
+            reader: try CacheReader(forReadingFrom: testFileLocation),
+            header: try CacheHeaderHandle(
+                forReadingFrom: testFileLocation,
+                maximumBytes: header.maximumBytes,
+                overwritesOldMessages: header.overwritesOldMessages),
+            decoder: JSONDecoder(),
+            encoder: JSONEncoder())
+
+        let message = TestableMessage(stringLiteral: TestableMessage.lorumIpsum[0].value)
+        try cacheToWrite.append(message: message)
+
+        // Make sure the header data is persisted before we read it as part of the `messages()` call below.
+        try header.synchronizeHeaderData()
+        // Our file is empty. Make the file corrupted by setting the offset at end of newest message to be further in the file.
+        // This should never happen, but past versions of this repo could lead to a file having this kind of inconsistency if a crash occurred at the wrong time.
+        try header.updateOffsetInFileAtEndOfNewestMessage(to: header.offsetInFileAtEndOfNewestMessage + 1000)
+        return header
+    }
+
+    func test_messages_timeout_WhenOffsetInFileAtEndOfNewestMessageLargerThanActualFileLength() throws {
+        do {
+            let header = try prepareCacheWithIncorrectOffsetInHeader()
+            let cacheToRead = try CacheAdvance<TestableMessage>(fileURL: testFileLocation,
+                                                                maximumBytes: header.maximumBytes,
+                                                                shouldOverwriteOldMessages: header.overwritesOldMessages)
+            DispatchQueue.global().async {
+                do {
+                    let _ = try cacheToRead.messages()
+                    // messages() should be in an infinite loop, and never return
+                    XCTFail()
+                } catch {
+                    XCTFail()
+                }
+            }
+        } catch {
+            XCTFail()
+        }
+        let expectation = XCTestExpectation()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 2)
+    }
+
+    func test_messages_seekForwardOnlyTrue_WhenOffsetInFileAtEndOfNewestMessageLargerThanActualFileLength() throws {
+        do {
+            let header = try prepareCacheWithIncorrectOffsetInHeader()
+            let cacheToRead = try CacheAdvance<TestableMessage>(fileURL: testFileLocation,
+                                                                maximumBytes: header.maximumBytes,
+                                                                shouldOverwriteOldMessages: header.overwritesOldMessages,
+                                                                readerForwardOnly: true)
+            DispatchQueue.global().async {
+                do {
+                    let messages = try cacheToRead.messages()
+                    XCTAssertTrue(messages.count > 0)
+                } catch {
+                    XCTFail()
+                }
+            }
+        } catch {
+            XCTFail()
+        }
+    }
+
+
     func test_isWritable_returnsTrueWhenStaticHeaderMetadataMatches() throws {
         let originalCache = try createCache(overwritesOldMessages: false)
         XCTAssertTrue(try originalCache.isWritable())
