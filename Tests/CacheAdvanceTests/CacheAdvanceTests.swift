@@ -151,7 +151,6 @@ final class CacheAdvanceTests: XCTestCase {
         }
     }
 
-
     func test_isWritable_returnsTrueWhenStaticHeaderMetadataMatches() throws {
         let originalCache = try createCache(overwritesOldMessages: false)
         XCTAssertTrue(try originalCache.isWritable())
