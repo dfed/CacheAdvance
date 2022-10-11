@@ -96,34 +96,6 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertEqual(messages, [])
     }
 
-    func test_messages_throwsFileCorruptedWhenOffsetInFileAtEndOfNewestMessageIsBeyondLastMessageInEmptyFile() throws {
-        let randomHighValue: UInt64 = 101_000
-        let header = try CacheHeaderHandle(
-            forReadingFrom: testFileLocation,
-            maximumBytes: randomHighValue,
-            overwritesOldMessages: true)
-        let cache = CacheAdvance<TestableMessage>(
-            fileURL: testFileLocation,
-            writer: try FileHandle(forWritingTo: testFileLocation),
-            reader: try CacheReader(
-                forReadingFrom: testFileLocation,
-                maximumBytes: randomHighValue),
-            header: header,
-            decoder: JSONDecoder(),
-            encoder: JSONEncoder())
-
-        // Make sure the header data is persisted before we read it as part of the `messages()` call below.
-        try header.synchronizeHeaderData()
-        // Our file is empty. Make the file corrupted by setting the offset at end of newest message to be further in the file.
-        // This should never happen, but past versions of this repo could lead to a file having this kind of inconsistency if a crash occurred at the wrong time.
-        try header.updateOffsetInFileAtEndOfNewestMessage(
-            to: FileHeader.expectedEndOfHeaderInFile + 1)
-
-        XCTAssertThrowsError(try cache.messages()) {
-            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileCorrupted)
-        }
-    }
-
     func test_messages_throwsFileCorruptedWhenOffsetInFileAtEndOfNewestMessageIsBeyondEndOfNewestMessageButBeforeEndOfFile() throws {
         let message: TestableMessage = "This is a test"
         let requiredByteCount = try requiredByteCount(for: [message])
