@@ -134,6 +134,36 @@ final class CacheAdvanceTests: XCTestCase {
         wait(for: [expectation], timeout: 2)
     }
 
+  func test_messages_timeout_WhenOffsetInFileAtEndOfNewestMessageSmallThanActualFileLength() throws {
+      do {
+          let message = TestableMessage(stringLiteral: TestableMessage.lorumIpsum[0].value)
+          let header = try prepareIncorrectOffsetInHeaderAndWriteMessage(messages: [message],
+                                                                         randomHighValue: 103_000,
+                                                                         offsetInFileAtEndOfNewestMessageToAdd: 0,
+                                                                         offsetInFileAtEndOfNewestMessageToMinus: 1)
+          let cacheToRead = try CacheAdvance<TestableMessage>(fileURL: testFileLocation,
+                                                              maximumBytes: header.maximumBytes,
+                                                              shouldOverwriteOldMessages: header.overwritesOldMessages)
+          DispatchQueue.global().async {
+              do {
+                  let _ = try cacheToRead.messages()
+                  // messages() should be in an infinite loop, and never return
+                  XCTFail()
+              } catch {
+                  XCTFail()
+              }
+          }
+      } catch {
+          XCTFail()
+      }
+      let expectation = XCTestExpectation()
+      DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+          expectation.fulfill()
+      }
+      wait(for: [expectation], timeout: 2)
+  }
+
+
     func test_messages_seekForwardOnlyTrue_WhenOffsetInFileAtEndOfNewestMessageLargerThanActualFileLength() throws {
         do {
             let message = TestableMessage(stringLiteral: TestableMessage.lorumIpsum[0].value)
@@ -687,7 +717,9 @@ final class CacheAdvanceTests: XCTestCase {
     /// - Parameter messageCount: The number of messages to write to the cache file
     /// Returns the header handle of the cache.
     private func prepareIncorrectOffsetInHeaderAndWriteMessage(messages: [TestableMessage],
-                                                               randomHighValue: UInt64 = 101_000) throws -> CacheHeaderHandle {
+                                                               randomHighValue: UInt64 = 101_000,
+                                                               offsetInFileAtEndOfNewestMessageToAdd: UInt64 = 1,
+                                                               offsetInFileAtEndOfNewestMessageToMinus: UInt64 = 0) throws -> CacheHeaderHandle {
         let header = try CacheHeaderHandle(
             forReadingFrom: testFileLocation,
             maximumBytes: randomHighValue,
@@ -709,7 +741,10 @@ final class CacheAdvanceTests: XCTestCase {
         // Make sure the header data is persisted before we read it as part of the `messages()` call below.
         try header.synchronizeHeaderData()
         // This should never happen, but past versions of this repo could lead to a file having this kind of inconsistency if a crash occurred at the wrong time.
-        try header.updateOffsetInFileAtEndOfNewestMessage(to: header.offsetInFileAtEndOfNewestMessage + 1)
+        let offsetInFileAtEndOfNewestMessage = header.offsetInFileAtEndOfNewestMessage
+        + offsetInFileAtEndOfNewestMessageToAdd
+        - offsetInFileAtEndOfNewestMessageToMinus
+        try header.updateOffsetInFileAtEndOfNewestMessage(to: offsetInFileAtEndOfNewestMessage)
         return header
     }
 
