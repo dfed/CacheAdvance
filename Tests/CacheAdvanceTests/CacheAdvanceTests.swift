@@ -98,7 +98,7 @@ final class CacheAdvanceTests: XCTestCase {
 
     func test_messages_throwsFileCorruptedWhenOffsetInFileAtEndOfNewestMessageIsBeyondEndOfNewestMessageButBeforeEndOfFile() throws {
         let message: TestableMessage = "This is a test"
-        let requiredByteCount = try requiredByteCount(for: [message])
+        let requiredByteCount = try self.requiredByteCount(for: [message])
         let maximumBytes = requiredByteCount + 2
         let header = try CacheHeaderHandle(
             forReadingFrom: testFileLocation,
@@ -106,7 +106,7 @@ final class CacheAdvanceTests: XCTestCase {
             overwritesOldMessages: true)
 
         func makeCache() throws -> CacheAdvance<TestableMessage> {
-            CacheAdvance<TestableMessage>(
+            return CacheAdvance<TestableMessage>(
                 fileURL: testFileLocation,
                 writer: try FileHandle(forWritingTo: testFileLocation),
                 reader: try CacheReader(
@@ -141,7 +141,7 @@ final class CacheAdvanceTests: XCTestCase {
             overwritesOldMessages: true)
 
         func makeCache() throws -> CacheAdvance<TestableMessage> {
-            CacheAdvance<TestableMessage>(
+            return CacheAdvance<TestableMessage>(
                 fileURL: testFileLocation,
                 writer: try FileHandle(forWritingTo: testFileLocation),
                 reader: try CacheReader(
@@ -176,7 +176,7 @@ final class CacheAdvanceTests: XCTestCase {
             overwritesOldMessages: true)
 
         func makeCache() throws -> CacheAdvance<TestableMessage> {
-            CacheAdvance<TestableMessage>(
+            return CacheAdvance<TestableMessage>(
                 fileURL: testFileLocation,
                 writer: try FileHandle(forWritingTo: testFileLocation),
                 reader: try CacheReader(
