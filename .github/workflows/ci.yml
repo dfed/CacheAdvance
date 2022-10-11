@@ -16,7 +16,7 @@ jobs:
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
-        run: xcversion select 11.7
+        run: sudo xcode-select --switch /Applications/Xcode_11.7.app/Contents/Developer
       - name: Lint Podspec
         run: bundle exec pod lib lint --verbose --fail-fast --swift-version=5.1
   carthage:
@@ -28,7 +28,7 @@ jobs:
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
-        run: xcversion select 11.7
+        run: sudo xcode-select --switch /Applications/Xcode_11.7.app/Contents/Developer
       - name: Install Carthage
         run: brew outdated carthage || brew upgrade carthage
       - name: Build Framework
@@ -49,7 +49,7 @@ jobs:
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
-        run: xcversion select 11.7
+        run: sudo xcode-select --switch /Applications/Xcode_11.7.app/Contents/Developer
       - name: Prepare Simulator Runtimes
         run: Scripts/github/prepare-simulators.sh ${{ matrix.platforms }}
       - name: Build and Test Framework
@@ -73,7 +73,7 @@ jobs:
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
-        run: xcversion select 12.4
+        run: sudo xcode-select --switch /Applications/Xcode_12.4.app/Contents/Developer
       - name: Prepare Simulator Runtimes
         run: Scripts/github/prepare-simulators.sh ${{ matrix.platforms }}
       - name: Build and Test Framework
@@ -97,7 +97,7 @@ jobs:
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
-        run: xcversion select 13.4.1
+        run: sudo xcode-select --switch /Applications/Xcode_13.4.1.app/Contents/Developer
       - name: Prepare Simulator Runtimes
         run: Scripts/github/prepare-simulators.sh ${{ matrix.platforms }}
       - name: Build and Test Framework
@@ -114,6 +114,6 @@ jobs:
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
-        run: xcversion select 13.4.1
+        run: sudo xcode-select --switch /Applications/Xcode_13.4.1.app/Contents/Developer
       - name: Build and Test Framework
         run: xcrun swift test -c release -Xswiftc -enable-testing
