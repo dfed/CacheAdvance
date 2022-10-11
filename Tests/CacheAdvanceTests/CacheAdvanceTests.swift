@@ -96,8 +96,8 @@ final class CacheAdvanceTests: XCTestCase {
         XCTAssertEqual(messages, [])
     }
 
-    func test_messages_throwsFileCorruptedWhenOffsetInFileAtEndOfNewsetMessageOutOfSync() throws {
-        let randomHighValue: UInt64 = 10_1000
+    func test_messages_throwsFileCorruptedWhenOffsetInFileAtEndOfNewestMessageIsBeyondLastMessageInEmptyFile() throws {
+        let randomHighValue: UInt64 = 101_000
         let header = try CacheHeaderHandle(
             forReadingFrom: testFileLocation,
             maximumBytes: randomHighValue,
@@ -105,11 +105,10 @@ final class CacheAdvanceTests: XCTestCase {
         let cache = CacheAdvance<TestableMessage>(
             fileURL: testFileLocation,
             writer: try FileHandle(forWritingTo: testFileLocation),
-            reader: try CacheReader(forReadingFrom: testFileLocation),
-            header: try CacheHeaderHandle(
+            reader: try CacheReader(
                 forReadingFrom: testFileLocation,
-                maximumBytes: header.maximumBytes,
-                overwritesOldMessages: header.overwritesOldMessages),
+                maximumBytes: randomHighValue),
+            header: header,
             decoder: JSONDecoder(),
             encoder: JSONEncoder())
 
@@ -121,6 +120,112 @@ final class CacheAdvanceTests: XCTestCase {
             to: FileHeader.expectedEndOfHeaderInFile + 1)
 
         XCTAssertThrowsError(try cache.messages()) {
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileCorrupted)
+        }
+    }
+
+    func test_messages_throwsFileCorruptedWhenOffsetInFileAtEndOfNewestMessageIsBeyondEndOfNewestMessageButBeforeEndOfFile() throws {
+        let message: TestableMessage = "This is a test"
+        let requiredByteCount = try requiredByteCount(for: [message])
+        let maximumBytes = requiredByteCount + 2
+        let header = try CacheHeaderHandle(
+            forReadingFrom: testFileLocation,
+            maximumBytes: maximumBytes,
+            overwritesOldMessages: true)
+
+        func makeCache() throws -> CacheAdvance<TestableMessage> {
+            CacheAdvance<TestableMessage>(
+                fileURL: testFileLocation,
+                writer: try FileHandle(forWritingTo: testFileLocation),
+                reader: try CacheReader(
+                    forReadingFrom: testFileLocation,
+                    maximumBytes: maximumBytes),
+                header: header,
+                decoder: JSONDecoder(),
+                encoder: JSONEncoder())
+        }
+        let writingCache = try makeCache()
+        try writingCache.append(message: message)
+
+        // Make the file corrupted by setting the offset at end of newest message to be further in the file.
+        // This could happen if a crash occurred during a write of `header.offsetInFileAtEndOfNewestMessage` on a big-endian device.
+        try header.updateOffsetInFileAtEndOfNewestMessage(
+            to: requiredByteCount + 1)
+
+        // Create a new cache instance that uses the corrupted data persisted to disk
+        let corruptedReadingCache = try makeCache()
+
+        XCTAssertThrowsError(try corruptedReadingCache.messages()) {
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileCorrupted)
+        }
+    }
+
+    func test_messages_throwsFileCorruptedWhenOffsetInFileAtEndOfNewestMessageIsBeyondEndOfFile() throws {
+        let message: TestableMessage = "This is a test"
+        let maximumBytes = try requiredByteCount(for: [message])
+        let header = try CacheHeaderHandle(
+            forReadingFrom: testFileLocation,
+            maximumBytes: maximumBytes,
+            overwritesOldMessages: true)
+
+        func makeCache() throws -> CacheAdvance<TestableMessage> {
+            CacheAdvance<TestableMessage>(
+                fileURL: testFileLocation,
+                writer: try FileHandle(forWritingTo: testFileLocation),
+                reader: try CacheReader(
+                    forReadingFrom: testFileLocation,
+                    maximumBytes: maximumBytes),
+                header: header,
+                decoder: JSONDecoder(),
+                encoder: JSONEncoder())
+        }
+        let writingCache = try makeCache()
+        try writingCache.append(message: message)
+
+        // Make the file corrupted by setting the offset at end of newest message to be further in the file.
+        // This could happen if a crash occurred during a write of `header.offsetInFileAtEndOfNewestMessage` on a big-endian device.
+        try header.updateOffsetInFileAtEndOfNewestMessage(
+            to: header.offsetInFileAtEndOfNewestMessage + 1)
+
+        // Create a new cache instance that uses the corrupted data persisted to disk
+        let corruptedReadingCache = try makeCache()
+
+        XCTAssertThrowsError(try corruptedReadingCache.messages()) {
+            XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileCorrupted)
+        }
+    }
+
+    func test_messages_throwsFileCorruptedWhenOffsetInFileAtEndOfNewestMessageIsBeforeEndOfNewestMessage() throws {
+        let message: TestableMessage = "This is a test"
+        let maximumBytes = try requiredByteCount(for: [message])
+        let header = try CacheHeaderHandle(
+            forReadingFrom: testFileLocation,
+            maximumBytes: maximumBytes,
+            overwritesOldMessages: true)
+
+        func makeCache() throws -> CacheAdvance<TestableMessage> {
+            CacheAdvance<TestableMessage>(
+                fileURL: testFileLocation,
+                writer: try FileHandle(forWritingTo: testFileLocation),
+                reader: try CacheReader(
+                    forReadingFrom: testFileLocation,
+                    maximumBytes: maximumBytes),
+                header: header,
+                decoder: JSONDecoder(),
+                encoder: JSONEncoder())
+        }
+        let writingCache = try makeCache()
+        try writingCache.append(message: message)
+
+        // Make the file corrupted by setting the offset at end of newest message to be earlier in the file.
+        // This could happen if a crash occurred during a write of `header.offsetInFileAtEndOfNewestMessage` on a little-endian device.
+        try header.updateOffsetInFileAtEndOfNewestMessage(
+            to: header.offsetInFileAtEndOfNewestMessage - 1)
+
+        // Create a new cache instance that uses the corrupted data persisted to disk
+        let corruptedReadingCache = try makeCache()
+
+        XCTAssertThrowsError(try corruptedReadingCache.messages()) {
             XCTAssertEqual($0 as? CacheAdvanceError, CacheAdvanceError.fileCorrupted)
         }
     }
