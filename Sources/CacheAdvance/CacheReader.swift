@@ -23,9 +23,12 @@ final class CacheReader {
 
     /// Creates a new instance of the receiver.
     ///
-    /// - Parameter file: The file URL indicating the desired location of the on-disk store. This file should already exist.
-    init(forReadingFrom file: URL) throws {
+    /// - Parameters:
+    ///   - file: The file URL indicating the desired location of the on-disk store. This file should already exist.
+    ///   - maximumBytes: The maximum size of the cache, in bytes.
+    init(forReadingFrom file: URL, maximumBytes: Bytes) throws {
         reader = try FileHandle(forReadingFrom: file)
+        self.maximumBytes = maximumBytes
     }
 
     deinit {
@@ -42,7 +45,7 @@ final class CacheReader {
     }
 
     /// Returns the next encodable message, seeking to the beginning of the next message.
-    func nextEncodedMessage(previousReadWasEmpty: Bool = false) throws -> Data? {
+    func nextEncodedMessage() throws -> Data? {
         let startingOffset = offsetInFile
 
         guard startingOffset != offsetInFileAtEndOfNewestMessage else {
@@ -52,6 +55,18 @@ final class CacheReader {
 
         switch try nextEncodedMessageSpan() {
         case let .span(messageLength):
+            // Check our assumptions before we try to read the message.
+            let endOfMessage = startingOffset + UInt64(MessageSpan.storageLength) + UInt64(messageLength)
+            let startingOffsetIsBeforeEndOfNewestMessageAndDoesNotExceedEndOfNewestMessage = startingOffset < offsetInFileAtEndOfNewestMessage && endOfMessage <= offsetInFileAtEndOfNewestMessage
+            let startingOffsetIsAfterEndOfNewestMessageAndDoesNotExceedEndOfFile = offsetInFileAtEndOfNewestMessage < startingOffset && endOfMessage <= maximumBytes
+            guard
+                startingOffsetIsBeforeEndOfNewestMessageAndDoesNotExceedEndOfNewestMessage
+                    || startingOffsetIsAfterEndOfNewestMessageAndDoesNotExceedEndOfFile
+            else {
+                // The offsetInFileAtEndOfNewestMessage is incorrect. This likely occured due to a crash when writing our header file.
+                throw CacheAdvanceError.fileCorrupted
+            }
+
             let message = try reader.readDataUp(toLength: Int(messageLength))
             guard message.count > 0 else {
                 throw CacheAdvanceError.fileCorrupted
@@ -60,15 +75,16 @@ final class CacheReader {
             return message
 
         case .emptyRead:
-            guard !previousReadWasEmpty else {
-                // If the previous read was also empty, then the file has been corrupted.
+            guard offsetInFileAtEndOfNewestMessage < startingOffset else {
+                // We started reading before the offset of the end of the newest message, therefore we expected a message to be read. We instead read an empty space, meaning that the file is corrupt.
                 throw CacheAdvanceError.fileCorrupted
             }
+
             // We know the next message is at the end of the file header. Let's seek to it.
             try reader.seek(to: FileHeader.expectedEndOfHeaderInFile)
 
             // We know there's a message to read now that we're at the start of the file.
-            return try nextEncodedMessage(previousReadWasEmpty: true)
+            return try nextEncodedMessage()
 
         case .invalidFormat:
             throw CacheAdvanceError.fileCorrupted
@@ -116,6 +132,7 @@ final class CacheReader {
     }
 
     private let reader: FileHandle
+    private let maximumBytes: Bytes
 
 }
 
