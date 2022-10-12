@@ -39,8 +39,8 @@ jobs:
     strategy:
       matrix:
         platforms: [
-          'iOS_13,tvOS_13,watchOS_6',
-          'macOS_10_15',
+          'iOS_13,watchOS_6',
+          'macOS_10_15,tvOS_13',
         ]
       fail-fast: false
     steps:
@@ -60,8 +60,8 @@ jobs:
     strategy:
       matrix:
         platforms: [
-          'iOS_14,tvOS_14,watchOS_7',
-          'macOS_11',
+          'iOS_14,watchOS_7',
+          'macOS_11,tvOS_14',
         ]
       fail-fast: false
     steps:
@@ -81,8 +81,8 @@ jobs:
     strategy:
       matrix:
         platforms: [
-          'iOS_15,tvOS_15,watchOS_8',
-          'macOS_12',
+          'iOS_15,watchOS_8',
+          'macOS_12,tvOS_15',
         ]
       fail-fast: false
     steps:
@@ -111,5 +111,43 @@ jobs:
         run: bundle install
       - name: Select Xcode Version
         run: sudo xcode-select --switch /Applications/Xcode_13.4.1.app/Contents/Developer
+      - name: Build and Test Framework
+        run: xcrun swift test -c release -Xswiftc -enable-testing
+  spm-14:
+    name: Build Xcode 14
+    runs-on: macOS-12
+    strategy:
+      matrix:
+        platforms: [
+          'iOS_16,watchOS_9',
+          'macOS_12,tvOS_16',
+        ]
+      fail-fast: false
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Bundle Install
+        run: bundle install
+      - name: Select Xcode Version
+        run: sudo xcode-select --switch /Applications/Xcode_14.0.1.app/Contents/Developer
+      - name: Prepare Simulator Runtimes
+        run: Scripts/github/prepare-simulators.sh ${{ matrix.platforms }}
+      - name: Build and Test Framework
+        run: Scripts/build.swift ${{ matrix.platforms }}
+      - name: Prepare Coverage Reports
+        run: ./Scripts/prepare-coverage-reports.sh
+      - name: Upload Coverage Reports
+        if: success()
+        uses: codecov/codecov-action@v3
+  spm-14-swift:
+    name: Swift Build Xcode 14
+    runs-on: macOS-12
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Bundle Install
+        run: bundle install
+      - name: Select Xcode Version
+        run: sudo xcode-select --switch /Applications/Xcode_14.0.1.app/Contents/Developer
       - name: Build and Test Framework
         run: xcrun swift test -c release -Xswiftc -enable-testing
