@@ -75,8 +75,8 @@ final class CacheReader {
             return message
 
         case .emptyRead:
-            guard !(startingOffset < offsetInFileAtEndOfNewestMessage) else {
-                // We started reading before the offset of the end of the newest message, therefore we expect a message to be read. We instead read an empty space, meaning that the file is corrupt.
+            guard offsetInFileAtEndOfNewestMessage < startingOffset else {
+                // We started reading before the offset of the end of the newest message, therefore we expected a message to be read. We instead read an empty space, meaning that the file is corrupt.
                 throw CacheAdvanceError.fileCorrupted
             }
 
