@@ -23,6 +23,9 @@ protocol BigEndianHostSwappable where Self: FixedWidthInteger {
     /// Converts the big-endian value in x to the current endian format and returns the resulting value.
     static func swapToHost(_ x: Self) -> Self
 
+    /// The maximum representable integer in this type.
+    static var max: Self { get }
+
 }
 
 extension BigEndianHostSwappable {
