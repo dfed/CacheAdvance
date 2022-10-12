@@ -99,7 +99,7 @@ public final class CacheAdvance<T: Codable> {
             throw CacheAdvanceError.fileNotWritable
         }
 
-        let encodableMessage = EncodableMessage(message: message, encoder: encoder)
+        let encodableMessage = EncodableMessage<T, MessageSpan>(message: message, encoder: encoder)
         let messageData = try encodableMessage.encodedData()
         let bytesNeededToStoreMessage = Bytes(messageData.count)
 

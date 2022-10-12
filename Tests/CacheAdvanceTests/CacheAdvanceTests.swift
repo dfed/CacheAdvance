@@ -671,7 +671,7 @@ final class CacheAdvanceTests: XCTestCase {
         let encoder = JSONEncoder()
         return try FileHeader.expectedEndOfHeaderInFile
             + messages.reduce(0) { allocatedSize, message in
-                let encodableMessage = EncodableMessage(message: message, encoder: encoder)
+                let encodableMessage = EncodableMessage<T, MessageSpan>(message: message, encoder: encoder)
                 let data = try encodableMessage.encodedData()
                 return allocatedSize + UInt64(data.count)
         }
