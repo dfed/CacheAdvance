@@ -5,3 +5,14 @@ comment:
   layout: "reach,diff,flags,tree"
   behavior: default
   require_changes: no
+
+coverage:
+  status:
+    project:
+      default:
+        threshold: 0.25%
+    patch: off
+
+ignore:
+  - "Sources/LorumIpsum"
+  - "Tests"

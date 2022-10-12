@@ -12,7 +12,7 @@ jobs:
     runs-on: macOS-11
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
@@ -24,7 +24,7 @@ jobs:
     runs-on: macOS-11
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
@@ -45,7 +45,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
@@ -54,9 +54,6 @@ jobs:
         run: Scripts/github/prepare-simulators.sh ${{ matrix.platforms }}
       - name: Build and Test Framework
         run: Scripts/build.swift ${{ matrix.platforms }}
-      - name: Upload Coverage Reports
-        if: success()
-        run: Scripts/upload-coverage-reports.sh ${{ matrix.platforms }}
   spm-12:
     name: Build Xcode 12
     runs-on: macOS-11
@@ -69,7 +66,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
@@ -78,9 +75,6 @@ jobs:
         run: Scripts/github/prepare-simulators.sh ${{ matrix.platforms }}
       - name: Build and Test Framework
         run: Scripts/build.swift ${{ matrix.platforms }}
-      - name: Upload Coverage Reports
-        if: success()
-        run: Scripts/upload-coverage-reports.sh ${{ matrix.platforms }}
   spm-13:
     name: Build Xcode 13
     runs-on: macOS-12
@@ -93,7 +87,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
@@ -102,15 +96,17 @@ jobs:
         run: Scripts/github/prepare-simulators.sh ${{ matrix.platforms }}
       - name: Build and Test Framework
         run: Scripts/build.swift ${{ matrix.platforms }}
+      - name: Prepare Coverage Reports
+        run: ./Scripts/prepare-coverage-reports.sh
       - name: Upload Coverage Reports
         if: success()
-        run: Scripts/upload-coverage-reports.sh ${{ matrix.platforms }}
+        uses: codecov/codecov-action@v3
   spm-13-swift:
     name: Swift Build Xcode 13
     runs-on: macOS-12
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
