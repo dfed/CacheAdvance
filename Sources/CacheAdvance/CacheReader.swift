@@ -25,7 +25,7 @@ final class CacheReader {
     ///
     /// - Parameters:
     ///   - file: The file URL indicating the desired location of the on-disk store. This file should already exist.
-    ///   - maximumBytes: The maximum size of the cache, in bytes. Logs larger than this size will fail to append to the store.
+    ///   - maximumBytes: The maximum size of the cache, in bytes.
     init(forReadingFrom file: URL, maximumBytes: Bytes) throws {
         reader = try FileHandle(forReadingFrom: file)
         self.maximumBytes = maximumBytes
@@ -56,12 +56,12 @@ final class CacheReader {
         switch try nextEncodedMessageSpan() {
         case let .span(messageLength):
             // Check our assumptions before we try to read the message.
-            let endOfMessage = Bytes(startingOffset) + Bytes(MessageSpan.storageLength) + Bytes(messageLength)
+            let endOfMessage = startingOffset + UInt64(MessageSpan.storageLength) + UInt64(messageLength)
             let startingOffsetIsBeforeEndOfNewestMessageAndDoesNotExceedEndOfNewestMessage = startingOffset < offsetInFileAtEndOfNewestMessage && endOfMessage <= offsetInFileAtEndOfNewestMessage
-            let startingOffsetIsOnOrAfterAfterEndOfNewestMessageAndDoesNotExceedEndOfFile = startingOffset >= offsetInFileAtEndOfNewestMessage && endOfMessage <= maximumBytes
+            let startingOffsetIsAfterEndOfNewestMessageAndDoesNotExceedEndOfFile = offsetInFileAtEndOfNewestMessage < startingOffset && endOfMessage <= maximumBytes
             guard
                 startingOffsetIsBeforeEndOfNewestMessageAndDoesNotExceedEndOfNewestMessage
-                    || startingOffsetIsOnOrAfterAfterEndOfNewestMessageAndDoesNotExceedEndOfFile
+                    || startingOffsetIsAfterEndOfNewestMessageAndDoesNotExceedEndOfFile
             else {
                 // The offsetInFileAtEndOfNewestMessage is incorrect. This likely occured due to a crash when writing our header file.
                 throw CacheAdvanceError.fileCorrupted
