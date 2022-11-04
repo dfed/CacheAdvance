@@ -42,6 +42,9 @@ final class CacheReader {
     }
 
     /// Returns the encodable messages in a range
+    ///
+    /// - Parameter startOffset: the start offset to start reading
+    /// - Parameter endOffset: the end offset to stop reading, the default value is EOF if the value is nil.
     func encodedMessagesFromOffset(_ startOffset: UInt64, endOffset: UInt64? = nil) throws -> [Data] {
         var encodedMessages = [Data]()
         try reader.seek(to: startOffset)
