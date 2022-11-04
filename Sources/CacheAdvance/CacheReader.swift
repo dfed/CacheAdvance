@@ -41,15 +41,24 @@ final class CacheReader {
         reader.offsetInFile
     }
 
-    /// Returns the next encodable message, seeking to the beginning of the next message.
-    func nextEncodedMessage(previousReadWasEmpty: Bool = false) throws -> Data? {
-        let startingOffset = offsetInFile
-
-        guard startingOffset != offsetInFileAtEndOfNewestMessage else {
-            // We're at the last message.
-            return nil
+    /// Returns the encodable messages in a range
+    func encodedMessagesFromOffset(_ startOffset: UInt64, endOffset: UInt64? = nil) throws -> [Data] {
+        var encodedMessages = [Data]()
+        try reader.seek(to: startOffset)
+        while let data = try nextEncodedMessage() {
+            encodedMessages.append(data)
+            if let endOffset, offsetInFile >= endOffset {
+                break
+            }
         }
+        if let endOffset, offsetInFile != endOffset {
+            throw CacheAdvanceError.fileCorrupted
+        }
+        return encodedMessages
+    }
 
+    /// Returns the next encodable message, seeking to the beginning of the next message.
+    func nextEncodedMessage() throws -> Data? {
         switch try nextEncodedMessageSpan() {
         case let .span(messageLength):
             let message = try reader.readDataUp(toLength: Int(messageLength))
@@ -60,15 +69,7 @@ final class CacheReader {
             return message
 
         case .emptyRead:
-            guard !previousReadWasEmpty else {
-                // If the previous read was also empty, then the file has been corrupted.
-                throw CacheAdvanceError.fileCorrupted
-            }
-            // We know the next message is at the end of the file header. Let's seek to it.
-            try reader.seek(to: FileHeader.expectedEndOfHeaderInFile)
-
-            // We know there's a message to read now that we're at the start of the file.
-            return try nextEncodedMessage(previousReadWasEmpty: true)
+            return nil
 
         case .invalidFormat:
             throw CacheAdvanceError.fileCorrupted

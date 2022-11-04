@@ -170,10 +170,28 @@ public final class CacheAdvance<T: Codable> {
         try header.checkFile()
 
         var messages = [T]()
-        while let encodedMessage = try reader.nextEncodedMessage() {
-            messages.append(try decoder.decode(T.self, from: encodedMessage))
-        }
+        // There is only one range: | `offsetInFileOfOldestMessage` -> `offsetInFileAtEndOfNewestMessage`|
+        if reader.offsetInFileOfOldestMessage < reader.offsetInFileAtEndOfNewestMessage {
+            for encodedMessage in try reader.encodedMessagesFromOffset(reader.offsetInFileOfOldestMessage,
+                                                                       endOffset: reader.offsetInFileAtEndOfNewestMessage) {
+                messages.append(try decoder.decode(T.self, from: encodedMessage))
+            }
+        } else {
+            // In this case, the messages could be split to two ranges
+            // | First Range | (GAP: ignore) | Second Range |
 
+            // This is second range: | `offsetInFileOfOldestMessage` -> EOF |
+            for encodedMessage in try reader.encodedMessagesFromOffset(reader.offsetInFileOfOldestMessage) {
+                messages.append(try decoder.decode(T.self, from: encodedMessage))
+            }
+
+            // This is first range: | `expectedEndOfHeaderInFile` -> `offsetInFileAtEndOfNewestMessage`|
+            for encodedMessage in try reader.encodedMessagesFromOffset(
+                FileHeader.expectedEndOfHeaderInFile,
+                endOffset: reader.offsetInFileAtEndOfNewestMessage) {
+                messages.append(try decoder.decode(T.self, from: encodedMessage))
+            }
+        }
         // Now that we've read all messages, seek back to the oldest message.
         try reader.seekToBeginningOfOldestMessage()
 

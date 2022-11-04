@@ -79,7 +79,7 @@ struct FileHeader {
     static let version: UInt8 = 1
 
     /// Calculates the offset in the file where the header should end.
-    static var expectedEndOfHeaderInFile = Field(rawValue: Field.allCases.endIndex)!.expectedEndOfFieldInFile
+    static let expectedEndOfHeaderInFile = Field(rawValue: Field.allCases.endIndex)!.expectedEndOfFieldInFile
 
     func data(for field: Field) -> Data {
         switch field {
