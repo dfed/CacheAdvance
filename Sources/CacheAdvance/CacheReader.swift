@@ -69,6 +69,7 @@ final class CacheReader {
             return message
 
         case .emptyRead:
+            // We hit an empty read when reach EOF, so return nil to stop.
             return nil
 
         case .invalidFormat:
