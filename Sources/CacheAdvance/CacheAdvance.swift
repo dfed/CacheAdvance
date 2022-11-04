@@ -47,9 +47,7 @@ public final class CacheAdvance<T: Codable> {
         self.init(
             fileURL: fileURL,
             writer: try FileHandle(forWritingTo: fileURL),
-            reader: try CacheReader(
-                forReadingFrom: fileURL,
-                maximumBytes: maximumBytes),
+            reader: try CacheReader(forReadingFrom: fileURL),
             header: try CacheHeaderHandle(
                 forReadingFrom: fileURL,
                 maximumBytes: maximumBytes,
