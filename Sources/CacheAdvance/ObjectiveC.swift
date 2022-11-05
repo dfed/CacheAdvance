@@ -34,7 +34,9 @@ final class ObjectiveC {
         SwiftTryCatch.try({
             result = .success(work())
         }, catch: { exception in
-            result = .failure(ObjectiveCError(exception: exception))
+            result = .failure(ObjectiveCError(
+                exceptionName: exception.name,
+                reason: exception.reason))
         })
 
         switch result {
@@ -51,5 +53,6 @@ struct ObjectiveCTryFailure: Error {}
 
 /// A `throw`able NSException.
 struct ObjectiveCError: Error {
-    let exception: NSException
+    let exceptionName: NSExceptionName
+    let reason: String?
 }
