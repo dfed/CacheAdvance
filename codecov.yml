@@ -14,5 +14,6 @@ coverage:
     patch: off
 
 ignore:
+  - "Sources/CacheAdvance/FileHandleExtensions.swift"
   - "Sources/LorumIpsum"
   - "Tests"
