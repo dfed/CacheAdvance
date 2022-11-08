@@ -60,26 +60,6 @@ final class CacheReader {
         return encodedMessages
     }
 
-    /// Returns the next encodable message, seeking to the beginning of the next message.
-    func nextEncodedMessage() throws -> Data? {
-        switch try nextEncodedMessageSpan() {
-        case let .span(messageLength):
-            let message = try reader.readDataUp(toLength: Int(messageLength))
-            guard message.count > 0 else {
-                throw CacheAdvanceError.fileCorrupted
-            }
-
-            return message
-
-        case .emptyRead:
-            // An empty read means we hit the EOF. It is the responsibility of the calling code to validate this assumption.
-            return nil
-
-        case .invalidFormat:
-            throw CacheAdvanceError.fileCorrupted
-        }
-    }
-
     /// Seeks to the beginning of the oldest message in the file.
     func seekToBeginningOfOldestMessage() throws {
         try reader.seek(to: offsetInFileOfOldestMessage)
@@ -102,6 +82,26 @@ final class CacheReader {
     }
 
     // MARK: Private
+
+    /// Returns the next encodable message, seeking to the beginning of the next message.
+    private func nextEncodedMessage() throws -> Data? {
+        switch try nextEncodedMessageSpan() {
+        case let .span(messageLength):
+            let message = try reader.readDataUp(toLength: Int(messageLength))
+            guard message.count > 0 else {
+                throw CacheAdvanceError.fileCorrupted
+            }
+
+            return message
+
+        case .emptyRead:
+            // An empty read means we hit the EOF. It is the responsibility of the calling code to validate this assumption.
+            return nil
+
+        case .invalidFormat:
+            throw CacheAdvanceError.fileCorrupted
+        }
+    }
 
     /// Returns the next encoded message span, seeking to the end the span.
     private func nextEncodedMessageSpan() throws -> NextMessageSpan {
