@@ -43,8 +43,8 @@ final class CacheReader {
 
     /// Returns the encodable messages in a range
     ///
-    /// - Parameter startOffset: the start offset to start reading
-    /// - Parameter endOffset: the end offset to stop reading, the default value is EOF if the value is nil.
+    /// - Parameter startOffset: the offset from which to start reading
+    /// - Parameter endOffset: the offset at which to stop reading. If `nil`, the end offset will be the EOF
     func encodedMessagesFromOffset(_ startOffset: UInt64, endOffset: UInt64? = nil) throws -> [Data] {
         var encodedMessages = [Data]()
         try reader.seek(to: startOffset)
@@ -72,7 +72,7 @@ final class CacheReader {
             return message
 
         case .emptyRead:
-            // We hit an empty read when reach EOF, so return nil to stop.
+            // An empty read means we hit the EOF. It is the responsibility of the calling code to validate this assumption.
             return nil
 
         case .invalidFormat:
