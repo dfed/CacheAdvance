@@ -178,6 +178,9 @@ public final class CacheAdvance<T: Codable> {
             for encodedMessage in encodedMessages {
                 messages.append(try decoder.decode(T.self, from: encodedMessage))
             }
+        } else if reader.offsetInFileOfOldestMessage == reader.offsetInFileAtEndOfNewestMessage {
+            // This is an empty cache.
+            return []
         } else {
             // In this case, the messages could be split to two ranges
             // | First Range | (GAP: ignore) | Second Range |
