@@ -50,8 +50,12 @@ final class CacheReader {
         try reader.seek(to: startOffset)
         while let data = try nextEncodedMessage() {
             encodedMessages.append(data)
-            if let endOffset = endOffset, offsetInFile >= endOffset {
-                break
+            if let endOffset = endOffset {
+                if offsetInFile == endOffset {
+                    break
+                } else if offsetInFile > endOffset {
+                    throw CacheAdvanceError.fileCorrupted
+                }
             }
         }
         if let endOffset = endOffset, offsetInFile != endOffset {
