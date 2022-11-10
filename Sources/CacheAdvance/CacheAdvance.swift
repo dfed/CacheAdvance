@@ -47,9 +47,7 @@ public final class CacheAdvance<T: Codable> {
         self.init(
             fileURL: fileURL,
             writer: try FileHandle(forWritingTo: fileURL),
-            reader: try CacheReader(
-                forReadingFrom: fileURL,
-                maximumBytes: maximumBytes),
+            reader: try CacheReader(forReadingFrom: fileURL),
             header: try CacheHeaderHandle(
                 forReadingFrom: fileURL,
                 maximumBytes: maximumBytes,
@@ -172,10 +170,35 @@ public final class CacheAdvance<T: Codable> {
         try header.checkFile()
 
         var messages = [T]()
-        while let encodedMessage = try reader.nextEncodedMessage() {
-            messages.append(try decoder.decode(T.self, from: encodedMessage))
-        }
+        if reader.offsetInFileOfOldestMessage < reader.offsetInFileAtEndOfNewestMessage {
+            // There is only one range: | `offsetInFileOfOldestMessage` -> `offsetInFileAtEndOfNewestMessage` |
+            let encodedMessages = try reader.encodedMessagesFromOffset(
+                reader.offsetInFileOfOldestMessage,
+                endOffset: reader.offsetInFileAtEndOfNewestMessage)
+            for encodedMessage in encodedMessages {
+                messages.append(try decoder.decode(T.self, from: encodedMessage))
+            }
+        } else if reader.offsetInFileOfOldestMessage == reader.offsetInFileAtEndOfNewestMessage {
+            // This is an empty cache.
+            return []
+        } else {
+            // In this case, the messages could be split to two ranges
+            // | First Range | (GAP: ignore) | Second Range |
 
+            // This is second range: | `offsetInFileOfOldestMessage` -> EOF |
+            let olderMessages = try reader.encodedMessagesFromOffset(reader.offsetInFileOfOldestMessage)
+            for encodedMessage in olderMessages {
+                messages.append(try decoder.decode(T.self, from: encodedMessage))
+            }
+
+            // This is first range: | `expectedEndOfHeaderInFile` -> `offsetInFileAtEndOfNewestMessage` |
+            let newerMessages = try reader.encodedMessagesFromOffset(
+                FileHeader.expectedEndOfHeaderInFile,
+                endOffset: reader.offsetInFileAtEndOfNewestMessage)
+            for encodedMessage in newerMessages {
+                messages.append(try decoder.decode(T.self, from: encodedMessage))
+            }
+        }
         // Now that we've read all messages, seek back to the oldest message.
         try reader.seekToBeginningOfOldestMessage()
 
