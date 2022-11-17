@@ -59,6 +59,7 @@ final class CacheReader {
             }
         }
         if let endOffset = endOffset, offsetInFile < endOffset {
+            // If we finished reading messages but our offset in the file is less than our expected ending offset, this file is corrupted.
             throw CacheAdvanceError.fileCorrupted
         }
         return encodedMessages
