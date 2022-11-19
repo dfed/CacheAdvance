@@ -32,6 +32,7 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
     case macOS_10_15
     case macOS_11
     case macOS_12
+    case macOS_13
     case watchOS_6
     case watchOS_7
     case watchOS_8
@@ -59,7 +60,8 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
 
         case .macOS_10_15,
              .macOS_11,
-             .macOS_12:
+             .macOS_12,
+             .macOS_13:
             return "platform=OS X"
 
         case .watchOS_6:
@@ -93,6 +95,8 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
             return "macosx11.1"
         case .macOS_12:
             return "macosx12.3"
+        case .macOS_13:
+            return "macosx13.0"
 
         case .watchOS_6,
              .watchOS_7,
@@ -114,7 +118,8 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
              .tvOS_16,
              .macOS_10_15,
              .macOS_11,
-             .macOS_12:
+             .macOS_12,
+             .macOS_13:
             return true
 
         case .watchOS_6,
@@ -143,6 +148,7 @@ enum Platform: String, CaseIterable, CustomStringConvertible {
              .tvOS_15,
              .tvOS_16,
              .macOS_12,
+             .macOS_13,
              .watchOS_8,
              .watchOS_9:
             // Xcode 13+ do not require xcodeproj generation
