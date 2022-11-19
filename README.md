@@ -134,6 +134,8 @@ Double-click on `Package.swift` in the root of the repository to open the projec
 
 The default branch of this repository is `main`. Between the initial commit and [`151ab3f`](https://github.com/dfed/CacheAdvance/commit/151ab3f1d57531b9ae7a9219d0d8a33300704595), the default branch of this repository was `master`. See #46 for more details on why this change was made.
 
-## Attribution
+## Appreciations
 
 Shout out to [Peter Westen](https://twitter.com/pwesten) who inspired the creation of this library.
+
+Big thanks to [Michael Bachand](https://github.com/bachand) who has reviewed nearly every change to this library over the years.
