@@ -195,7 +195,8 @@ for rawPlatform in rawPlatforms {
         "-scheme", "CacheAdvance-Package",
         "-sdk", platform.sdk,
         "-derivedDataPath", platform.derivedDataPath,
-        "-PBXBuildsContinueAfterErrors=0"
+        "-PBXBuildsContinueAfterErrors=0",
+        "OTHER_SWIFT_FLAGS=-warnings-as-errors",
     ]
     if platform.shouldGenerateXcodeproj {
         // Point at the generated project
