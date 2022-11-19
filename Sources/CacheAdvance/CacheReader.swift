@@ -54,11 +54,13 @@ final class CacheReader {
                 if offsetInFile == endOffset {
                     break
                 } else if offsetInFile > endOffset {
+                    // The messages on disk are out of sync with our header data.
                     throw CacheAdvanceError.fileCorrupted
                 }
             }
         }
         if let endOffset = endOffset, offsetInFile != endOffset {
+            // If we finished reading messages but our offset in the file is less (or greater) than our expected ending offset, our header data is incorrect.
             throw CacheAdvanceError.fileCorrupted
         }
         return encodedMessages
