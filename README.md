@@ -1,5 +1,6 @@
 # CacheAdvance
 
+[![CI Status](https://img.shields.io/github/workflow/status/dfed/cacheadvance/CI/main)](https://github.com/dfed/cacheadvance/actions?query=workflow%3ACI+branch%3Amain)
 [![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible-4BC51D.svg?style=flat)](https://github.com/apple/swift-package-manager)
 [![codecov](https://codecov.io/gh/dfed/CacheAdvance/branch/main/graph/badge.svg?token=nZBHcZZ63F)](https://codecov.io/gh/dfed/CacheAdvance)
 [![Version](https://img.shields.io/cocoapods/v/CacheAdvance.svg)](https://cocoapods.org/pods/CacheAdvance)
