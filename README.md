@@ -107,16 +107,6 @@ platform :ios, '13.0'
 pod 'CacheAdvance', '~> 2.0'
 ```
 
-### Carthage
-
-To install CacheAdvance in your iOS project with [Carthage](https://github.com/Carthage/Carthage), add the following to your `Cartfile`:
-
-```ogdl
-github "dfed/CacheAdvance"
-```
-
-Run `carthage` to build the framework and drag the built `CacheAdvance.framework` into your Xcode project.
-
 ### Submodules
 
 To use git submodules, checkout the submodule with `git submodule add git@github.com:dfed/CacheAdvance.git`, drag CacheAdvance.xcodeproj to your project, and add CacheAdvance as a build dependency.
