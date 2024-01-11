@@ -17,7 +17,9 @@
 
 import Foundation
 
+@objc(CADLorumIpsum)
 public final class LorumIpsum: NSObject {
+    @objc
     public static let messages: [String] = [
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
         "Arcu cursus euismod quis viverra nibh cras pulvinar.",

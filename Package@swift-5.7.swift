@@ -16,6 +16,10 @@ let package = Package(
         .library(
             name: "CacheAdvance",
             targets: ["CacheAdvance"]
+        ),
+        .library(
+            name: "CADCacheAdvance",
+            targets: ["CADCacheAdvance"]
         )
     ],
     targets: [
@@ -28,8 +32,17 @@ let package = Package(
             dependencies: ["CacheAdvance", "LorumIpsum"]
         ),
         .target(
+            name: "CADCacheAdvance",
+            dependencies: ["CacheAdvance"],
+            swiftSettings: [.define("SWIFT_PACKAGE_MANAGER")]
+        ),
+        .target(
             name: "LorumIpsum",
             dependencies: []
+        ),
+        .testTarget(
+            name: "CADCacheAdvanceTests",
+            dependencies: ["CADCacheAdvance", "LorumIpsum"]
         ),
     ]
 )
