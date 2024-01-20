@@ -3,9 +3,9 @@
 [![CI Status](https://img.shields.io/github/actions/workflow/status/dfed/cacheadvance/ci.yml?branch=main)](https://github.com/dfed/cacheadvance/actions?query=workflow%3ACI+branch%3Amain)
 [![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible-4BC51D.svg?style=flat)](https://github.com/apple/swift-package-manager)
 [![codecov](https://codecov.io/gh/dfed/CacheAdvance/branch/main/graph/badge.svg?token=nZBHcZZ63F)](https://codecov.io/gh/dfed/CacheAdvance)
-[![Version](https://img.shields.io/cocoapods/v/CacheAdvance.svg)](https://cocoapods.org/pods/CacheAdvance)
 [![License](https://img.shields.io/cocoapods/l/CacheAdvance.svg)](https://cocoapods.org/pods/CacheAdvance)
-[![Platform](https://img.shields.io/cocoapods/p/CacheAdvance.svg)](https://cocoapods.org/pods/CacheAdvance)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fdfed%2FCacheAdvance%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/dfed/CacheAdvance)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fdfed%2FCacheAdvance%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/dfed/CacheAdvance)
 
 A performant cache for logging systems. CacheAdvance persists log events 30x faster than SQLite.
 
