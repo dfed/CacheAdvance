@@ -224,7 +224,7 @@ for rawPlatform in rawPlatforms {
         throw TaskError.code(1)
     }
 
-    if isFirstRun && platform.shouldGenerateXcodeproj {
+    if isFirstRun, platform.shouldGenerateXcodeproj {
         // Generate the xcode project if we need it
         try execute(commandPath: "/usr/bin/swift", arguments: ["package", "generate-xcodeproj", "--output=generated/"])
 

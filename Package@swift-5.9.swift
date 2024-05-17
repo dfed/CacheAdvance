@@ -11,7 +11,7 @@ let package = Package(
         .watchOS(.v6),
         .macOS(.v10_15),
         .macCatalyst(.v13),
-        .visionOS(.v1)
+        .visionOS(.v1),
     ],
     products: [
         .library(
@@ -21,7 +21,7 @@ let package = Package(
         .library(
             name: "CADCacheAdvance",
             targets: ["CADCacheAdvance"]
-        )
+        ),
     ],
     targets: [
         .target(

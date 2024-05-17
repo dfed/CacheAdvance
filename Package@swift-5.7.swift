@@ -20,7 +20,7 @@ let package = Package(
         .library(
             name: "CADCacheAdvance",
             targets: ["CADCacheAdvance"]
-        )
+        ),
     ],
     targets: [
         .target(
