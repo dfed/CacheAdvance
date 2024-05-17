@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1.3'
+          ruby-version: '3.3.1'
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Bundle Install
@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1.3'
+          ruby-version: '3.3.1'
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Bundle Install
@@ -66,7 +66,7 @@ jobs:
     steps:
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1.3'
+          ruby-version: '3.3.1'
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Bundle Install
@@ -88,7 +88,7 @@ jobs:
     steps:
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1.3'
+          ruby-version: '3.3.1'
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Bundle Install
@@ -110,7 +110,7 @@ jobs:
     steps:
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1.3'
+          ruby-version: '3.3.1'
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Bundle Install
@@ -134,7 +134,7 @@ jobs:
     steps:
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1.3'
+          ruby-version: '3.3.1'
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Bundle Install
@@ -154,7 +154,7 @@ jobs:
     steps:
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1.3'
+          ruby-version: '3.3.1'
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Bundle Install
