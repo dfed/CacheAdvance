@@ -9,7 +9,7 @@ on:
 jobs:
   pod-lint:
     name: Pod Lint
-    runs-on: macOS-14
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         swift_version: [
@@ -17,6 +17,7 @@ jobs:
           '5.7',
           '5.8',
           '5.9',
+          '5.10',
         ]
       fail-fast: false
     steps:
@@ -24,11 +25,13 @@ jobs:
         with:
           ruby-version: '3.3.1'
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      - name: Setup Swift Environment
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: ${{ matrix.swift_version }}
       - name: Bundle Install
         run: bundle install
-      - name: Select Xcode Version
-        run: sudo xcode-select --switch /Applications/Xcode_15.2.app/Contents/Developer
       - name: Lint Podspec
         run: bundle exec pod lib lint --verbose --fail-fast --swift-version=${{ matrix.swift_version }}
   spm-13:
@@ -46,7 +49,7 @@ jobs:
         with:
           ruby-version: '3.3.1'
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
@@ -68,7 +71,7 @@ jobs:
         with:
           ruby-version: '3.3.1'
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
@@ -90,7 +93,7 @@ jobs:
         with:
           ruby-version: '3.3.1'
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
@@ -112,7 +115,7 @@ jobs:
         with:
           ruby-version: '3.3.1'
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
@@ -136,7 +139,7 @@ jobs:
         with:
           ruby-version: '3.3.1'
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
@@ -156,7 +159,7 @@ jobs:
         with:
           ruby-version: '3.3.1'
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Bundle Install
         run: bundle install
       - name: Select Xcode Version
