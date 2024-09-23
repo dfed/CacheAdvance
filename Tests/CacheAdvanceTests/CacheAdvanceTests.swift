@@ -106,7 +106,7 @@ final class CacheAdvanceTests: XCTestCase {
             overwritesOldMessages: true)
 
         func makeCache() throws -> CacheAdvance<TestableMessage> {
-            return CacheAdvance<TestableMessage>(
+            CacheAdvance<TestableMessage>(
                 fileURL: testFileLocation,
                 writer: try FileHandle(forWritingTo: testFileLocation),
                 reader: try CacheReader(
@@ -142,7 +142,7 @@ final class CacheAdvanceTests: XCTestCase {
             overwritesOldMessages: true)
 
         func makeCache() throws -> CacheAdvance<TestableMessage> {
-            return CacheAdvance<TestableMessage>(
+            CacheAdvance<TestableMessage>(
                 fileURL: testFileLocation,
                 writer: try FileHandle(forWritingTo: testFileLocation),
                 reader: try CacheReader(
@@ -178,7 +178,7 @@ final class CacheAdvanceTests: XCTestCase {
             overwritesOldMessages: true)
 
         func makeCache() throws -> CacheAdvance<TestableMessage> {
-            return CacheAdvance<TestableMessage>(
+            CacheAdvance<TestableMessage>(
                 fileURL: testFileLocation,
                 writer: try FileHandle(forWritingTo: testFileLocation),
                 reader: try CacheReader(

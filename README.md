@@ -78,12 +78,12 @@ The first 64bytes of a CacheAdvance is reserved for storing metadata about the f
 
 ## Requirements
 
-* Xcode 12.4 or later.
+* Xcode 16.0 or later.
 * iOS 13 or later.
 * tvOS 13 or later.
 * watchOS 6 or later.
 * macOS 10.15 or later.
-* Swift 5.6 or later.
+* Swift 5.10 or later.
 
 ## Installation
 
@@ -93,7 +93,7 @@ To install CacheAdvance in your iOS project with [Swift Package Manager](https:/
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/dfed/CacheAdvance", from: "2.0.0"),
+    .package(url: "https://github.com/dfed/CacheAdvance", from: "3.0.0"),
 ]
 ```
 
@@ -103,7 +103,7 @@ To install CacheAdvance in your iOS project with [CocoaPods](http://cocoapods.or
 
 ```
 platform :ios, '13.0'
-pod 'CacheAdvance', '~> 2.0'
+pod 'CacheAdvance', '~> 3.0'
 ```
 
 ### Submodules

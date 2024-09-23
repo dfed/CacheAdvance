@@ -84,17 +84,17 @@ struct FileHeader {
     func data(for field: Field) -> Data {
         switch field {
         case .version:
-            return Data(version)
+            Data(version)
         case .maximumBytes:
-            return Data(maximumBytes)
+            Data(maximumBytes)
         case .overwriteOldMessages:
-            return Data(overwritesOldMessages)
+            Data(overwritesOldMessages)
         case .offsetInFileOfOldestMessage:
-            return Data(offsetInFileOfOldestMessage)
+            Data(offsetInFileOfOldestMessage)
         case .offsetInFileAtEndOfNewestMessage:
-            return Data(offsetInFileAtEndOfNewestMessage)
+            Data(offsetInFileAtEndOfNewestMessage)
         case .reservedSpace:
-            return Data(repeating: 0, count: field.storageLength)
+            Data(repeating: 0, count: field.storageLength)
         }
     }
 
@@ -112,20 +112,20 @@ struct FileHeader {
         var storageLength: Int {
             switch self {
             case .version:
-                return UInt8.storageLength
+                UInt8.storageLength
             case .maximumBytes:
-                return Bytes.storageLength
+                Bytes.storageLength
             case .overwriteOldMessages:
-                return Bool.storageLength
+                Bool.storageLength
             case .offsetInFileOfOldestMessage:
-                return UInt64.storageLength
+                UInt64.storageLength
             case .offsetInFileAtEndOfNewestMessage:
-                return UInt64.storageLength
+                UInt64.storageLength
             case .reservedSpace:
                 // Subtract from this value every time another additive field is added.
                 // We currently have a total of 64 bytes reserved for the header.
                 // We're currently using only 26 of them.
-                return 38
+                38
             }
         }
 

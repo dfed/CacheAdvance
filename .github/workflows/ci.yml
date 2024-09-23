@@ -9,147 +9,41 @@ on:
 jobs:
   pod-lint:
     name: Pod Lint
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        swift_version: [
-          '5.6',
-          '5.7',
-          '5.8',
-          '5.9',
-          '5.10',
-        ]
-      fail-fast: false
+    runs-on: macOS-14
     steps:
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3.1'
       - name: Checkout Repo
         uses: actions/checkout@v4
-      - name: Setup Swift Environment
-        uses: swift-actions/setup-swift@v2
+      - uses: ruby/setup-ruby@v1
         with:
-          swift-version: ${{ matrix.swift_version }}
-      - name: Bundle Install
-        run: bundle install
+          ruby-version: '3.3.5'
+          bundler-cache: true
+      - name: Select Xcode Version
+        run: sudo xcode-select --switch /Applications/Xcode_16.app/Contents/Developer
       - name: Lint Podspec
-        run: bundle exec pod lib lint --verbose --fail-fast --swift-version=${{ matrix.swift_version }}
-  spm-13:
-    name: Build Xcode 13
-    runs-on: macOS-12
-    strategy:
-      matrix:
-        platforms: [
-          'iOS_15,watchOS_8',
-          'macOS_12,tvOS_15',
-        ]
-      fail-fast: false
-    steps:
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3.1'
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-      - name: Bundle Install
-        run: bundle install
-      - name: Select Xcode Version
-        run: sudo xcode-select --switch /Applications/Xcode_13.4.1.app/Contents/Developer
-      - name: Prepare Simulator Runtimes
-        run: Scripts/github/prepare-simulators.sh ${{ matrix.platforms }}
-      - name: Build and Test Framework
-        run: Scripts/build.swift ${{ matrix.platforms }}
-      - name: Prepare Coverage Reports
-        run: ./Scripts/prepare-coverage-reports.sh
-      - name: Upload Coverage Reports
-        if: success()
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-  spm-13-swift:
-    name: Swift Build Xcode 13
-    runs-on: macOS-12
-    steps:
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3.1'
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-      - name: Bundle Install
-        run: bundle install
-      - name: Select Xcode Version
-        run: sudo xcode-select --switch /Applications/Xcode_13.4.1.app/Contents/Developer
-      - name: Build and Test Framework
-        run: xcrun swift test -c release -Xswiftc -enable-testing
-  spm-14:
-    name: Build Xcode 14
-    runs-on: macOS-12
-    strategy:
-      matrix:
-        platforms: [
-          'iOS_16,watchOS_9',
-          'macOS_12,tvOS_16',
-        ]
-      fail-fast: false
-    steps:
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3.1'
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-      - name: Bundle Install
-        run: bundle install
-      - name: Select Xcode Version
-        run: sudo xcode-select --switch /Applications/Xcode_14.0.1.app/Contents/Developer
-      - name: Prepare Simulator Runtimes
-        run: Scripts/github/prepare-simulators.sh ${{ matrix.platforms }}
-      - name: Build and Test Framework
-        run: Scripts/build.swift ${{ matrix.platforms }}
-      - name: Prepare Coverage Reports
-        run: ./Scripts/prepare-coverage-reports.sh
-      - name: Upload Coverage Reports
-        if: success()
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-  spm-14-swift:
-    name: Swift Build Xcode 14
-    runs-on: macOS-12
-    steps:
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3.1'
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-      - name: Bundle Install
-        run: bundle install
-      - name: Select Xcode Version
-        run: sudo xcode-select --switch /Applications/Xcode_14.0.1.app/Contents/Developer
-      - name: Build and Test Framework
-        run: xcrun swift test -c release -Xswiftc -enable-testing
-  spm-15:
-    name: Build Xcode 15
+        run: bundle exec pod lib lint --verbose --fail-fast --swift-version=6.0
+  spm-16:
+    name: Build Xcode 16
     runs-on: macOS-14
     strategy:
       matrix:
         platforms: [
-          'iOS_17,watchOS_10',
-          'macOS_14,tvOS_17',
-          'macCatalyst_14',
-          'visionOS_1'
+          'iOS_18,watchOS_11',
+          'macOS_15,tvOS_18',
+          'macCatalyst_15',
+          'visionOS_2'
         ]
       fail-fast: false
     steps:
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3.1'
       - name: Checkout Repo
         uses: actions/checkout@v4
-      - name: Bundle Install
-        run: bundle install
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3.5'
+          bundler-cache: true
       - name: Select Xcode Version
-        run: sudo xcode-select --switch /Applications/Xcode_15.2.app/Contents/Developer
+        run: sudo xcode-select --switch /Applications/Xcode_16.app/Contents/Developer
       - name: Download visionOS
-        if: matrix.platforms == 'visionOS_1'
+        if: matrix.platforms == 'visionOS_2'
         run: |
           sudo xcodebuild -runFirstLaunch
           sudo xcrun simctl list
@@ -164,18 +58,17 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-  spm-15-swift:
-    name: Swift Build Xcode 15
+  spm-16-swift:
+    name: Swift Build Xcode 16
     runs-on: macOS-14
     steps:
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3.1'
       - name: Checkout Repo
         uses: actions/checkout@v4
-      - name: Bundle Install
-        run: bundle install
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3.5'
+          bundler-cache: true
       - name: Select Xcode Version
-        run: sudo xcode-select --switch /Applications/Xcode_15.2.app/Contents/Developer
+        run: sudo xcode-select --switch /Applications/Xcode_16.app/Contents/Developer
       - name: Build and Test Framework
         run: xcrun swift test -c release -Xswiftc -enable-testing

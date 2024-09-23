@@ -1,4 +1,4 @@
-// swift-tools-version:5.6
+// swift-tools-version:6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -25,24 +25,39 @@ let package = Package(
     targets: [
         .target(
             name: "CacheAdvance",
-            swiftSettings: [.define("SWIFT_PACKAGE_MANAGER")]
+            swiftSettings: [
+                .swiftLanguageMode(.v6),
+                .define("SWIFT_PACKAGE_MANAGER")
+            ]
         ),
         .testTarget(
             name: "CacheAdvanceTests",
-            dependencies: ["CacheAdvance", "LorumIpsum"]
+            dependencies: ["CacheAdvance", "LorumIpsum"],
+            swiftSettings: [
+                .swiftLanguageMode(.v6),
+            ]
         ),
         .target(
             name: "CADCacheAdvance",
             dependencies: ["CacheAdvance"],
-            swiftSettings: [.define("SWIFT_PACKAGE_MANAGER")]
+            swiftSettings: [
+                .swiftLanguageMode(.v6),
+                .define("SWIFT_PACKAGE_MANAGER")
+            ]
         ),
         .target(
             name: "LorumIpsum",
-            dependencies: []
+            dependencies: [],
+            swiftSettings: [
+                .swiftLanguageMode(.v6),
+            ]
         ),
         .testTarget(
             name: "CADCacheAdvanceTests",
-            dependencies: ["CADCacheAdvance", "LorumIpsum"]
+            dependencies: ["CADCacheAdvance", "LorumIpsum"],
+            swiftSettings: [
+                .swiftLanguageMode(.v6),
+            ]
         ),
     ]
 )
