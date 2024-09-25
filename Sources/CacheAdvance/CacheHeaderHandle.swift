@@ -188,9 +188,9 @@ final class CacheHeaderHandle {
 
     private func memoizedMetadata() throws -> Metadata {
         if let persistedMetadata = self.persistedMetadata {
-            return persistedMetadata
+            persistedMetadata
         } else {
-            return try Metadata(headerData: try readHeaderData())
+            try Metadata(headerData: try readHeaderData())
         }
     }
 

@@ -99,7 +99,7 @@ public final class __ObjectiveCCompatibleCacheAdvanceWithGenericData: NSObject {
 final class PassthroughDataDecoder: MessageDecoder {
     func decode<T>(_ type: T.Type, from data: Data) throws -> T where T : Decodable {
         // Force cast because this type is only used with a CacheAdvance<Data> type.
-        return data as! T
+        data as! T
     }
 }
 
@@ -109,6 +109,6 @@ final class PassthroughDataDecoder: MessageDecoder {
 final class PassthroughDataEncoder: MessageEncoder {
     func encode<T>(_ value: T) throws -> Data where T : Encodable {
         // Force cast because this type is only used with a CacheAdvance<Data> type.
-        return value as! Data
+        value as! Data
     }
 }

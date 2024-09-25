@@ -25,12 +25,12 @@ extension FileHandle {
     func readDataUp(toLength length: Int) throws -> Data {
         if #available(iOS 13.4, tvOS 13.4, watchOS 6.2, macOS 10.15.4, *) {
             if let data = try read(upToCount: length) {
-                return data
+                data
             } else {
-                return Data()
+                Data()
             }
         } else {
-            return try __readDataUp(toLength: length)
+            try __readDataUp(toLength: length)
         }
     }
 
