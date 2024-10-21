@@ -72,3 +72,11 @@ jobs:
         run: sudo xcode-select --switch /Applications/Xcode_16.app/Contents/Developer
       - name: Build and Test Framework
         run: xcrun swift test -c release -Xswiftc -enable-testing
+  readme-validation:
+    name: Check Markdown links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+      - name: Validate Markdown
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
