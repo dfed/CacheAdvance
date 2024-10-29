@@ -9,7 +9,7 @@ on:
 jobs:
   pod-lint:
     name: Pod Lint
-    runs-on: macOS-14
+    runs-on: macOS-15
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -29,7 +29,7 @@ jobs:
         run: bundle exec pod lib lint --verbose --fail-fast --swift-version=6.0
   spm-16:
     name: Build Xcode 16
-    runs-on: macOS-14
+    runs-on: macOS-15
     strategy:
       matrix:
         platforms: [
@@ -66,7 +66,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
   spm-16-swift:
     name: Swift Build Xcode 16
-    runs-on: macOS-14
+    runs-on: macOS-15
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
