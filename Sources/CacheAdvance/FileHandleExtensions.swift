@@ -23,6 +23,13 @@ extension FileHandle {
 
     /// A method to read data from a file handle that is safe to call in Swift from any operation system version.
     func readDataUp(toLength length: Int) throws -> Data {
+#if os(Linux)
+        if let data = try read(upToCount: length) {
+            data
+        } else {
+            Data()
+        }
+#else
         if #available(iOS 13.4, tvOS 13.4, watchOS 6.2, macOS 10.15.4, *) {
             if let data = try read(upToCount: length) {
                 data
@@ -32,15 +39,20 @@ extension FileHandle {
         } else {
             try __readDataUp(toLength: length)
         }
+#endif
     }
 
     /// A method to write data to a file handle that is safe to call in Swift from any operation system version.
     func write(data: Data) throws {
+#if os(Linux)
+        try write(contentsOf: data)
+#else
         if #available(iOS 13.4, tvOS 13.4, watchOS 6.2, macOS 10.15.4, *) {
             try write(contentsOf: data)
         } else {
             try __write(data, error: ())
         }
+#endif
     }
 
     /// A method to seek on a file handle that is safe to call in Swift from any operation system version.
