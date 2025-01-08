@@ -17,10 +17,4 @@
 
 import Foundation
 
-extension UInt8: BigEndianHostSwappable {
-    
-    static func swapToHost(_ x: UInt8) -> UInt8 {
-        x // UInt8 is 1-byte long, so local endianness does not affect storage of this type.
-    }
-    
-}
+extension UInt8: BigEndianHostSwappable {}
