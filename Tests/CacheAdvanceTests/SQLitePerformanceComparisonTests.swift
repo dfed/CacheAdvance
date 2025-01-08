@@ -15,6 +15,7 @@
 //  limitations under the License.
 //
 
+#if !os(Linux)
 import SQLite3
 import XCTest
 
@@ -318,3 +319,4 @@ class SQLiteCache<T: Codable> {
     }
 
 }
+#endif
