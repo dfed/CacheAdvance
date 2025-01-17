@@ -93,7 +93,7 @@ for rawPlatform in rawPlatforms {
     }
 
     var xcodeBuildArguments = [
-        "-scheme", "CacheAdvance",
+        "-scheme", "CacheAdvance-Package",
         "-sdk", platform.sdk,
         "-derivedDataPath", platform.derivedDataPath,
         "-PBXBuildsContinueAfterErrors=0",
