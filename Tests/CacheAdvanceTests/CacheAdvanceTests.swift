@@ -726,10 +726,11 @@ final class CacheAdvanceTests: XCTestCase {
     }
 
     private func clearCacheFile() {
-        FileManager.default.createFile(
+        XCTAssertTrue(FileManager.default.createFile(
             atPath: testFileLocation.path,
             contents: nil,
-            attributes: nil)
+            attributes: nil
+        ))
     }
 
     private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("CacheAdvanceTests")

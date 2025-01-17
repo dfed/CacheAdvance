@@ -25,7 +25,7 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
         super.setUp()
 
         // Delete the existing cache.
-        FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
+        XCTAssertTrue(FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil))
     }
 
     // MARK: Behavior Tests
