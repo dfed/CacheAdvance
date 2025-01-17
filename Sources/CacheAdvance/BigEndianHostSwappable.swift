@@ -34,8 +34,9 @@ extension BigEndianHostSwappable {
     ///
     /// - Parameter data: A data blob representing encodable data. Must be of length `Self.storageLength`.
     init(_ data: Data) {
-        let decodedSize = data.withUnsafeBytes {
-            $0.load(as: Self.self)
+        var decodedSize: Self = 0
+        _ = withUnsafeMutableBytes(of: &decodedSize) {
+            data.copyBytes(to: $0, count: data.count)
         }
         self = Self(bigEndian: decodedSize)
     }
