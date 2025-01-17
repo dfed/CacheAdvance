@@ -21,7 +21,7 @@ import Foundation
 protocol BigEndianHostSwappable where Self: FixedWidthInteger {
 
     /// Converts the big-endian value in x to the current endian format and returns the resulting value.
-    static func swapToHost(_ x: Self) -> Self
+    init(bigEndian value: Self)
 
     /// The maximum representable integer in this type.
     static var max: Self { get }
@@ -34,10 +34,11 @@ extension BigEndianHostSwappable {
     ///
     /// - Parameter data: A data blob representing encodable data. Must be of length `Self.storageLength`.
     init(_ data: Data) {
-        let decodedSize = data.withUnsafeBytes {
-            $0.load(as: Self.self)
+        var decodedSize: Self = 0
+        _ = withUnsafeMutableBytes(of: &decodedSize) {
+            data.copyBytes(to: $0, count: data.count)
         }
-        self = Self.swapToHost(decodedSize)
+        self = Self(bigEndian: decodedSize)
     }
 
     /// The length of a contiguous data blob required to store this type.

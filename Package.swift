@@ -21,7 +21,13 @@ let package = Package(
             name: "CADCacheAdvance",
             targets: ["CADCacheAdvance"]
         ),
-    ],
+    ].filter {
+#if os(Linux)
+        $0.name != "CADCacheAdvance"
+#else
+        true
+#endif
+    },
     targets: [
         .target(
             name: "CacheAdvance",
@@ -59,5 +65,12 @@ let package = Package(
                 .swiftLanguageMode(.v6),
             ]
         ),
-    ]
+    ].filter {
+#if os(Linux)
+        $0.name != "CADCacheAdvance"
+        && $0.name != "CADCacheAdvanceTests"
+#else
+        true
+#endif
+    }
 )

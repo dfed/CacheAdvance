@@ -26,7 +26,7 @@ final class CacheHeaderHandleTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil)
+        XCTAssertTrue(FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil))
     }
 
     override func tearDown() {

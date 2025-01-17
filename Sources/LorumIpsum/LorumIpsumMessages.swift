@@ -17,9 +17,7 @@
 
 import Foundation
 
-@objc(CADLorumIpsum)
 public final class LorumIpsum: NSObject {
-    @objc
     public static let messages: [String] = [
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
         "Arcu cursus euismod quis viverra nibh cras pulvinar.",
@@ -503,3 +501,11 @@ public final class LorumIpsum: NSObject {
         "Eu turpis egestas pretium aenean pharetra magna.",
     ]
 }
+
+#if !os(Linux)
+@objc
+public final class CADLorumIpsum: NSObject {
+    @objc
+    public static let messages = LorumIpsum.messages
+}
+#endif
