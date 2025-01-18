@@ -89,7 +89,7 @@ The first 64bytes of a CacheAdvance is reserved for storing metadata about the f
 
 ### Swift Package Manager
 
-To install CacheAdvance in your iOS project with [Swift Package Manager](https://github.com/apple/swift-package-manager), the following lines can be added to your `Package.swift` file:
+To install CacheAdvance in your project with [Swift Package Manager](https://github.com/apple/swift-package-manager), the following lines can be added to your `Package.swift` file:
 
 ```swift
 dependencies: [
@@ -99,16 +99,11 @@ dependencies: [
 
 ### CocoaPods
 
-To install CacheAdvance in your iOS project with [CocoaPods](http://cocoapods.org), add the following to your `Podfile`:
+To install CacheAdvance in your project with [CocoaPods](http://cocoapods.org), add the following to your `Podfile`:
 
 ```
-platform :ios, '13.0'
 pod 'CacheAdvance', '~> 3.0'
 ```
-
-### Submodules
-
-To use git submodules, checkout the submodule with `git submodule add git@github.com:dfed/CacheAdvance.git`, drag CacheAdvance.xcodeproj to your project, and add CacheAdvance as a build dependency.
 
 ## Contributing
 
