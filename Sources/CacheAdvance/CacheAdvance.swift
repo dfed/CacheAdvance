@@ -35,7 +35,7 @@ public final class CacheAdvance<T: Codable> {
 	/// - Warning: `shouldOverwriteOldMessages` must be consistent for the life of a cache. Changing this value after logs have been persisted to a cache will prevent appending new messages to this cache.
 	/// - Warning: `decoder` must have a consistent implementation for the life of a cache. Changing this value after logs have been persisted to a cache may prevent reading messages from this cache.
 	/// - Warning: `encoder` must have a consistent implementation for the life of a cache. Changing this value after logs have been persisted to a cache may prevent reading messages from this cache.
-	convenience public init(
+	public convenience init(
 		fileURL: URL,
 		maximumBytes: Bytes,
 		shouldOverwriteOldMessages: Bool,
