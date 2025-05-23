@@ -21,12 +21,10 @@ import XCTest
 @testable import CacheAdvance
 
 final class BigEndianHostSwappableTests: XCTestCase {
+	// MARK: Behavior Tests
 
-    // MARK: Behavior Tests
-
-    func test_init_canBeInitializedFromEncodedData() {
-        let expectedValue: UInt64 = 10
-        XCTAssertEqual(UInt64(Data(expectedValue)), expectedValue)
-    }
-
+	func test_init_canBeInitializedFromEncodedData() {
+		let expectedValue: UInt64 = 10
+		XCTAssertEqual(UInt64(Data(expectedValue)), expectedValue)
+	}
 }

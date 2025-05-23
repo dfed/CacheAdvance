@@ -19,7 +19,7 @@ import Foundation
 
 /// An object capable of decoding a message of type `T` from `Data`.
 public protocol MessageDecoder {
-    func decode<T>(_ type: T.Type, from data: Data) throws -> T where T : Decodable
+	func decode<T>(_ type: T.Type, from data: Data) throws -> T where T: Decodable
 }
 
 extension JSONDecoder: MessageDecoder {}

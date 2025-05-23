@@ -21,12 +21,10 @@ import XCTest
 @testable import CacheAdvance
 
 final class BoolExtensionsTests: XCTestCase {
+	// MARK: Behavior Tests
 
-    // MARK: Behavior Tests
-
-    func test_init_canBeInitializedFromEncodedData() {
-        XCTAssertEqual(Bool(Data(true)), true)
-        XCTAssertEqual(Bool(Data(false)), false)
-    }
-
+	func test_init_canBeInitializedFromEncodedData() {
+		XCTAssertEqual(Bool(Data(true)), true)
+		XCTAssertEqual(Bool(Data(false)), false)
+	}
 }

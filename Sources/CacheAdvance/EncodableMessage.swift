@@ -23,34 +23,32 @@ import Foundation
 /// -  `messageSize` is a big-endian encoded `MessageSpan` of length `messageSpanStorageLength`.
 /// - `data` is length `messageSize`.
 struct EncodableMessage<T: Codable, Size: BigEndianHostSwappable> {
+	// MARK: Initialization
 
-    // MARK: Initialization
+	/// Initializes an encoded message from the raw, codable source.
+	/// - Parameters:
+	///   - message: The messages to encode.
+	///   - encoder: The encoder to use.
+	init(message: T, encoder: MessageEncoder) {
+		self.message = message
+		self.encoder = encoder
+	}
 
-    /// Initializes an encoded message from the raw, codable source.
-    /// - Parameters:
-    ///   - message: The messages to encode.
-    ///   - encoder: The encoder to use.
-    init(message: T, encoder: MessageEncoder) {
-        self.message = message
-        self.encoder = encoder
-    }
+	// MARK: Internal
 
-    // MARK: Internal
+	/// The encoded message, prefixed with the size of the message blob.
+	func encodedData() throws -> Data {
+		let messageData = try encoder.encode(message)
+		guard messageData.count < Size.max else {
+			// We can't encode the length this message in a MessageSpan.
+			throw CacheAdvanceError.messageLargerThanCacheCapacity
+		}
+		let encodedSize = Data(MessageSpan(messageData.count))
+		return encodedSize + messageData
+	}
 
-    /// The encoded message, prefixed with the size of the message blob.
-    func encodedData() throws -> Data {
-        let messageData = try encoder.encode(message)
-        guard messageData.count < Size.max else {
-            // We can't encode the length this message in a MessageSpan.
-            throw CacheAdvanceError.messageLargerThanCacheCapacity
-        }
-        let encodedSize = Data(MessageSpan(messageData.count))
-        return encodedSize + messageData
-    }
+	// MARK: Private
 
-    // MARK: Private
-
-    private let message: T
-    private let encoder: MessageEncoder
-
+	private let message: T
+	private let encoder: MessageEncoder
 }

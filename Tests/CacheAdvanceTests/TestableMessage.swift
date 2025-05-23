@@ -19,14 +19,13 @@ import Foundation
 import LorumIpsum
 
 struct TestableMessage: Codable, ExpressibleByStringLiteral, Equatable {
+	typealias StringLiteralType = String
 
-    typealias StringLiteralType = String
+	init(stringLiteral value: Self.StringLiteralType) {
+		self.value = value
+	}
 
-    init(stringLiteral value: Self.StringLiteralType) {
-        self.value = value
-    }
+	let value: String
 
-    let value: String
-
-    static let lorumIpsum = LorumIpsum.messages.map { TestableMessage(stringLiteral: $0) }
+	static let lorumIpsum = LorumIpsum.messages.map { TestableMessage(stringLiteral: $0) }
 }

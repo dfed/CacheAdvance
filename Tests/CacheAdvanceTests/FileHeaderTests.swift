@@ -21,62 +21,64 @@ import XCTest
 @testable import CacheAdvance
 
 final class FileHeaderTests: XCTestCase {
+	// MARK: Behavior Tests
 
-    // MARK: Behavior Tests
+	func test_initFromData_returnsNilWhenDataIsOfIncorrectLength() throws {
+		XCTAssertNil(FileHeader(from: Data(repeating: 0, count: 8)))
+	}
 
-    func test_initFromData_returnsNilWhenDataIsOfIncorrectLength() throws {
-        XCTAssertNil(FileHeader(from: Data(repeating: 0, count: 8)))
-    }
+	func test_initFromData_readsZerodData() throws {
+		let fileHeader = FileHeader(from: Data(repeating: 0, count: Int(FileHeader.expectedEndOfHeaderInFile)))
+		XCTAssertEqual(fileHeader?.version, 0)
+		XCTAssertEqual(fileHeader?.maximumBytes, 0)
+		XCTAssertEqual(fileHeader?.overwritesOldMessages, false)
+		XCTAssertEqual(fileHeader?.offsetInFileOfOldestMessage, 0)
+		XCTAssertEqual(fileHeader?.offsetInFileAtEndOfNewestMessage, 0)
+	}
 
-    func test_initFromData_readsZerodData() throws {
-        let fileHeader = FileHeader(from: Data(repeating: 0, count: Int(FileHeader.expectedEndOfHeaderInFile)))
-        XCTAssertEqual(fileHeader?.version, 0)
-        XCTAssertEqual(fileHeader?.maximumBytes, 0)
-        XCTAssertEqual(fileHeader?.overwritesOldMessages, false)
-        XCTAssertEqual(fileHeader?.offsetInFileOfOldestMessage, 0)
-        XCTAssertEqual(fileHeader?.offsetInFileAtEndOfNewestMessage, 0)
-    }
+	func test_initFromData_readsOutExpectedData() throws {
+		let fileHeader = createFileHeader()
 
-    func test_initFromData_readsOutExpectedData() throws {
-        let fileHeader = createFileHeader()
+		let fileHeaderFromData = FileHeader(from: fileHeader.asData)
+		XCTAssertEqual(fileHeader.version, fileHeaderFromData?.version)
+		XCTAssertEqual(fileHeader.maximumBytes, fileHeaderFromData?.maximumBytes)
+		XCTAssertEqual(fileHeader.overwritesOldMessages, fileHeaderFromData?.overwritesOldMessages)
+		XCTAssertEqual(fileHeader.offsetInFileOfOldestMessage, fileHeaderFromData?.offsetInFileOfOldestMessage)
+		XCTAssertEqual(fileHeader.offsetInFileAtEndOfNewestMessage, fileHeaderFromData?.offsetInFileAtEndOfNewestMessage)
+	}
 
-        let fileHeaderFromData = FileHeader(from: fileHeader.asData)
-        XCTAssertEqual(fileHeader.version, fileHeaderFromData?.version)
-        XCTAssertEqual(fileHeader.maximumBytes, fileHeaderFromData?.maximumBytes)
-        XCTAssertEqual(fileHeader.overwritesOldMessages, fileHeaderFromData?.overwritesOldMessages)
-        XCTAssertEqual(fileHeader.offsetInFileOfOldestMessage, fileHeaderFromData?.offsetInFileOfOldestMessage)
-        XCTAssertEqual(fileHeader.offsetInFileAtEndOfNewestMessage, fileHeaderFromData?.offsetInFileAtEndOfNewestMessage)
-    }
+	func test_expectedEndOfHeaderInFile_hasCorrectLengthForHeaderVersion1() {
+		XCTAssertEqual(
+			FileHeader.expectedEndOfHeaderInFile,
+			64,
+			"Header length has changed from expected 64 bytes for header version 1. This represents a breaking change."
+		)
+	}
 
-    func test_expectedEndOfHeaderInFile_hasCorrectLengthForHeaderVersion1() {
-        XCTAssertEqual(
-            FileHeader.expectedEndOfHeaderInFile,
-            64,
-            "Header length has changed from expected 64 bytes for header version 1. This represents a breaking change.")
-    }
+	func test_expectedEndOfHeaderInFile_hasExpectedLength() {
+		XCTAssertEqual(
+			UInt64(createFileHeader().asData.count),
+			FileHeader.expectedEndOfHeaderInFile
+		)
+	}
 
-    func test_expectedEndOfHeaderInFile_hasExpectedLength() {
-        XCTAssertEqual(
-            UInt64(createFileHeader().asData.count),
-            FileHeader.expectedEndOfHeaderInFile)
-    }
+	// MARK: Private
 
-    // MARK: Private
-
-    private func createFileHeader(
-        version: UInt8 = FileHeader.version,
-        maximumBytes: Bytes = 500,
-        overwritesOldMessages: Bool = false,
-        offsetInFileOfOldestMessage: UInt64 = 20,
-        offsetInFileAtEndOfNewestMessage: UInt64 = 400)
-        -> FileHeader
-    {
-        FileHeader(
-            version: version,
-            maximumBytes: maximumBytes,
-            overwritesOldMessages: overwritesOldMessages,
-            offsetInFileOfOldestMessage: offsetInFileOfOldestMessage,
-            offsetInFileAtEndOfNewestMessage: offsetInFileAtEndOfNewestMessage)
-    }
-
+	private func createFileHeader(
+		version: UInt8 = FileHeader.version,
+		maximumBytes: Bytes = 500,
+		overwritesOldMessages: Bool = false,
+		offsetInFileOfOldestMessage: UInt64 = 20,
+		offsetInFileAtEndOfNewestMessage: UInt64 = 400
+	)
+		-> FileHeader
+	{
+		FileHeader(
+			version: version,
+			maximumBytes: maximumBytes,
+			overwritesOldMessages: overwritesOldMessages,
+			offsetInFileOfOldestMessage: offsetInFileOfOldestMessage,
+			offsetInFileAtEndOfNewestMessage: offsetInFileAtEndOfNewestMessage
+		)
+	}
 }
