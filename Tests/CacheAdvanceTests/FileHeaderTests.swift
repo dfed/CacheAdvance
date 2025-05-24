@@ -16,50 +16,48 @@
 //
 
 import Foundation
-import XCTest
+import Testing
 
 @testable import CacheAdvance
 
-final class FileHeaderTests: XCTestCase {
+struct FileHeaderTests {
 	// MARK: Behavior Tests
 
-	func test_initFromData_returnsNilWhenDataIsOfIncorrectLength() throws {
-		XCTAssertNil(FileHeader(from: Data(repeating: 0, count: 8)))
+	@Test
+	func initFromData_returnsNilWhenDataIsOfIncorrectLength() throws {
+		#expect(FileHeader(from: Data(repeating: 0, count: 8)) == nil)
 	}
 
-	func test_initFromData_readsZerodData() throws {
+	@Test
+	func initFromData_readsZerodData() throws {
 		let fileHeader = FileHeader(from: Data(repeating: 0, count: Int(FileHeader.expectedEndOfHeaderInFile)))
-		XCTAssertEqual(fileHeader?.version, 0)
-		XCTAssertEqual(fileHeader?.maximumBytes, 0)
-		XCTAssertEqual(fileHeader?.overwritesOldMessages, false)
-		XCTAssertEqual(fileHeader?.offsetInFileOfOldestMessage, 0)
-		XCTAssertEqual(fileHeader?.offsetInFileAtEndOfNewestMessage, 0)
+		#expect(fileHeader?.version == 0)
+		#expect(fileHeader?.maximumBytes == 0)
+		#expect(fileHeader?.overwritesOldMessages == false)
+		#expect(fileHeader?.offsetInFileOfOldestMessage == 0)
+		#expect(fileHeader?.offsetInFileAtEndOfNewestMessage == 0)
 	}
 
-	func test_initFromData_readsOutExpectedData() throws {
+	@Test
+	func initFromData_readsOutExpectedData() throws {
 		let fileHeader = createFileHeader()
 
 		let fileHeaderFromData = FileHeader(from: fileHeader.asData)
-		XCTAssertEqual(fileHeader.version, fileHeaderFromData?.version)
-		XCTAssertEqual(fileHeader.maximumBytes, fileHeaderFromData?.maximumBytes)
-		XCTAssertEqual(fileHeader.overwritesOldMessages, fileHeaderFromData?.overwritesOldMessages)
-		XCTAssertEqual(fileHeader.offsetInFileOfOldestMessage, fileHeaderFromData?.offsetInFileOfOldestMessage)
-		XCTAssertEqual(fileHeader.offsetInFileAtEndOfNewestMessage, fileHeaderFromData?.offsetInFileAtEndOfNewestMessage)
+		#expect(fileHeader.version == fileHeaderFromData?.version)
+		#expect(fileHeader.maximumBytes == fileHeaderFromData?.maximumBytes)
+		#expect(fileHeader.overwritesOldMessages == fileHeaderFromData?.overwritesOldMessages)
+		#expect(fileHeader.offsetInFileOfOldestMessage == fileHeaderFromData?.offsetInFileOfOldestMessage)
+		#expect(fileHeader.offsetInFileAtEndOfNewestMessage == fileHeaderFromData?.offsetInFileAtEndOfNewestMessage)
 	}
 
-	func test_expectedEndOfHeaderInFile_hasCorrectLengthForHeaderVersion1() {
-		XCTAssertEqual(
-			FileHeader.expectedEndOfHeaderInFile,
-			64,
-			"Header length has changed from expected 64 bytes for header version 1. This represents a breaking change."
-		)
+	@Test
+	func expectedEndOfHeaderInFile_hasCorrectLengthForHeaderVersion1() {
+		#expect(FileHeader.expectedEndOfHeaderInFile == 64, "Header length has changed from expected 64 bytes for header version 1. This represents a breaking change.")
 	}
 
-	func test_expectedEndOfHeaderInFile_hasExpectedLength() {
-		XCTAssertEqual(
-			UInt64(createFileHeader().asData.count),
-			FileHeader.expectedEndOfHeaderInFile
-		)
+	@Test
+	func expectedEndOfHeaderInFile_hasExpectedLength() {
+		#expect(UInt64(createFileHeader().asData.count) == FileHeader.expectedEndOfHeaderInFile)
 	}
 
 	// MARK: Private
@@ -70,9 +68,7 @@ final class FileHeaderTests: XCTestCase {
 		overwritesOldMessages: Bool = false,
 		offsetInFileOfOldestMessage: UInt64 = 20,
 		offsetInFileAtEndOfNewestMessage: UInt64 = 400
-	)
-		-> FileHeader
-	{
+	) -> FileHeader {
 		FileHeader(
 			version: version,
 			maximumBytes: maximumBytes,
