@@ -18,6 +18,6 @@
 import Foundation
 
 /// A storage unit that measures message length.
-/// 
+///
 /// - Warning: If this value is changed, previously persisted message encodings will not be readable.
 typealias MessageSpan = UInt32

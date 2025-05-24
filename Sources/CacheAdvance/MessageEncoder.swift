@@ -19,7 +19,7 @@ import Foundation
 
 /// An object capable of encoding a message of type `T` to `Data`.
 public protocol MessageEncoder {
-    func encode<T>(_ value: T) throws -> Data where T : Encodable
+	func encode(_ value: some Encodable) throws -> Data
 }
 
 extension JSONEncoder: MessageEncoder {}

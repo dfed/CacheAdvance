@@ -18,20 +18,17 @@
 import Foundation
 
 extension Bool {
+	init(_ data: Data) {
+		self = UInt8(data) == 1 ? true : false
+	}
 
-    init(_ data: Data) {
-        self = UInt8(data) == 1 ? true : false
-    }
-
-    static var storageLength: Int { UInt8.storageLength }
+	static var storageLength: Int { UInt8.storageLength }
 }
 
 extension Data {
-
-    /// Initializes Data from a numeric value. The data will always be of length 1.
-    /// - Parameter value: the value to encode as data.
-    init(_ value: Bool) {
-        self.init(UInt8(value ? 1 : 0))
-    }
-
+	/// Initializes Data from a numeric value. The data will always be of length 1.
+	/// - Parameter value: the value to encode as data.
+	init(_ value: Bool) {
+		self.init(UInt8(value ? 1 : 0))
+	}
 }
