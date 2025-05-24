@@ -186,6 +186,7 @@
 
 	// MARK: - SQLiteCacheTests
 
+	@Suite(.serialized)
 	struct SQLiteCacheTests {
 		// MARK: Initialization
 

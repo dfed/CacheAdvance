@@ -77,7 +77,7 @@ jobs:
       - name: Build and Test Framework
         run: xcrun swift test -c release -Xswiftc -enable-testing
   spm-16-swift:
-    name: Swift Build and Test Xcode 16
+    name: Swift Build Xcode 16
     runs-on: macOS-15
     steps:
       - name: Checkout Repo
