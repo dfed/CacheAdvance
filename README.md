@@ -2,7 +2,7 @@
 
 [![CI Status](https://img.shields.io/github/actions/workflow/status/dfed/cacheadvance/ci.yml?branch=main)](https://github.com/dfed/cacheadvance/actions?query=workflow%3ACI+branch%3Amain)
 [![codecov](https://codecov.io/gh/dfed/CacheAdvance/branch/main/graph/badge.svg?token=nZBHcZZ63F)](https://codecov.io/gh/dfed/CacheAdvance)
-[![License](https://img.shields.io/cocoapods/l/CacheAdvance.svg)](https://cocoapods.org/pods/CacheAdvance)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](https://spdx.org/licenses/Apache-2.0.html)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fdfed%2FCacheAdvance%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/dfed/CacheAdvance)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fdfed%2FCacheAdvance%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/dfed/CacheAdvance)
 
