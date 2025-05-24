@@ -99,7 +99,7 @@ dependencies: [
 
 ### CocoaPods
 
-To install CacheAdvance in your project with [CocoaPods](http://cocoapods.org), add the following to your `Podfile`:
+To install CacheAdvance in your project with [CocoaPods](https://blog.cocoapods.org/CocoaPods-Specs-Repo), add the following to your `Podfile`:
 
 ```
 pod 'CacheAdvance', '~> 3.0'
