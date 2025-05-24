@@ -16,15 +16,16 @@
 //
 
 import Foundation
-import XCTest
+import Testing
 
 @testable import CacheAdvance
 
-final class BoolExtensionsTests: XCTestCase {
+struct BoolExtensionsTests {
 	// MARK: Behavior Tests
 
-	func test_init_canBeInitializedFromEncodedData() {
-		XCTAssertEqual(Bool(Data(true)), true)
-		XCTAssertEqual(Bool(Data(false)), false)
+	@Test
+	func init_canBeInitializedFromEncodedData() {
+		#expect(Bool(Data(true)))
+		#expect(!Bool(Data(false)))
 	}
 }
