@@ -41,9 +41,7 @@ public final class CacheAdvance<T: Codable> {
 		shouldOverwriteOldMessages: Bool,
 		decoder: MessageDecoder = JSONDecoder(),
 		encoder: MessageEncoder = JSONEncoder()
-	)
-		throws
-	{
+	) throws {
 		try self.init(
 			fileURL: fileURL,
 			writer: FileHandle(forWritingTo: fileURL),
