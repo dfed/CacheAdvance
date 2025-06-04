@@ -173,9 +173,8 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
 struct FlushableCacheTests {
 	// MARK: Initialization
 
-	init() {
-		// Delete the existing cache.
-		#expect(FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil))
+	init() throws {
+		try Data().write(to: testFileLocation)
 	}
 
 	// MARK: Behavior Tests
