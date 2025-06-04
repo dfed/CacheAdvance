@@ -21,15 +21,11 @@ import Testing
 @testable import CacheAdvance
 
 @Suite(.serialized)
-struct CacheHeaderHandleTests: ~Copyable {
+struct CacheHeaderHandleTests {
 	// MARK: Initializatino
 
-	init() {
-		#expect(FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil))
-	}
-
-	deinit {
-		try? FileManager.default.removeItem(at: testFileLocation)
+	init() throws {
+		Data().write(to: testFileLocation)
 	}
 
 	// MARK: Behavior Tests
