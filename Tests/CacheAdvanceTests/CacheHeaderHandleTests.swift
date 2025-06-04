@@ -236,10 +236,7 @@ struct CacheHeaderHandleTests {
 		maximumBytes: Bytes = 500,
 		overwritesOldMessages: Bool = true,
 		version: UInt8 = FileHeader.version
-	)
-		throws
-		-> CacheHeaderHandle
-	{
+	) throws -> CacheHeaderHandle {
 		try CacheHeaderHandle(
 			forReadingFrom: testFileLocation,
 			maximumBytes: maximumBytes,
