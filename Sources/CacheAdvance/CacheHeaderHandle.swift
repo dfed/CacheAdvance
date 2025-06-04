@@ -32,9 +32,7 @@ final class CacheHeaderHandle {
 		maximumBytes: Bytes,
 		overwritesOldMessages: Bool,
 		version: UInt8 = FileHeader.version
-	)
-		throws
-	{
+	) throws {
 		handle = try FileHandle(forUpdating: file)
 		self.maximumBytes = maximumBytes
 		self.overwritesOldMessages = overwritesOldMessages

@@ -15,7 +15,7 @@
 //  limitations under the License.
 //
 
-public enum CacheAdvanceError: Error, Equatable {
+public enum CacheAdvanceError: Error, Equatable, Sendable {
 	/// Thrown when the message being appended is too large to be stored in a cache of this size.
 	case messageLargerThanCacheCapacity
 	/// Thrown when a message being appended to a cache that does not overwrite old messages is too large to store in the remaining space.
