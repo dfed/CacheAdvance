@@ -25,7 +25,7 @@ struct CacheHeaderHandleTests {
 	// MARK: Initializatino
 
 	init() throws {
-		Data().write(to: testFileLocation)
+		try Data().write(to: testFileLocation)
 	}
 
 	// MARK: Behavior Tests

@@ -18,7 +18,7 @@ jobs:
           ruby-version: '3.3.5'
           bundler-cache: true
       - name: Select Xcode Version
-        run: sudo xcode-select --switch /Applications/Xcode_16.3.app/Contents/Developer
+        run: sudo xcode-select --switch /Applications/Xcode_16.app/Contents/Developer
       - name: Download visionOS
         run: |
           sudo xcodebuild -runFirstLaunch
@@ -26,7 +26,7 @@ jobs:
           sudo xcodebuild -downloadPlatform visionOS
           sudo xcodebuild -runFirstLaunch
       - name: Lint Podspec
-        run: bundle exec pod lib lint --verbose --fail-fast --swift-version=6.1 --allow-warnings # Cocoapods v1.6 now warns about potential naming colisions. We can fix this in the next breaking change.
+        run: bundle exec pod lib lint --verbose --fail-fast --swift-version=6.0 --allow-warnings # Cocoapods v1.6 now warns about potential naming colisions. We can fix this in the next breaking change.
   spm-16:
     name: Build Xcode 16
     runs-on: macOS-15
@@ -47,7 +47,7 @@ jobs:
           ruby-version: '3.3.5'
           bundler-cache: true
       - name: Select Xcode Version
-        run: sudo xcode-select --switch /Applications/Xcode_16.3.app/Contents/Developer
+        run: sudo xcode-select --switch /Applications/Xcode_16.app/Contents/Developer
       - name: Download visionOS
         if: matrix.platforms == 'visionOS_2'
         run: |
@@ -62,20 +62,6 @@ jobs:
       - name: Upload Coverage Reports
         if: success()
         uses: codecov/codecov-action@v4
-  spm-16-swift-test:
-    name: Swift Build and Test Xcode 16
-    runs-on: macOS-15
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3.5'
-          bundler-cache: true
-      - name: Select Xcode Version
-        run: sudo xcode-select --switch /Applications/Xcode_16.3.app/Contents/Developer
-      - name: Build and Test Framework
-        run: xcrun swift test -c release -Xswiftc -enable-testing
   spm-16-swift:
     name: Swift Build Xcode 16
     runs-on: macOS-15
@@ -88,12 +74,12 @@ jobs:
           bundler-cache: true
       - name: Select Xcode Version
         run: sudo xcode-select --switch /Applications/Xcode_16.app/Contents/Developer
-      - name: Build Framework
-        run: xcrun swift build -c release
+      - name: Build and Test Framework
+        run: xcrun swift test -c release -Xswiftc -enable-testing
   linux:
     name: Build and Test on Linux
     runs-on: ubuntu-latest
-    container: swift:6.1
+    container: swift:6.0.3
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
