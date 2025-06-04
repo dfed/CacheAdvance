@@ -15,6 +15,8 @@
 //  limitations under the License.
 //
 
+import Foundation
+import Testing
 import XCTest
 
 final class FlushableCachePerformanceComparisonTests: XCTestCase {
@@ -25,74 +27,6 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
 
 		// Delete the existing cache.
 		XCTAssertTrue(FileManager.default.createFile(atPath: testFileLocation.path, contents: nil, attributes: nil))
-	}
-
-	// MARK: Behavior Tests
-
-	func test_append_flushableCache_fillableCache_canMaintainMaxCount() throws {
-		let cache = FlushableCache<TestableMessage>(
-			location: testFileLocation,
-			maxMessageCount: TestableMessage.lorumIpsum.count,
-			shouldOverwriteMessages: false
-		)
-		for message in TestableMessage.lorumIpsum + TestableMessage.lorumIpsum {
-			try cache.appendMessage(message)
-		}
-
-		XCTAssertEqual(try cache.messages().count, TestableMessage.lorumIpsum.count)
-	}
-
-	func test_messages_flushableCache_fillableCache_canReadInsertedMessages() throws {
-		let cache = FlushableCache<TestableMessage>(
-			location: testFileLocation,
-			maxMessageCount: TestableMessage.lorumIpsum.count,
-			shouldOverwriteMessages: true
-		)
-		for message in TestableMessage.lorumIpsum {
-			try cache.appendMessage(message)
-		}
-
-		XCTAssertEqual(try cache.messages(), TestableMessage.lorumIpsum)
-	}
-
-	func test_append_flushableCache_overwritingCache_canMaintainMaxCount() throws {
-		let cache = FlushableCache<TestableMessage>(
-			location: testFileLocation,
-			maxMessageCount: TestableMessage.lorumIpsum.count,
-			shouldOverwriteMessages: true
-		)
-		for message in TestableMessage.lorumIpsum + TestableMessage.lorumIpsum {
-			try cache.appendMessage(message)
-		}
-
-		XCTAssertEqual(try cache.messages().count, TestableMessage.lorumIpsum.count)
-	}
-
-	func test_append_flushableCache_overwritingCache_storesOnlyMostRecentMessages() throws {
-		let cache = FlushableCache<TestableMessage>(
-			location: testFileLocation,
-			maxMessageCount: TestableMessage.lorumIpsum.count,
-			shouldOverwriteMessages: true
-		)
-		for message in TestableMessage.lorumIpsum {
-			try cache.appendMessage(message)
-		}
-		try cache.appendMessage(#function)
-
-		XCTAssertEqual(try cache.messages(), Array(TestableMessage.lorumIpsum.dropFirst()) + [#function])
-	}
-
-	func test_messages_flushableCache_overwritingCache_canReadInsertedMessages() throws {
-		let cache = FlushableCache<TestableMessage>(
-			location: testFileLocation,
-			maxMessageCount: TestableMessage.lorumIpsum.count,
-			shouldOverwriteMessages: true
-		)
-		for message in TestableMessage.lorumIpsum {
-			try cache.appendMessage(message)
-		}
-
-		XCTAssertEqual(try cache.messages(), TestableMessage.lorumIpsum)
 	}
 
 	// MARK: Performance Tests
@@ -230,11 +164,101 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
 
 	// MARK: Private
 
-	private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("SQLiteTests")
+	private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("FlushableCachePerformanceComparisonTests")
 }
 
+// MARK: - FlushableCacheTests
+
+@Suite(.serialized)
+struct FlushableCacheTests {
+	// MARK: Initialization
+
+	init() throws {
+		try Data().write(to: testFileLocation)
+	}
+
+	// MARK: Behavior Tests
+
+	@Test
+	func append_flushableCache_fillableCache_canMaintainMaxCount() throws {
+		let cache = FlushableCache<TestableMessage>(
+			location: testFileLocation,
+			maxMessageCount: TestableMessage.lorumIpsum.count,
+			shouldOverwriteMessages: false
+		)
+		for message in TestableMessage.lorumIpsum + TestableMessage.lorumIpsum {
+			try cache.appendMessage(message)
+		}
+
+		#expect(try cache.messages().count == TestableMessage.lorumIpsum.count)
+	}
+
+	@Test
+	func messages_flushableCache_fillableCache_canReadInsertedMessages() throws {
+		let cache = FlushableCache<TestableMessage>(
+			location: testFileLocation,
+			maxMessageCount: TestableMessage.lorumIpsum.count,
+			shouldOverwriteMessages: true
+		)
+		for message in TestableMessage.lorumIpsum {
+			try cache.appendMessage(message)
+		}
+
+		#expect(try cache.messages() == TestableMessage.lorumIpsum)
+	}
+
+	@Test
+	func append_flushableCache_overwritingCache_canMaintainMaxCount() throws {
+		let cache = FlushableCache<TestableMessage>(
+			location: testFileLocation,
+			maxMessageCount: TestableMessage.lorumIpsum.count,
+			shouldOverwriteMessages: true
+		)
+		for message in TestableMessage.lorumIpsum + TestableMessage.lorumIpsum {
+			try cache.appendMessage(message)
+		}
+
+		#expect(try cache.messages().count == TestableMessage.lorumIpsum.count)
+	}
+
+	@Test
+	func append_flushableCache_overwritingCache_storesOnlyMostRecentMessages() throws {
+		let cache = FlushableCache<TestableMessage>(
+			location: testFileLocation,
+			maxMessageCount: TestableMessage.lorumIpsum.count,
+			shouldOverwriteMessages: true
+		)
+		for message in TestableMessage.lorumIpsum {
+			try cache.appendMessage(message)
+		}
+		try cache.appendMessage(#function)
+
+		#expect(try cache.messages() == Array(TestableMessage.lorumIpsum.dropFirst()) + [#function])
+	}
+
+	@Test
+	func messages_flushableCache_overwritingCache_canReadInsertedMessages() throws {
+		let cache = FlushableCache<TestableMessage>(
+			location: testFileLocation,
+			maxMessageCount: TestableMessage.lorumIpsum.count,
+			shouldOverwriteMessages: true
+		)
+		for message in TestableMessage.lorumIpsum {
+			try cache.appendMessage(message)
+		}
+
+		#expect(try cache.messages() == TestableMessage.lorumIpsum)
+	}
+
+	// MARK: Private
+
+	private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("FlushableCacheTests")
+}
+
+// MARK: - FlushableCache
+
 /// A simple in-memory cache that can be flushed to disk.
-class FlushableCache<T: Codable> {
+private class FlushableCache<T: Codable> {
 	// MARK: Initialization
 
 	init(

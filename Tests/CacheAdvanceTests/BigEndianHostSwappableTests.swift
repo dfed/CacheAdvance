@@ -16,15 +16,16 @@
 //
 
 import Foundation
-import XCTest
+import Testing
 
 @testable import CacheAdvance
 
-final class BigEndianHostSwappableTests: XCTestCase {
+struct BigEndianHostSwappableTests {
 	// MARK: Behavior Tests
 
-	func test_init_canBeInitializedFromEncodedData() {
+	@Test
+	func init_canBeInitializedFromEncodedData() {
 		let expectedValue: UInt64 = 10
-		XCTAssertEqual(UInt64(Data(expectedValue)), expectedValue)
+		#expect(UInt64(Data(expectedValue)) == expectedValue)
 	}
 }

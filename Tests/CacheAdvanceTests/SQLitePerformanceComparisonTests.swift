@@ -17,6 +17,7 @@
 
 #if !os(Linux)
 	import SQLite3
+	import Testing
 	import XCTest
 
 	@testable import CacheAdvance
@@ -29,74 +30,6 @@
 
 			// Delete the existing cache.
 			try? FileManager.default.removeItem(at: testFileLocation)
-		}
-
-		// MARK: Behavior Tests
-
-		func test_append_sqlite_fillableCache_canMaintainMaxCount() {
-			let cache = SQLiteCache<TestableMessage>(
-				location: testFileLocation,
-				maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
-				shouldOverwriteMessages: false
-			)
-			for message in TestableMessage.lorumIpsum + TestableMessage.lorumIpsum {
-				cache.appendMessage(message)
-			}
-
-			XCTAssertEqual(cache.messages().count, TestableMessage.lorumIpsum.count)
-		}
-
-		func test_messages_sqlite_fillableCache_canReadInsertedMessages() {
-			let cache = SQLiteCache<TestableMessage>(
-				location: testFileLocation,
-				maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
-				shouldOverwriteMessages: true
-			)
-			for message in TestableMessage.lorumIpsum {
-				cache.appendMessage(message)
-			}
-
-			XCTAssertEqual(cache.messages(), TestableMessage.lorumIpsum)
-		}
-
-		func test_append_sqlite_overwritingCache_canMaintainMaxCount() {
-			let cache = SQLiteCache<TestableMessage>(
-				location: testFileLocation,
-				maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
-				shouldOverwriteMessages: true
-			)
-			for message in TestableMessage.lorumIpsum + TestableMessage.lorumIpsum {
-				cache.appendMessage(message)
-			}
-
-			XCTAssertEqual(cache.messages().count, TestableMessage.lorumIpsum.count)
-		}
-
-		func test_append_sqlite_overwritingCache_storesOnlyMostRecentMessages() {
-			let cache = SQLiteCache<TestableMessage>(
-				location: testFileLocation,
-				maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
-				shouldOverwriteMessages: true
-			)
-			for message in TestableMessage.lorumIpsum {
-				cache.appendMessage(message)
-			}
-			cache.appendMessage(#function)
-
-			XCTAssertEqual(cache.messages(), Array(TestableMessage.lorumIpsum.dropFirst()) + [#function])
-		}
-
-		func test_messages_sqlite_overwritingCache_canReadInsertedMessages() {
-			let cache = SQLiteCache<TestableMessage>(
-				location: testFileLocation,
-				maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
-				shouldOverwriteMessages: true
-			)
-			for message in TestableMessage.lorumIpsum {
-				cache.appendMessage(message)
-			}
-
-			XCTAssertEqual(cache.messages(), TestableMessage.lorumIpsum)
 		}
 
 		// MARK: Performance Tests
@@ -183,7 +116,98 @@
 		private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("SQLiteTests")
 	}
 
-	class SQLiteCache<T: Codable> {
+	// MARK: - SQLiteCacheTests
+
+	@Suite(.serialized)
+	struct SQLiteCacheTests {
+		// MARK: Initialization
+
+		init() {
+			// Delete the existing cache.
+			try? FileManager.default.removeItem(at: testFileLocation)
+		}
+
+		// MARK: Behavior Tests
+
+		@Test
+		func append_sqlite_fillableCache_canMaintainMaxCount() {
+			let cache = SQLiteCache<TestableMessage>(
+				location: testFileLocation,
+				maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
+				shouldOverwriteMessages: false
+			)
+			for message in TestableMessage.lorumIpsum + TestableMessage.lorumIpsum {
+				cache.appendMessage(message)
+			}
+
+			#expect(cache.messages().count == TestableMessage.lorumIpsum.count)
+		}
+
+		@Test
+		func messages_sqlite_fillableCache_canReadInsertedMessages() {
+			let cache = SQLiteCache<TestableMessage>(
+				location: testFileLocation,
+				maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
+				shouldOverwriteMessages: true
+			)
+			for message in TestableMessage.lorumIpsum {
+				cache.appendMessage(message)
+			}
+
+			#expect(cache.messages() == TestableMessage.lorumIpsum)
+		}
+
+		@Test
+		func append_sqlite_overwritingCache_canMaintainMaxCount() {
+			let cache = SQLiteCache<TestableMessage>(
+				location: testFileLocation,
+				maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
+				shouldOverwriteMessages: true
+			)
+			for message in TestableMessage.lorumIpsum + TestableMessage.lorumIpsum {
+				cache.appendMessage(message)
+			}
+
+			#expect(cache.messages().count == TestableMessage.lorumIpsum.count)
+		}
+
+		@Test
+		func append_sqlite_overwritingCache_storesOnlyMostRecentMessages() {
+			let cache = SQLiteCache<TestableMessage>(
+				location: testFileLocation,
+				maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
+				shouldOverwriteMessages: true
+			)
+			for message in TestableMessage.lorumIpsum {
+				cache.appendMessage(message)
+			}
+			cache.appendMessage(#function)
+
+			#expect(cache.messages() == Array(TestableMessage.lorumIpsum.dropFirst()) + [#function])
+		}
+
+		@Test
+		func messages_sqlite_overwritingCache_canReadInsertedMessages() {
+			let cache = SQLiteCache<TestableMessage>(
+				location: testFileLocation,
+				maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
+				shouldOverwriteMessages: true
+			)
+			for message in TestableMessage.lorumIpsum {
+				cache.appendMessage(message)
+			}
+
+			#expect(cache.messages() == TestableMessage.lorumIpsum)
+		}
+
+		// MARK: Private
+
+		private let testFileLocation = FileManager.default.temporaryDirectory.appendingPathComponent("SQLiteTests")
+	}
+
+	// MARK: - SQLiteCache
+
+	private class SQLiteCache<T: Codable> {
 		// MARK: Initialization
 
 		init(
