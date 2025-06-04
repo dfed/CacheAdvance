@@ -501,10 +501,3 @@ public final class LorumIpsum: NSObject {
 		"Eu turpis egestas pretium aenean pharetra magna.",
 	]
 }
-
-#if !os(Linux)
-	@objc
-	public final class CADLorumIpsum: NSObject {
-		@objc public static let messages = LorumIpsum.messages
-	}
-#endif
