@@ -7,9 +7,9 @@ Pod::Spec.new do |s|
   s.authors  = 'Dan Federman'
   s.source   = { :git => 'https://github.com/dfed/CacheAdvance.git', :tag => s.version }
   s.source_files = 'Sources/**/*.{swift}'
-  s.ios.deployment_target = '13.0'
-  s.tvos.deployment_target = '13.0'
-  s.watchos.deployment_target = '6.0'
-  s.macos.deployment_target = '10.15'
+  s.ios.deployment_target = '15.0'
+  s.tvos.deployment_target = '15.0'
+  s.watchos.deployment_target = '7.0'
+  s.macos.deployment_target = '11'
   s.visionos.deployment_target = '1.0'
 end
