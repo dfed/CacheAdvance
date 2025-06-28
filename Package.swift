@@ -23,7 +23,6 @@ let package = Package(
 			name: "CacheAdvance",
 			swiftSettings: [
 				.swiftLanguageMode(.v6),
-				.define("SWIFT_PACKAGE_MANAGER"),
 			]
 		),
 		.testTarget(
