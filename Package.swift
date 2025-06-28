@@ -27,14 +27,7 @@ let package = Package(
 		),
 		.testTarget(
 			name: "CacheAdvanceTests",
-			dependencies: ["CacheAdvance", "LorumIpsum"],
-			swiftSettings: [
-				.swiftLanguageMode(.v6),
-			]
-		),
-		.target(
-			name: "LorumIpsum",
-			dependencies: [],
+			dependencies: ["CacheAdvance"],
 			swiftSettings: [
 				.swiftLanguageMode(.v6),
 			]
