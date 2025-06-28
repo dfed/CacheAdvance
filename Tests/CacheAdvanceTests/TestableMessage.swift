@@ -16,7 +16,6 @@
 //
 
 import Foundation
-import LorumIpsum
 
 struct TestableMessage: Codable, ExpressibleByStringLiteral, Equatable {
 	typealias StringLiteralType = String

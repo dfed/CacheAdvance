@@ -31,5 +31,4 @@ for directory in $(git rev-parse --show-toplevel)/.build/derivedData/*/; do
 	echo "Finding coverage information for $build_type"
 
 	exportlcov $build_type 'CacheAdvanceTests'
-	exportlcov $build_type 'CADCacheAdvanceTests'
 done

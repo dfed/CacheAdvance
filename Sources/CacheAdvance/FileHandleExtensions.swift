@@ -29,14 +29,10 @@ extension FileHandle {
 				Data()
 			}
 		#else
-			if #available(iOS 13.4, tvOS 13.4, watchOS 6.2, macOS 10.15.4, *) {
-				if let data = try read(upToCount: length) {
-					data
-				} else {
-					Data()
-				}
+			if let data = try read(upToCount: length) {
+				data
 			} else {
-				try __readDataUp(toLength: length)
+				Data()
 			}
 		#endif
 	}
@@ -46,11 +42,7 @@ extension FileHandle {
 		#if os(Linux)
 			try write(contentsOf: data)
 		#else
-			if #available(iOS 13.4, tvOS 13.4, watchOS 6.2, macOS 10.15.4, *) {
-				try write(contentsOf: data)
-			} else {
-				try __write(data, error: ())
-			}
+			try write(contentsOf: data)
 		#endif
 	}
 

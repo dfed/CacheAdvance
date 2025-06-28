@@ -232,19 +232,10 @@
 			guard db == nil else {
 				return
 			}
-			guard sqlite3_open(NSString(string: location.path).utf8String, &db) == SQLITE_OK else {
-				XCTFail("Failed to open database")
-				return
-			}
+			XCTAssertEqual(sqlite3_open(NSString(string: location.path).utf8String, &db), SQLITE_OK)
 			var createTableStatement: OpaquePointer?
-			guard sqlite3_prepare_v2(db, "CREATE TABLE Messages(Message BLOB);", -1, &createTableStatement, nil) == SQLITE_OK else {
-				XCTFail("Failed to prepare database")
-				return
-			}
-			guard sqlite3_step(createTableStatement) == SQLITE_DONE else {
-				XCTFail("Failed to create database")
-				return
-			}
+			XCTAssertEqual(sqlite3_prepare_v2(db, "CREATE TABLE Messages(Message BLOB);", -1, &createTableStatement, nil), SQLITE_OK)
+			XCTAssertEqual(sqlite3_step(createTableStatement), SQLITE_DONE)
 			sqlite3_finalize(createTableStatement)
 		}
 
@@ -265,32 +256,20 @@
 				// Delete the first message to make room for this message.
 				let rawDeleteQuery = "DELETE FROM Messages ORDER BY rowid LIMIT 1;"
 				var deleteQuery: OpaquePointer?
-				guard sqlite3_prepare_v2(db, rawDeleteQuery, -1, &deleteQuery, nil) == SQLITE_OK else {
-					XCTFail("Failed to prepare delete")
-					return
-				}
+				XCTAssertEqual(sqlite3_prepare_v2(db, rawDeleteQuery, -1, &deleteQuery, nil), SQLITE_OK)
 				defer {
 					sqlite3_finalize(deleteQuery)
 				}
 
-				guard sqlite3_step(deleteQuery) == SQLITE_DONE else {
-					XCTFail("Failed to delete oldest message")
-					return
-				}
+				XCTAssertEqual(sqlite3_step(deleteQuery), SQLITE_DONE)
 			}
 
 			let insertStatementString = "INSERT INTO Messages(Message) VALUES (?);"
 			var insertStatement: OpaquePointer?
 
-			guard sqlite3_prepare_v2(db, insertStatementString, -1, &insertStatement, nil) == SQLITE_OK else {
-				XCTFail("Failed to prepare message")
-				return
-			}
+			XCTAssertEqual(sqlite3_prepare_v2(db, insertStatementString, -1, &insertStatement, nil), SQLITE_OK)
 			sqlite3_bind_blob(insertStatement, 1, messageDataPointer, Int32(messageData.count), nil)
-			guard sqlite3_step(insertStatement) == SQLITE_DONE else {
-				XCTFail("Failed to insert message")
-				return
-			}
+			XCTAssertEqual(sqlite3_step(insertStatement), SQLITE_DONE)
 			sqlite3_finalize(insertStatement)
 		}
 
@@ -298,10 +277,7 @@
 			createDatabaseIfNecessay()
 			let rawQuery = "SELECT * FROM Messages;"
 			var query: OpaquePointer?
-			guard sqlite3_prepare_v2(db, rawQuery, -1, &query, nil) == SQLITE_OK else {
-				XCTFail("Failed to prepare read")
-				return []
-			}
+			XCTAssertEqual(sqlite3_prepare_v2(db, rawQuery, -1, &query, nil), SQLITE_OK)
 			defer {
 				sqlite3_finalize(query)
 			}
@@ -335,18 +311,12 @@
 		private func messageCount() -> Int32 {
 			let rawCountQuery = "SELECT COUNT(*) FROM Messages;"
 			var countQuery: OpaquePointer?
-			guard sqlite3_prepare_v2(db, rawCountQuery, -1, &countQuery, nil) == SQLITE_OK else {
-				XCTFail("Failed to prepare read")
-				return Int32.max
-			}
+			XCTAssertEqual(sqlite3_prepare_v2(db, rawCountQuery, -1, &countQuery, nil), SQLITE_OK)
 			defer {
 				sqlite3_finalize(countQuery)
 			}
 
-			guard sqlite3_step(countQuery) == SQLITE_ROW else {
-				XCTFail("Failed to get persisted message count")
-				return Int32.max
-			}
+			XCTAssertEqual(sqlite3_step(countQuery), SQLITE_ROW)
 
 			return sqlite3_column_int(countQuery, 0)
 		}

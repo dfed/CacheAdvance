@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3.5'
+          ruby-version: '3.4.3'
           bundler-cache: true
       - name: Select Xcode Version
         run: sudo xcode-select --switch /Applications/Xcode_16.app/Contents/Developer
@@ -26,7 +26,7 @@ jobs:
           sudo xcodebuild -downloadPlatform visionOS
           sudo xcodebuild -runFirstLaunch
       - name: Lint Podspec
-        run: bundle exec pod lib lint --verbose --fail-fast --swift-version=6.0 --allow-warnings # Cocoapods v1.6 now warns about potential naming colisions. We can fix this in the next breaking change.
+        run: bundle exec pod lib lint --verbose --fail-fast --swift-version=6.0 --allow-warnings # Cocoapods v1.6 now warns about potential naming colisions.
   spm-16:
     name: Build Xcode 16
     runs-on: macOS-15
@@ -44,7 +44,7 @@ jobs:
         uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3.5'
+          ruby-version: '3.4.3'
           bundler-cache: true
       - name: Select Xcode Version
         run: sudo xcode-select --switch /Applications/Xcode_16.app/Contents/Developer
@@ -70,7 +70,7 @@ jobs:
         uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3.5'
+          ruby-version: '3.4.3'
           bundler-cache: true
       - name: Select Xcode Version
         run: sudo xcode-select --switch /Applications/Xcode_16.app/Contents/Developer
