@@ -61,15 +61,6 @@ CacheAdvance immediately persists each appended messages to disk using `FileHand
 
 The first 64bytes of a CacheAdvance is reserved for storing metadata about the file. Any configuration data that must be static between cache opens should be stored in this header. It is also reasonable to store mutable information in the header, if doing so speeds up reads or writes to the file. The header format is managed by [FileHeader.swift](Sources/CacheAdvance/FileHeader.swift).
 
-## Requirements
-
-* Xcode 16.0 or later.
-* iOS 13 or later.
-* tvOS 13 or later.
-* watchOS 6 or later.
-* macOS 10.15 or later.
-* Swift 6.0 or later.
-
 ## Installation
 
 ### Swift Package Manager
