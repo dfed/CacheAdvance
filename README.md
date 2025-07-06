@@ -59,7 +59,7 @@ If a `CacheAdvanceError.fileCorrupted` error is thrown, the cache file is corrup
 
 CacheAdvance immediately persists each appended messages to disk using `FileHandle`s. Messages are encoded into `Data` using a `JSONEncoder` by default, though the encoding/decoding mechanism can be customized. Messages are written to disk as an encoded data blob that is prefixed with the length of the message. The length of a message is stored using a `UInt32` to ensure that the size of the data on disk that stores a message's length is consistent between devices.
 
-The first 64bytes of a CacheAdvance is reserved for storing metadata about the file. Any configuration data that must be static between cache opens should be stored in this header. It is also reasonable to store mutable information in the header, if doing so speeds up reads or writes to the file. The header format is managed by [FileHeader.swift](Sources/CacheAdvance/FileHeader.swift).
+The first 64 bytes of a CacheAdvance is reserved for storing metadata about the file. Any configuration data that must be static between cache opens should be stored in this header. It is also reasonable to store mutable information in the header, if doing so speeds up reads or writes to the file. The header format is managed by [FileHeader.swift](Sources/CacheAdvance/FileHeader.swift).
 
 ## Installation
 
