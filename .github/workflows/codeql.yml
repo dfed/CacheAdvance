@@ -22,8 +22,7 @@ on:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    runs-on: ubuntu-latest
-    container: swift:6.0
+    runs-on: macOS-15
     permissions:
       # required for all workflows
       security-events: write
@@ -56,6 +55,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
+    - name: Select Xcode Version
+      run: sudo xcode-select --switch /Applications/Xcode_16.4.app/Contents/Developer
 
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
