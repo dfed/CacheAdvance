@@ -91,15 +91,12 @@ jobs:
   linux-6-0:
     name: Build and Test on Linux 6.0
     runs-on: ubuntu-latest
+    container: swift:6.0.3
     permissions:
       contents: read
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v5
-      - name: Setup Swift 6.0.3
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: "6.0.3"
       - name: Build and Test Framework
         run: swift test -c release --enable-code-coverage -Xswiftc -enable-testing
       - name: Prepare Coverage Reports
@@ -114,15 +111,12 @@ jobs:
   linux-6-1:
     name: Build and Test on Linux 6.1
     runs-on: ubuntu-latest
+    container: swift:6.1
     permissions:
       contents: read
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v5
-      - name: Setup Swift 6.1
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: "6.1"
       - name: Build and Test Framework
         run: swift test -c release --enable-code-coverage -Xswiftc -enable-testing
       - name: Prepare Coverage Reports
