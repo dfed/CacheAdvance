@@ -69,6 +69,9 @@ jobs:
       - name: Upload Coverage Reports
         if: success()
         uses: codecov/codecov-action@v5
+        with:
+          fail_ci_if_error: true
+          verbose: true
   spm-16-swift:
     name: Swift Build Xcode 16
     runs-on: macOS-15
