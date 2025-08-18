@@ -68,7 +68,10 @@ jobs:
         run: ./Scripts/prepare-coverage-reports.sh
       - name: Upload Coverage Reports
         if: success()
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
+        with:
+          fail_ci_if_error: true
+          verbose: true
   spm-16-swift:
     name: Swift Build Xcode 16
     runs-on: macOS-15
@@ -99,13 +102,16 @@ jobs:
       - name: Prepare Coverage Reports
         run: |
           llvm-cov export -format="lcov" .build/x86_64-unknown-linux-gnu/release/CacheAdvancePackageTests.xctest -instr-profile .build/x86_64-unknown-linux-gnu/release/codecov/default.profdata > coverage.lcov
+      - name: Install curl for Codecov
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends curl ca-certificates
       - name: Upload Coverage Reports
         if: success()
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
           verbose: true
-          os: linux
   linux-6-1:
     name: Build and Test on Linux 6.1
     runs-on: ubuntu-latest
@@ -120,13 +126,16 @@ jobs:
       - name: Prepare Coverage Reports
         run: |
           llvm-cov export -format="lcov" .build/x86_64-unknown-linux-gnu/release/CacheAdvancePackageTests.xctest -instr-profile .build/x86_64-unknown-linux-gnu/release/codecov/default.profdata > coverage.lcov
+      - name: Install curl for Codecov
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends curl ca-certificates
       - name: Upload Coverage Reports
         if: success()
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
           verbose: true
-          os: linux
   readme-validation:
     name: Check Markdown links
     runs-on: ubuntu-latest

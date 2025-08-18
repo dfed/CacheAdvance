@@ -35,6 +35,7 @@
 		// MARK: Performance Tests
 
 		func test_performance_sqlite_createDatabaseAndAppendSingleMessage() {
+			guard performanceTestsEnabled else { return }
 			measure {
 				// Delete any existing database.
 				try? FileManager.default.removeItem(at: testFileLocation)
@@ -50,6 +51,7 @@
 		}
 
 		func test_performance_sqlite_append_fillableCache() {
+			guard performanceTestsEnabled else { return }
 			// Create a cache that won't run out of room over multiple test runs.
 			let cache = SQLiteCache<TestableMessage>(
 				location: testFileLocation,
@@ -66,6 +68,7 @@
 		}
 
 		func test_performance_sqlite_append_overwritingCache() {
+			guard performanceTestsEnabled else { return }
 			let cache = SQLiteCache<TestableMessage>(
 				location: testFileLocation,
 				maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
@@ -84,6 +87,7 @@
 		}
 
 		func test_performance_sqlite_messages_fillableCache() {
+			guard performanceTestsEnabled else { return }
 			let cache = SQLiteCache<TestableMessage>(
 				location: testFileLocation,
 				maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
@@ -98,6 +102,7 @@
 		}
 
 		func test_performance_sqlite_messages_overwritingCache() {
+			guard performanceTestsEnabled else { return }
 			let cache = SQLiteCache<TestableMessage>(
 				location: testFileLocation,
 				maxMessageCount: Int32(TestableMessage.lorumIpsum.count),
