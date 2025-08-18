@@ -730,6 +730,7 @@ final class CacheAdvancePerformanceTests: XCTestCase {
 	// MARK: Performance Tests
 
 	func test_performance_createCacheAndAppendSingleMessage() throws {
+		guard performanceTestsEnabled else { return }
 		measure {
 			clearCacheFile()
 
@@ -742,6 +743,7 @@ final class CacheAdvancePerformanceTests: XCTestCase {
 	}
 
 	func test_performance_append_fillableCache() throws {
+		guard performanceTestsEnabled else { return }
 		let maximumBytes = try Bytes(Double(requiredByteCount(for: TestableMessage.lorumIpsum)))
 		// Create a cache that won't run out of room over multiple test runs
 		guard let sut = try? createCache(maximumByes: maximumBytes * 10, overwritesOldMessages: false) else {
@@ -758,6 +760,7 @@ final class CacheAdvancePerformanceTests: XCTestCase {
 	}
 
 	func test_performance_append_overwritingCache() throws {
+		guard performanceTestsEnabled else { return }
 		let sut = try createCache(overwritesOldMessages: true)
 		// Fill the cache before the test starts.
 		for message in TestableMessage.lorumIpsum {
@@ -771,6 +774,7 @@ final class CacheAdvancePerformanceTests: XCTestCase {
 	}
 
 	func test_performance_messages_fillableCache() throws {
+		guard performanceTestsEnabled else { return }
 		let sut = try createCache(overwritesOldMessages: false)
 		for message in TestableMessage.lorumIpsum {
 			try sut.append(message: message)
@@ -784,6 +788,7 @@ final class CacheAdvancePerformanceTests: XCTestCase {
 	}
 
 	func test_performance_messages_overwritingCache() throws {
+		guard performanceTestsEnabled else { return }
 		let sut = try createCache(overwritesOldMessages: true)
 		for message in TestableMessage.lorumIpsum + TestableMessage.lorumIpsum {
 			try sut.append(message: message)

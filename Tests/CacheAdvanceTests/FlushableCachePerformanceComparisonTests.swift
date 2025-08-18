@@ -32,6 +32,7 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
 	// MARK: Performance Tests
 
 	func test_performance_flushableCache_createCacheAndAppendSingleMessageAndFlush() {
+		guard performanceTestsEnabled else { return }
 		let cache = FlushableCache<TestableMessage>(
 			location: testFileLocation,
 			maxMessageCount: TestableMessage.lorumIpsum.count,
@@ -47,6 +48,7 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
 	}
 
 	func test_performance_flushableCache_appendAndFlush_fillableCache() {
+		guard performanceTestsEnabled else { return }
 		let cache = FlushableCache<TestableMessage>(
 			location: testFileLocation,
 			maxMessageCount: TestableMessage.lorumIpsum.count,
@@ -64,6 +66,7 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
 	}
 
 	func test_performance_flushableCache_appendAndFlush_overwritingCache() throws {
+		guard performanceTestsEnabled else { return }
 		let cache = FlushableCache<TestableMessage>(
 			location: testFileLocation,
 			maxMessageCount: TestableMessage.lorumIpsum.count,
@@ -83,6 +86,7 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
 	}
 
 	func test_performance_flushableCache_appendAndFlushEvery50Messages_fillableCache() {
+		guard performanceTestsEnabled else { return }
 		let cache = FlushableCache<TestableMessage>(
 			location: testFileLocation,
 			maxMessageCount: TestableMessage.lorumIpsum.count,
@@ -102,6 +106,7 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
 	}
 
 	func test_performance_flushableCache_appendAndFlushEvery50Messages_overwritingCache() throws {
+		guard performanceTestsEnabled else { return }
 		let cache = FlushableCache<TestableMessage>(
 			location: testFileLocation,
 			maxMessageCount: TestableMessage.lorumIpsum.count,
@@ -123,6 +128,7 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
 	}
 
 	func test_performance_flushableCache_messages_fillableCache() throws {
+		guard performanceTestsEnabled else { return }
 		let cache = FlushableCache<TestableMessage>(
 			location: testFileLocation,
 			maxMessageCount: TestableMessage.lorumIpsum.count,
@@ -143,6 +149,7 @@ final class FlushableCachePerformanceComparisonTests: XCTestCase {
 	}
 
 	func test_performance_flushableCache_messages_overwritingCache() throws {
+		guard performanceTestsEnabled else { return }
 		let cache = FlushableCache<TestableMessage>(
 			location: testFileLocation,
 			maxMessageCount: TestableMessage.lorumIpsum.count,
