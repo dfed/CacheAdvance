@@ -33,7 +33,7 @@ try myCache.append(message: someMessage)
 
 By the time the above method exits, the message will have been persisted to disk. A CacheAdvance keeps no in-memory buffer. Appending a new message is cheap, as a CacheAdvance needs to encode and persist only the new message and associated metadata.
 
-A CacheAdvance instance that does not overwrite old messages will throw a `CacheAdvanceError.messageDataTooLarge` if appending a message would exceed the cache's `maximumBytes`. A CacheAdvance instance that does overwrite old messages will throw a `CacheAdvanceError.messageDataTooLarge` if the message would require more than `maximumBytes` to store even after evicting all older messages from the cache.
+A CacheAdvance instance that does not overwrite old messages will throw a `CacheAdvanceError.messageLargerThanRemainingCacheSize` if appending a message would exceed the cache's `maximumBytes`. A CacheAdvance instance that does overwrite old messages will throw a `CacheAdvanceError.messageLargerThanCacheCapacity` if the message would require more than `maximumBytes` to store even after evicting all older messages from the cache.
 
 To ensure that caches can be read from 32bit devices, messages should not be larger than 2GB in size.
 
@@ -57,7 +57,7 @@ If a `CacheAdvanceError.fileCorrupted` error is thrown, the cache file is corrup
 
 ## How it works
 
-CacheAdvance immediately persists each appended messages to disk using `FileHandle`s. Messages are encoded into `Data` using a `JSONEncoder` by default, though the encoding/decoding mechanism can be customized. Messages are written to disk as an encoded data blob that is prefixed with the length of the message. The length of a message is stored using a `UInt32` to ensure that the size of the data on disk that stores a message's length is consistent between devices.
+CacheAdvance immediately persists each appended message to disk using `FileHandle`s. Messages are encoded into `Data` using a `JSONEncoder` by default, though the encoding/decoding mechanism can be customized. Messages are written to disk as an encoded data blob that is prefixed with the length of the message. The length of a message is stored using a `UInt32` to ensure that the size of the data on disk that stores a message's length is consistent between devices.
 
 The first 64 bytes of a CacheAdvance is reserved for storing metadata about the file. Any configuration data that must be static between cache opens should be stored in this header. It is also reasonable to store mutable information in the header, if doing so speeds up reads or writes to the file. The header format is managed by [FileHeader.swift](Sources/CacheAdvance/FileHeader.swift).
 
