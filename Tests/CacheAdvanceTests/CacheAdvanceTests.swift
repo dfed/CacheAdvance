@@ -746,10 +746,8 @@ final class CacheAdvancePerformanceTests: XCTestCase {
 		guard performanceTestsEnabled else { return }
 		let maximumBytes = try Bytes(Double(requiredByteCount(for: TestableMessage.lorumIpsum)))
 		// Create a cache that won't run out of room over multiple test runs
-		guard let sut = try? createCache(maximumByes: maximumBytes * 10, overwritesOldMessages: false) else {
-			XCTFail("Could not create cache")
-			return
-		}
+		let sut = try XCTUnwrap(createCache(maximumByes: maximumBytes * 10, overwritesOldMessages: false), "Could not create cache")
+
 		// Force the cache to set up before we start writing messages.
 		_ = try sut.isWritable()
 		measure {
