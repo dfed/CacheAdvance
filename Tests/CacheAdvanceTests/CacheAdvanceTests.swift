@@ -231,7 +231,7 @@ struct CacheAdvanceTests {
 		#expect(try originalCache.isWritable())
 
 		let sut = try createCache(overwritesOldMessages: false)
-		#expect(try sut.isWritable())
+		#expect(try sut.isWritable(), "Expected isWritable to return true, but it returned false.")
 	}
 
 	@Test
@@ -243,7 +243,7 @@ struct CacheAdvanceTests {
 		try originalHeader.synchronizeHeaderData()
 
 		let sut = try createCache(overwritesOldMessages: false)
-		#expect(try !sut.isWritable())
+		#expect(try !sut.isWritable(), "Expected isWritable to return false, but it returned true.")
 	}
 
 	@Test
@@ -255,7 +255,7 @@ struct CacheAdvanceTests {
 			sizedToFit: TestableMessage.lorumIpsum.dropLast(),
 			overwritesOldMessages: false
 		)
-		#expect(try !sut.isWritable())
+		#expect(try !sut.isWritable(), "Expected isWritable to return false, but it returned true.")
 	}
 
 	@Test
@@ -264,7 +264,7 @@ struct CacheAdvanceTests {
 		#expect(try originalCache.isWritable())
 
 		let sut = try createCache(overwritesOldMessages: true)
-		#expect(try !sut.isWritable())
+		#expect(try !sut.isWritable(), "Expected isWritable to return false, but it returned true.")
 	}
 
 	@Test
