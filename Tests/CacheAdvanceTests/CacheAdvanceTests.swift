@@ -255,7 +255,7 @@ struct CacheAdvanceTests {
 			sizedToFit: TestableMessage.lorumIpsum.dropLast(),
 			overwritesOldMessages: false
 		)
-		#expect(try !sut.isWritable(), "Expected isWritable to return false, but it returned true.")
+		#expect(try !sut.isWritable(), "Cache with different maximum size should not be writable")
 	}
 
 	@Test
