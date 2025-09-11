@@ -231,7 +231,7 @@ struct CacheAdvanceTests {
 		#expect(try originalCache.isWritable())
 
 		let sut = try createCache(overwritesOldMessages: false)
-		#expect(try sut.isWritable())
+		#expect(try sut.isWritable(), "Identical cache should be writable")
 	}
 
 	@Test
@@ -243,7 +243,7 @@ struct CacheAdvanceTests {
 		try originalHeader.synchronizeHeaderData()
 
 		let sut = try createCache(overwritesOldMessages: false)
-		#expect(try !sut.isWritable())
+		#expect(try !sut.isWritable(), "Cache with different version should not be writable")
 	}
 
 	@Test
@@ -255,7 +255,7 @@ struct CacheAdvanceTests {
 			sizedToFit: TestableMessage.lorumIpsum.dropLast(),
 			overwritesOldMessages: false
 		)
-		#expect(try !sut.isWritable())
+		#expect(try !sut.isWritable(), "Cache with different maximum size should not be writable")
 	}
 
 	@Test
@@ -264,7 +264,7 @@ struct CacheAdvanceTests {
 		#expect(try originalCache.isWritable())
 
 		let sut = try createCache(overwritesOldMessages: true)
-		#expect(try !sut.isWritable())
+		#expect(try !sut.isWritable(), "Cache with different overwriting policy should not be writable")
 	}
 
 	@Test
