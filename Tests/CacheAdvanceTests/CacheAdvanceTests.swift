@@ -264,7 +264,7 @@ struct CacheAdvanceTests {
 		#expect(try originalCache.isWritable())
 
 		let sut = try createCache(overwritesOldMessages: true)
-		#expect(try !sut.isWritable(), "Expected isWritable to return false, but it returned true.")
+		#expect(try !sut.isWritable(), "Cache with different overwriting policy should not be writable")
 	}
 
 	@Test
