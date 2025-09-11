@@ -243,7 +243,7 @@ struct CacheAdvanceTests {
 		try originalHeader.synchronizeHeaderData()
 
 		let sut = try createCache(overwritesOldMessages: false)
-		#expect(try !sut.isWritable(), "Expected isWritable to return false, but it returned true.")
+		#expect(try !sut.isWritable(), "Cache with different version should not be writable")
 	}
 
 	@Test
