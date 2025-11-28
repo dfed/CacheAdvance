@@ -231,7 +231,7 @@ struct CacheAdvanceTests {
 		#expect(try originalCache.isWritable())
 
 		let sut = try createCache(overwritesOldMessages: false)
-		#expect(try sut.isWritable())
+		#expect(try sut.isWritable(), "Identical cache should be writable")
 	}
 
 	@Test
@@ -243,7 +243,7 @@ struct CacheAdvanceTests {
 		try originalHeader.synchronizeHeaderData()
 
 		let sut = try createCache(overwritesOldMessages: false)
-		#expect(try !sut.isWritable())
+		#expect(try !sut.isWritable(), "Cache with different version should not be writable")
 	}
 
 	@Test
@@ -255,7 +255,7 @@ struct CacheAdvanceTests {
 			sizedToFit: TestableMessage.lorumIpsum.dropLast(),
 			overwritesOldMessages: false
 		)
-		#expect(try !sut.isWritable())
+		#expect(try !sut.isWritable(), "Cache with different maximum size should not be writable")
 	}
 
 	@Test
@@ -264,7 +264,7 @@ struct CacheAdvanceTests {
 		#expect(try originalCache.isWritable())
 
 		let sut = try createCache(overwritesOldMessages: true)
-		#expect(try !sut.isWritable())
+		#expect(try !sut.isWritable(), "Cache with different overwriting policy should not be writable")
 	}
 
 	@Test
@@ -746,10 +746,8 @@ final class CacheAdvancePerformanceTests: XCTestCase {
 		guard performanceTestsEnabled else { return }
 		let maximumBytes = try Bytes(Double(requiredByteCount(for: TestableMessage.lorumIpsum)))
 		// Create a cache that won't run out of room over multiple test runs
-		guard let sut = try? createCache(maximumByes: maximumBytes * 10, overwritesOldMessages: false) else {
-			XCTFail("Could not create cache")
-			return
-		}
+		let sut = try XCTUnwrap(createCache(maximumByes: maximumBytes * 10, overwritesOldMessages: false), "Could not create cache")
+
 		// Force the cache to set up before we start writing messages.
 		_ = try sut.isWritable()
 		measure {
