@@ -67,9 +67,10 @@ jobs:
       - name: Build and Test Framework
         run: Scripts/build.swift ${{ matrix.platforms }}
       - name: Prepare Coverage Reports
+        if: matrix.platforms != 'watchOS_11'
         run: ./Scripts/prepare-coverage-reports.sh
       - name: Upload Coverage Reports
-        if: success()
+        if: success() && matrix.platforms != 'watchOS_11'
         uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
