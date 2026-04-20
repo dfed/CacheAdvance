@@ -38,9 +38,11 @@ jobs:
     strategy:
       matrix:
         platforms: [
-          'iOS_18,watchOS_11',
-          'macOS_15,tvOS_18',
+          'iOS_18',
+          'tvOS_18',
+          'macOS_15',
           'macCatalyst_15',
+          'watchOS_11',
           'visionOS_2'
         ]
       fail-fast: false
@@ -55,19 +57,20 @@ jobs:
           bundler-cache: true
       - name: Select Xcode Version
         run: sudo xcode-select --switch /Applications/Xcode_16.4.app/Contents/Developer
-      - name: Download visionOS
-        if: matrix.platforms == 'visionOS_2'
+      - name: Download Platform
+        if: matrix.platforms != 'macOS_15' && matrix.platforms != 'macCatalyst_15'
         run: |
           sudo xcodebuild -runFirstLaunch
           sudo xcrun simctl list
-          sudo xcodebuild -downloadPlatform visionOS
-          sudo xcodebuild -runFirstLaunch
+          PLATFORM="${{ matrix.platforms }}"
+          sudo xcodebuild -downloadPlatform "${PLATFORM%%_*}"
       - name: Build and Test Framework
         run: Scripts/build.swift ${{ matrix.platforms }}
       - name: Prepare Coverage Reports
+        if: matrix.platforms != 'watchOS_11'
         run: ./Scripts/prepare-coverage-reports.sh
       - name: Upload Coverage Reports
-        if: success()
+        if: success() && matrix.platforms != 'watchOS_11'
         uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
