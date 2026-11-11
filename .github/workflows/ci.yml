@@ -10,28 +10,6 @@ on:
   pull_request:
 
 jobs:
-  pod-lint:
-    name: Pod Lint
-    runs-on: macOS-15
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v6
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4.3'
-          bundler-cache: true
-      - name: Select Xcode Version
-        run: sudo xcode-select --switch /Applications/Xcode_16.4.app/Contents/Developer
-      - name: Download visionOS
-        run: |
-          sudo xcodebuild -runFirstLaunch
-          sudo xcrun simctl list
-          sudo xcodebuild -downloadPlatform visionOS
-          sudo xcodebuild -runFirstLaunch
-      - name: Lint Podspec
-        run: bundle exec pod lib lint --verbose --fail-fast --swift-version=6.0 --allow-warnings # Cocoapods v1.6 now warns about potential naming colisions.
   spm-16:
     name: Build Xcode 16
     runs-on: macOS-15
@@ -51,10 +29,6 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v6
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4.3'
-          bundler-cache: true
       - name: Select Xcode Version
         run: sudo xcode-select --switch /Applications/Xcode_16.4.app/Contents/Developer
       - name: Download Platform
@@ -83,10 +57,6 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v6
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4.3'
-          bundler-cache: true
       - name: Select Xcode Version
         run: sudo xcode-select --switch /Applications/Xcode_16.app/Contents/Developer
       - name: Build and Test Framework
